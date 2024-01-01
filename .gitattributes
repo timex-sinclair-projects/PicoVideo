@@ -1,0 +1,15 @@
+# Source text is stored with LF line endings.
+* text=auto
+*.bat text eol=crlf
+
+# Board fab outputs and PLD programming files must stay byte-exact
+# (JEDEC checksums cover the CR/LF bytes).
+hardware/** -text -diff
+pld/*.jed -text
+pld/*.abs -text
+
+*.uf2 binary
+*.zip binary
+*.pdf binary
+*.odt binary
+*.tap binary

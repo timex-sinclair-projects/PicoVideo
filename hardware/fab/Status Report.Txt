@@ -1,0 +1,17 @@
+Project Outputs Generation Report
+---------------------------------
+Start Output Generation At 1:05:42 PM On 12/16/2023
+
+Output: NC Drill
+Type  : NC Drill
+From  : PCB Document [tsPicoVid.CSPCBDoc]
+   Generated File[tsPicoVid-RoundHoles.TXT]
+   Generated File[tsPicoVid-SlotHoles.TXT]
+   Generated File[tsPicoVid.LDP]
+   Generated File[tsPicoVid.DRR]
+
+
+Files Generated   : 4
+Documents Printed : 0
+
+Finished Output Generation At 1:05:42 PM On 12/16/2023
