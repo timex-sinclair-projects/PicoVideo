@@ -1,3 +1,4 @@
+#define SOFTWARE_VER 0x10
 
 #define ATTR_BLACK 0x00
 #define ATTR_BLUE 0x01
@@ -58,7 +59,8 @@
 #define ULA_DAT_REG 0xff3b
 
 // 80 column text port I/O address
-#define TEXT_PORT 0x27
+#define TEXT_PORT 0x20
+#define TEST_PORT 0x21
 
 #define HIRES_DAT   0xE0
 #define HIRES_ADRL  0xE1

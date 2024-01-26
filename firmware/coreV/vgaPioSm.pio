@@ -61,6 +61,7 @@ static inline void hsync_program_init(PIO pio, uint sm, uint offset) {
     // Map the state machine's SET pin group to one pin, namely the PIN_HSYNC
     // parameter to this function.
     sm_config_set_set_pins(&c, PIN_HSYNC, 1);
+    gpio_set_drive_strength(PIN_HSYNC, GPIO_DRIVE_STRENGTH_12MA);
 
     // Set clock division (div by 10 for 25 MHz state machine)
     sm_config_set_clkdiv(&c, 10) ;
@@ -152,6 +153,7 @@ static inline void vsync_program_init(PIO pio, uint sm, uint offset) {
 
     // Set this pin's GPIO function (connect PIO to the pad)
     pio_gpio_init(pio, PIN_VSYNC);
+    gpio_set_drive_strength(PIN_VSYNC, GPIO_DRIVE_STRENGTH_12MA);
     
     // Set the pin direction to output at the PIO
     pio_sm_set_consecutive_pindirs(pio, sm, PIN_VSYNC, 1, true);
@@ -221,7 +223,17 @@ static inline void rgb_program_init(PIO pio, uint sm, uint offset) {
     pio_gpio_init(pio, 5);
     pio_gpio_init(pio, 6);
     pio_gpio_init(pio, 7);
-    
+
+
+    gpio_set_drive_strength(VGA_COLOR + 0, GPIO_DRIVE_STRENGTH_8MA);
+    gpio_set_drive_strength(VGA_COLOR + 1, GPIO_DRIVE_STRENGTH_8MA);
+    gpio_set_drive_strength(VGA_COLOR + 2, GPIO_DRIVE_STRENGTH_8MA);
+    gpio_set_drive_strength(VGA_COLOR + 3, GPIO_DRIVE_STRENGTH_8MA);
+    gpio_set_drive_strength(VGA_COLOR + 4, GPIO_DRIVE_STRENGTH_8MA);
+    gpio_set_drive_strength(VGA_COLOR + 5, GPIO_DRIVE_STRENGTH_8MA);
+    gpio_set_drive_strength(VGA_COLOR + 6, GPIO_DRIVE_STRENGTH_8MA);
+    gpio_set_drive_strength(VGA_COLOR + 7, GPIO_DRIVE_STRENGTH_8MA);
+
     // Set the pin direction to output at the PIO (8 pins)
     pio_sm_set_consecutive_pindirs(pio, sm, VGA_COLOR, 8, true);
 

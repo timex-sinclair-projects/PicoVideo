@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
-NCDrill File Report For: tsPicoVid.CSPCBDoc   12/16/2023  1:05:42 PM
+NCDrill File Report For: tsPicoVid.CSPCBDoc   1/15/2024  7:51:33 AM
 ---------------------------------------------------------------------------
 
 Layer Pair : Top Layer to Bottom Layer
@@ -8,18 +8,18 @@ ASCII SlotHoles File : tsPicoVid-SlotHoles.TXT
 
 Tool         Hole Size           Hole Type     Hole Count Plated       Tool Travel
 ---------------------------------------------------------------------------
-T1        20mil (0.508mm)          Round          84               25.59 Inch (649.86 mm)
-T2        25mil (0.635mm)          Round          148              31.64 Inch (803.76 mm)
+T1        20mil (0.508mm)          Round          85               26.01 Inch (660.58 mm)
+T2        25mil (0.635mm)          Round          152              31.26 Inch (794.12 mm)
 T3        30mil (0.762mm)          Round          9                0.80 Inch (20.32 mm)
 T4        38mil (0.9652mm)         Round          6                0.80 Inch (20.32 mm)
 T5        39.37mil (1mm)           Round          4                0.64 Inch (16.18 mm)
-T6        39.37mil (1mm)           Slot           5                305.97 Inch (7771.55 mm)
-T7        40mil (1.016mm)          Round          131              27.76 Inch (705.18 mm)
+T6        39.37mil (1mm)           Slot           5                305.75 Inch (7766.17 mm)
+T7        40mil (1.016mm)          Round          131              28.23 Inch (717.02 mm)
 T8        43.31mil (1.10007mm)     Round          4                0.28 Inch (7.00 mm)
 T9        98.43mil (2.50012mm)     Round          2                0.52 Inch (13.14 mm)
 T10       118.33mil (3.00558mm)    Round          2                0.98 Inch (24.98 mm)
 T11       59.06mil (1.50012mm)     Round          2         NPTH   0.30 Inch (7.50 mm)
 ---------------------------------------------------------------------------
-Totals                                            397              395.27 Inch (10039.79 mm)
+Totals                                            402              395.56 Inch (10047.32 mm)
 
-Total Processing Time (hh:mm:ss) : 00:00:00
+Total Processing Time (hh:mm:ss) : 00:00:01

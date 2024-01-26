@@ -49,7 +49,6 @@
 // Mask that defines the data pins in the Pico pin set
 //  This mask MUST change if these pins are reassigned
 #define DATAPINS_MASK   0b00000000011111111000000000000000
-//#define PDDR_MASK       0b00000100000000000000000000000000
 
 // Mask for the buffer select pins.
 //  This mask MUST change if these pins are reassigned
@@ -67,7 +66,7 @@
 #define CTLSIG PG3
 
 // Convenience macro to fetch the data bits
-#define GETDATA ((gpio_get_all() >> 15) & 0xff);
+#define GETDATA ((unsigned short)((gpio_get_all() >> 15) & 0xff));
 
 
 // globals used throughout the progam
@@ -106,6 +105,9 @@ unsigned char gOutVal;
 
 unsigned short dfAdr;
 
+unsigned char testPort;
+unsigned char xPort = 0;
+
 // test registers
 extern unsigned short gTestMemAdr;
 extern unsigned short gTestCrlReg;
@@ -114,9 +116,11 @@ void mySerOut(unsigned short myVal){
 unsigned char i;
 unsigned short mask = 0x0001;
 
+// ensure the line is high
     gpio_put(11, 1);
     sleep_us(5);
 
+// start bit
     gpio_put(11, 0);
     sleep_us(1);
 
@@ -206,27 +210,35 @@ unsigned char i;
     //  this means we do not need to worry about memory accesses.
         if (!gpio_get(RDPORT)){
             // reading from our ports
-                if (gZ80Adr == ULA_DAT_REG){
+                if (gZ80Adr == ULA_ADR_REG){
                     flag = 1;
-                    if (gUlaAdrReg == 0x40) {
-                        gOutVal = gUlaEna;
-                    }
-                    if (gUlaAdrReg == 0x41) {
-                        gOutVal = gUlaVmode;
-                    }
-                    if (gUlaAdrReg < 0x40){
-                        gOutVal = gUlaColors[gUlaAdrReg & 0x3F];
-                    }
+                    gOutVal = gUlaAdrReg;
                 } else {
-                    if (gZ80AdrL == TEXT_PORT){
+                    if (gZ80Adr == ULA_DAT_REG){
                         flag = 1;
-                        gOutVal     = gTextPort;
-//                        gOutVal     = gTextStat;
-                    }
-                }                
+                        gOutVal = 0xFF;
+                        if (gUlaAdrReg == 0x40) gOutVal = gUlaEna;
+                        if (gUlaAdrReg == 0x41) gOutVal = gUlaVmode;
+                        if (gUlaAdrReg == 0x7F) gOutVal = SOFTWARE_VER;
+                        if (gUlaAdrReg < 0x40) gOutVal = gUlaColors[(gUlaAdrReg & 0x3F)];
+                    } else {
+                        if (gZ80AdrL == TEXT_PORT){
+                            flag = 1;
+                            gOutVal     = (gpio_get(9) << 7) | (gpio_get(8) << 6) | (gTextStat & 1);
+                        }
+                        if (gZ80AdrL == TEST_PORT){
+                            flag = 1;
+                            gOutVal     = testPort;
+                        }
+                    }     
+                } 
                 if (flag){
+
                 // the data buffer is enabled when we arrive here
                     // set the buffer data direction to send to the Z80
+                        gpio_put(PDDIR, 0);
+                        gpio_put(PDDIR, 0);
+                        gpio_put(PDDIR, 0);
                         gpio_put(PDDIR, 0);
                     // make our data bus I/O pins outputs
                         gpio_set_dir_out_masked(DATAPINS_MASK);
@@ -236,11 +248,15 @@ unsigned char i;
                         while (gpio_get(PSEL));
                     // make the Pico pins input
                         gpio_set_dir_in_masked(DATAPINS_MASK);
+                        gpio_set_dir_in_masked(DATAPINS_MASK);
+                        gpio_set_dir_in_masked(DATAPINS_MASK);
+                        gpio_set_dir_in_masked(DATAPINS_MASK);
                     // set the dat direction to input from the Z80
                         gpio_put(PDDIR, 1); 
                     // unslect the data buffer by enabling the address buffer
                         gpio_put_masked(PG_MASK, ADRL);
                 }
+                goto endoFunc;
         } else {
         // some sort of write operation
         //  get the data from the Z80 bus since we may need it
@@ -254,7 +270,7 @@ unsigned char i;
                 } else if (gZ80Adr == ULA_DAT_REG){
                     if (gUlaAdrReg == 0x40) gUlaEna = gZ80Data;
                     if (gUlaAdrReg == 0x41) gUlaVmode = gZ80Data;
-                    if (gUlaAdrReg < 0x40) gUlaColors[gUlaAdrReg & 0x3F] = gZ80Data;
+                    if (gUlaAdrReg < 0x40) gUlaColors[(gUlaAdrReg & 0x3F)] = gZ80Data;
                 } else {
                     switch (gZ80AdrL){
                     case 0xFF:
@@ -283,9 +299,12 @@ unsigned char i;
                         gTextPort   = gZ80Data;
                         gTextStat   = 1;
                         break;
+                    case TEST_PORT:
+                        testPort    = gZ80Data;
+                        xPort       = gZ80Data;
+                        break;
                     }
                 }
-
         // ensure that global variables are updated
                 if (gUlaEna){
                 // ULA Plus active
@@ -303,12 +322,7 @@ unsigned char i;
         }
 
 
-
 endoFunc:
-
-
-
-
 
     // spin while the PSEL line is high. We MUST complete all bus operations
     //  prior to PSEL going inactive so there is no chance a race condition
