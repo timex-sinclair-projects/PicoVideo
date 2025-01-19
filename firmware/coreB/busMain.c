@@ -201,6 +201,7 @@ unsigned char i;
         gpio_put_masked(PG_MASK, ADRH);                 // get the high byte of the address
         gZ80AdrH     = GETDATA;
         gZ80AdrH     = GETDATA;
+        gZ80AdrH     = GETDATA;
         gpio_put_masked(PG_MASK, DATA);                 // set up to get the data
         gZ80Adr     = (gZ80AdrH << 8) | gZ80AdrL;       // make the 16 bit address for ULA Plus and video memory
 
@@ -262,6 +263,7 @@ unsigned char i;
         //  get the data from the Z80 bus since we may need it
             gZ80Data     = GETDATA;             // get the value from the data bus
             gZ80Data     = GETDATA;             // get the value from the data bus
+//            gZ80Data     = GETDATA;             // get the value from the data bus
 
             if (!gpio_get(IOPORT)){
         // writing to our I/O ports
