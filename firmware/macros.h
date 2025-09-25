@@ -1,4 +1,4 @@
-#define SOFTWARE_VER 0x10
+#define SOFTWARE_VER 0x42
 
 #define ATTR_BLACK 0x00
 #define ATTR_BLUE 0x01
@@ -15,26 +15,9 @@
 // convenient mnemonics for the TS colors. these translate
 //  the 3-bit values + intensity in the attributes to the
 //  corresponding 8 bit value for VGA output.
-// V1.0 color map
-// #define BLACK   0x00
-// #define BLUE    0x02
-// #define RED     0x80
-// #define MAGEN   0x82
-// #define GREEN   0x10
-// #define CYAN    0x12
-// #define YELLOW  0x90
-// #define WHITE   0x92
-
-// #define BBLACK  0x25
-// #define BBLUE   0x03
-// #define BRED    0xe0
-// #define BMAGEN  0xe3
-// #define BGREEN 0x1c
-// #define BCYAN   0x1f
-// #define BYELLOW 0xfc
-// #define BRWHITE 0xff
-
 // Board V.2 and above color map
+
+// regular colors
 #define BLACK   0x00
 #define BLUE    0x02
 #define RED     0x10
@@ -43,7 +26,7 @@
 #define CYAN    0x82
 #define YELLOW  0x90
 #define WHITE   0x92
-
+// bright colors
 #define BBLACK  0x25
 #define BBLUE   0x03
 #define BRED    0x1c
@@ -71,9 +54,13 @@
 #define DF1_OFFSET 0
 #define DF2_OFFSET 8192
 
-#define TEXTSCRN_SIZE 2048
-#define TEXTCHAR_OFFSET ((48 * 1024) - (2 * TEXTSCRN_SIZE))
-#define TEXTATTR_OFFSET ((48 * 1024) - TEXTSCRN_SIZE)
+// #define TEXTSCRN_SIZE 2048
+// #define TEXTCHAR_OFFSET ((48 * 1024) - (2 * TEXTSCRN_SIZE))
+// #define TEXTATTR_OFFSET ((48 * 1024) - TEXTSCRN_SIZE)
+
+//#define TEXTATTR_OFFSET 1536
+#define TEXTATTR_OFFSET 1920
+
 
 
 // video mode mnemonics
@@ -84,10 +71,9 @@
 #define VID_32DF2   0x01        // TS 32 column video using DF2
 #define VID_HIRES   0x02        // TS hires
 #define VID_QCOLOR  0x03        // new quad color mode
+#define VID_64C     0x05        // 64A column text mode -w- individual attributes in DF1
 #define VID_64      0x06        // standard TS 64 column mode using DF1 & DF2 and a fixed attribute
 #define VID_64A     0x07        // new TS 64 column mode that uses the attributes
-
-#define VID_80COL   0x08
 #define VID_HIRES8  0x09
 
 

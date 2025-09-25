@@ -297,11 +297,9 @@ unsigned int lineAdr        = 0;
 void waitForVsync(void){
 // spin until VSync is high
     while(!gpio_get(9)){
-//        if (gVidMode == VID_80COL) doTextMode();
     };
 // spin while VSync is high
     while(gpio_get(9)){
-//        if (gVidMode == VID_80COL) doTextMode();
     };
 
     gFlashCtr++;

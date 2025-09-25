@@ -26,7 +26,8 @@ add_executable(picoTsVid
 
     coreV/vidMain.c
     coreV/vgaPioSm.pio
-    coreV/diaplayProc.c
+    coreV/displayProc80.c
+#    coreV/displayProc.c
 #    coreV/col80.c
 )
 

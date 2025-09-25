@@ -44,6 +44,7 @@ extern unsigned char gDfRam[16384];
 extern unsigned char gBorder;
 extern unsigned char gVidMode;
 extern unsigned short bmapOffset[192];
+extern unsigned char speccyBlack;
 
 
 void corevMain(void);

@@ -15,12 +15,14 @@ extern unsigned char gRegFE;
 extern unsigned char gDfRam[16384];
 extern unsigned char gLbuf0[640];     // VGA line buffer 0
 extern unsigned char gLbuf1[640];     // VGA line buffer 1
-extern unsigned char biColor[];
+extern unsigned char biColor[4];
 extern unsigned char gUlaColors[];
 extern const unsigned char tsColors[];
 extern const unsigned char ts64Colors[];
+extern const unsigned char speccyColors[];
 extern unsigned short bmapOffset[192];
-extern unsigned short char80Bmap[2048];
+extern unsigned char vgaFont[2048];
+extern unsigned char speccyBlack;
 
 extern int fillCmd;
 
@@ -53,9 +55,15 @@ void __not_in_flash_func(getInkPaper)(void){
 // // get the ink color and keep the bright bit
 //     gInk    = ((gAttr & 0x40) >> 3) | (gAttr & 7);
 
-    gPalInk     = tsColors[(((gAttr & 0x40) >> 3) | (gAttr & 7))];
-    gPalPaper   = tsColors[((gAttr >> 3) & 0x0F)];
- 
+
+    if (speccyBlack){
+        gPalInk     = speccyColors[(((gAttr & 0x40) >> 3) | (gAttr & 7))];
+        gPalPaper   = speccyColors[((gAttr >> 3) & 0x0F)];
+    } else {
+        gPalInk     = tsColors[(((gAttr & 0x40) >> 3) | (gAttr & 7))];
+        gPalPaper   = tsColors[((gAttr >> 3) & 0x0F)];
+    }
+
 // apply flash if it is enabled
     if (gAttr & 0x80) gBmap = gBmap ^ gFlashMask;
 }
@@ -70,7 +78,6 @@ unsigned char *pLine1;
 unsigned char *pAttr1;
 unsigned char *pBuf;
 unsigned short bmapOfs, attrOfs;
-
 unsigned short charIndex;
 unsigned char charCode, charBmap, charAttr;
 
@@ -96,8 +103,8 @@ unsigned char charCode, charBmap, charAttr;
     case VID_QCOLOR:
     // quad color mode
 //        bmapOfs = bmapOffset[lineNr];
-        pLine   = &gDfRam[bmapOfs + DF1_OFFSET];
-        pLine1  = &gDfRam[bmapOfs + DF2_OFFSET];
+        pLine   = &gDfRam[DF1_OFFSET];
+        pLine1  = &gDfRam[DF2_OFFSET];
 
         for (i = 0; i < 32; i++){
             gBmap = *pLine++;
@@ -131,33 +138,9 @@ unsigned char charCode, charBmap, charAttr;
         }
         break;
 
-//     case VID_80COL:
-// // toy code for 80 column text mode
-//         pBuf -= 64;                         // point to the start of the line buffer
-//         charIndex = (lineNr >> 3)  * 80;    // the location of the first character on this line
-//         for (i = 0; i < 80; i++){
-//             charCode    =  gDfRam[charIndex];
-//             gAttr       =  gDfRam[charIndex + 2048];
-//             gBmap       =  char80Bmap[(charCode << 3) | (lineNr & 7)];
-//             getInkPaper();
-//             do64Col(pBuf, gBmap);
-//             charIndex++;
-//             pBuf += 8;
-//         }
-//         break;
-
-//     case VID_HIRES8:
-//         charIndex = lineNr << 8;            // 
-//         for (i = 0; i < 256; i++){
-//             gAttr = gDfRam[charIndex++];
-//             *pBuf++ = gAttr;
-//             *pBuf++ = gAttr;
-//         }
-//         break;
 
     case VID_64:
     case VID_64A:
-
     // standard 64 column mode
         pAttr   = &gDfRam[attrOfs + DF1_OFFSET];
         pAttr1  = &gDfRam[attrOfs + DF2_OFFSET];
@@ -174,8 +157,23 @@ unsigned char charCode, charBmap, charAttr;
 
             gAttr   = gTsCol64Ink;
             if (gVidMode == VID_64A) gAttr   = *pAttr1++;
-//            if (gVidMode == VID_64A) gAttr   = *pAttr++;
             gBmap   = *pLine1++;
+            getInkPaper();
+            do64Col(pBuf, gBmap);
+            pBuf += 8;
+        }
+        break;
+
+    case VID_64C:
+    // 64 column text mode
+        bmapOfs = ((lineNr & 0xfff8) << 3);
+        pLine   = &gDfRam[bmapOfs];
+        pLine1  = &gDfRam[bmapOfs + TEXTATTR_OFFSET];
+
+        for (i = 0; i < 64; i++){
+            charCode    = *pLine++;
+            gAttr       = *pLine1++;
+            gBmap       = vgaFont[((charCode << 3) | (lineNr & 7))];
             getInkPaper();
             do64Col(pBuf, gBmap);
             pBuf += 8;

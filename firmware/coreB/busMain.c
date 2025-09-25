@@ -73,9 +73,11 @@
 extern unsigned char gTsVidMode;
 extern unsigned char gTsRegFE;
 extern unsigned char gTsRegFF;
+extern unsigned char gTsRegF4;
 extern unsigned char gTsVidMode;
 extern unsigned char gTsCol64Ink;
 
+extern unsigned char speccyBlack;
 extern unsigned char gVidMode;
 extern unsigned char gBorder;
 
@@ -94,6 +96,10 @@ extern unsigned char gTextStat;
 
 extern unsigned short gHiresAdr;
 
+extern unsigned int gfontIndex;
+extern unsigned char vgaFont[2048];
+extern unsigned char biColor[4];
+
 
 unsigned char gZ80Ctl;          // selected bits from the Z80 control bus
 unsigned char gZ80Data;
@@ -107,6 +113,8 @@ unsigned short dfAdr;
 
 unsigned char testPort;
 unsigned char xPort = 0;
+
+unsigned char memMirror = 0;
 
 // test registers
 extern unsigned short gTestMemAdr;
@@ -180,6 +188,7 @@ void busSetup(void){
 void __not_in_flash_func(busMain(void)){
 unsigned char flag;
 unsigned char i;
+uint16_t fontAdr;
 
     gpio_put(25, 1);
     busSetup();
@@ -220,6 +229,22 @@ unsigned char i;
                         gOutVal = 0xFF;
                         if (gUlaAdrReg == 0x40) gOutVal = gUlaEna;
                         if (gUlaAdrReg == 0x41) gOutVal = gUlaVmode;
+                        if (gUlaAdrReg == 0x43) gOutVal = memMirror;
+                    // read a byte from font memory
+                        if (gUlaAdrReg == 0x46){
+                            gOutVal = vgaFont[gfontIndex++];
+                            gfontIndex &= 2047;
+                        }
+                    // read a byte from bicolor memory
+                        if (gUlaAdrReg == 0x47){
+                            gfontIndex &= 3;
+                            gOutVal = biColor[gfontIndex++];
+                            gfontIndex &= 3;
+                        }
+                        if (gUlaAdrReg == 0x48){
+                            gOutVal = gDfRam[gfontIndex++];
+                            gfontIndex &= 16383;
+                        }                           
                         if (gUlaAdrReg == 0x7F) gOutVal = SOFTWARE_VER;
                         if (gUlaAdrReg < 0x40) gOutVal = gUlaColors[(gUlaAdrReg & 0x3F)];
                     } else {
@@ -261,9 +286,9 @@ unsigned char i;
         } else {
         // some sort of write operation
         //  get the data from the Z80 bus since we may need it
+        //  the double read allows more time for the data to settle
             gZ80Data     = GETDATA;             // get the value from the data bus
             gZ80Data     = GETDATA;             // get the value from the data bus
-//            gZ80Data     = GETDATA;             // get the value from the data bus
 
             if (!gpio_get(IOPORT)){
         // writing to our I/O ports
@@ -272,6 +297,21 @@ unsigned char i;
                 } else if (gZ80Adr == ULA_DAT_REG){
                     if (gUlaAdrReg == 0x40) gUlaEna = gZ80Data;
                     if (gUlaAdrReg == 0x41) gUlaVmode = gZ80Data;
+                    if (gUlaAdrReg == 0x42) speccyBlack = gZ80Data;
+                    if (gUlaAdrReg == 0x43) memMirror = gZ80Data;
+                    if (gUlaAdrReg == 0x44) gfontIndex = (gfontIndex & 0xFF00) | gZ80Data;
+                    if (gUlaAdrReg == 0x45) gfontIndex = (gfontIndex & 0x00FF) | (gZ80Data << 8);
+                    if (gUlaAdrReg == 0x46){
+                        gfontIndex &= 2047;
+                        vgaFont[gfontIndex++] = gZ80Data;
+                        gfontIndex &= 2047;
+                    }
+                    if (gUlaAdrReg == 0x47){
+                        gfontIndex &= 3;
+                        biColor[gfontIndex++] = gZ80Data;
+                        gfontIndex &= 3;
+                    }
+                    
                     if (gUlaAdrReg < 0x40) gUlaColors[(gUlaAdrReg & 0x3F)] = gZ80Data;
                 } else {
                     switch (gZ80AdrL){
@@ -281,7 +321,10 @@ unsigned char i;
                     // this converts the 3-bit 64 column paper/ink value to the
                     //  equivalent bright attribute byte.
                         gTsCol64Ink = ((~gTsRegFF) & 0x3f) | ((gTsRegFF >> 3) & 7);
+                        gVidMode    = gTsRegFF & 0x07;
                         break;
+                    case 0xF4:
+                        gTsRegF4    = gZ80Data;
                     case HIRES_ADRL:
                         gHiresAdr = (gHiresAdr & 0xff00) | gZ80Data;
                         break;
@@ -318,9 +361,25 @@ unsigned char i;
                     gVidMode  = gTsRegFF & 0x07;
                 }
                 goto endoFunc;
-            }
+            } else {
         // the GAL ensures that only video memory addresses assert PSEL
-            gDfRam[gZ80Adr & 0x3fff] = gZ80Data; 
+            // this code ensures that the video memory is updated only when the
+            //  TS2068 HSR register is set to allow access to the home bank to
+            //  the TS2068. this allows writing to the dock and EXROM banks
+            //  without munging the video memory
+
+                if (((gTsRegF4 & 0x04) == 0) && ((gZ80Adr & 0x2000) == 0)){
+                // writing to the low memory addresses
+                    if (memMirror){
+                    // we are mirroring the high memory here
+                        gDfRam[(gZ80Adr & 0x3fff) + 8192] = gZ80Data;
+                    } else {
+                    // normal memory write
+                        gDfRam[gZ80Adr & 0x3fff] = gZ80Data;
+                    }
+                }
+                if (((gTsRegF4 & 0x08) == 0) && ((gZ80Adr & 0x2000) != 0)) gDfRam[gZ80Adr & 0x3fff] = gZ80Data;
+            }
         }
 
 
