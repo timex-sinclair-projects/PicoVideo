@@ -324,6 +324,7 @@ uint16_t fontAdr;
                         break;
                     case 0xF4:
                         gTsRegF4    = gZ80Data;
+                        break;
                     case HIRES_ADRL:
                         gHiresAdr = (gHiresAdr & 0xff00) | gZ80Data;
                         break;
