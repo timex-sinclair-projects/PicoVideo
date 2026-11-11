@@ -34,7 +34,7 @@ unsigned short gFlashCtr = 0;
 unsigned char gFlashMask = 0;
 
 unsigned char gVidMode = 0;
-unsigned char gBorder = BRWHITE;
+unsigned char gBorder = WHITE;
 
 unsigned char gTextPort;
 unsigned char gTextStat     = 0;
