@@ -25,7 +25,7 @@ unsigned char gUlaVmode = 0;
 unsigned char gUlaAdrReg = 0;
 
 unsigned char gTsVidMode = 0;
-unsigned char gTsCol64Ink = ATTR_BRIGHT | ATTR_BLUE | ATTR_WHITE;
+unsigned char gTsCol64Ink = ATTR_WHITE << 3;
 unsigned char gTsRegFE = 7;
 unsigned char gTsRegFF = 0;
 unsigned char gTsRegF4 = 0;

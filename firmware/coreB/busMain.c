@@ -29,6 +29,7 @@
 #include "hardware/clocks.h"
 
 #include "../macros.h"
+#include "../video_decode.h"
 
 // Mask bits for the control word (gZ80Ctl)
 #define IOMASK 1
@@ -318,10 +319,8 @@ uint16_t fontAdr;
                     case 0xFF:
                     // our local copy of the TS register
                         gTsRegFF    = gZ80Data;
-                    // this converts the 3-bit 64 column paper/ink value to the
-                    //  equivalent bright attribute byte.
-                        gTsCol64Ink = ((~gTsRegFF) & 0x3f) | ((gTsRegFF >> 3) & 7);
-                        gVidMode    = gTsRegFF & 0x07;
+                    // Decode only color bits; native 64-column BRIGHT is zero.
+                        gTsCol64Ink = pv_64_attribute(gTsRegFF);
                         break;
                     case 0xF4:
                         gTsRegF4    = gZ80Data;
@@ -353,13 +352,12 @@ uint16_t fontAdr;
         // ensure that global variables are updated
                 if (gUlaEna){
                 // ULA Plus active
-                    gBorder = gUlaColors[gTsRegFE & 0x07];
-                    gVidMode  = gUlaVmode & 0x0F;
+                    gBorder = gUlaColors[pv_ula_border(gTsRegFE)];
                 } else {
                     gBorder = borderColors[gTsRegFE & 0x07];
-                // save the video mode
-                    gVidMode  = gTsRegFF & 0x07;
                 }
+                // Palette selection must not pin native software to mode 0.
+                gVidMode = pv_video_mode(gUlaEna, gUlaVmode, gTsRegFF);
                 goto endoFunc;
             } else {
         // the GAL ensures that only video memory addresses assert PSEL
