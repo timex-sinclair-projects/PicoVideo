@@ -1,0 +1,102 @@
+--- a/picoCode/coreB/busMain.c
++++ b/picoCode/coreB/busMain.c
+@@ -29,6 +29,7 @@
+ #include "hardware/clocks.h"
+ 
+ #include "../macros.h"
++#include "../video_decode.h"
+ 
+ // Mask bits for the control word (gZ80Ctl)
+ #define IOMASK 1
+@@ -318,10 +319,8 @@
+                     case 0xFF:
+                     // our local copy of the TS register
+                         gTsRegFF    = gZ80Data;
+-                    // this converts the 3-bit 64 column paper/ink value to the
+-                    //  equivalent bright attribute byte.
+-                        gTsCol64Ink = ((~gTsRegFF) & 0x3f) | ((gTsRegFF >> 3) & 7);
+-                        gVidMode    = gTsRegFF & 0x07;
++                    // Decode only color bits; native 64-column BRIGHT is zero.
++                        gTsCol64Ink = pv_64_attribute(gTsRegFF);
+                         break;
+                     case 0xF4:
+                         gTsRegF4    = gZ80Data;
+@@ -353,13 +352,12 @@
+         // ensure that global variables are updated
+                 if (gUlaEna){
+                 // ULA Plus active
+-                    gBorder = gUlaColors[gTsRegFE & 0x07];
+-                    gVidMode  = gUlaVmode & 0x0F;
++                    gBorder = gUlaColors[pv_ula_border(gTsRegFE)];
+                 } else {
+                     gBorder = borderColors[gTsRegFE & 0x07];
+-                // save the video mode
+-                    gVidMode  = gTsRegFF & 0x07;
+                 }
++                // Palette selection must not pin native software to mode 0.
++                gVidMode = pv_video_mode(gUlaEna, gUlaVmode, gTsRegFF);
+                 goto endoFunc;
+             } else {
+         // the GAL ensures that only video memory addresses assert PSEL
+--- a/picoCode/globals.c
++++ b/picoCode/globals.c
+@@ -25,7 +25,7 @@
+ unsigned char gUlaAdrReg = 0;
+ 
+ unsigned char gTsVidMode = 0;
+-unsigned char gTsCol64Ink = ATTR_BRIGHT | ATTR_BLUE | ATTR_WHITE;
++unsigned char gTsCol64Ink = ATTR_WHITE << 3;
+ unsigned char gTsRegFE = 7;
+ unsigned char gTsRegFF = 0;
+ unsigned char gTsRegF4 = 0;
+--- /dev/null
++++ b/picoCode/video_decode.h
+@@ -0,0 +1,48 @@
++#ifndef PICOVIDEO_VIDEO_DECODE_H
++#define PICOVIDEO_VIDEO_DECODE_H
++
++/* Pure register decoding shared by the real bus handler and host tests.
++ * Always inline on GCC: the timing-sensitive bus loop must remain in RAM.
++ */
++#if defined(__GNUC__)
++#define PV_INLINE static inline __attribute__((always_inline))
++#else
++#define PV_INLINE static inline
++#endif
++
++/* $41 = 0 follows native $FF modes, independently of palette enable.
++ * Nonzero values retain explicit mode selection, including custom modes.
++ * $80 explicitly forces mode 0 (the low nibble remains the mode number).
++ */
++PV_INLINE unsigned char pv_video_mode(unsigned char palette_enabled,
++                                     unsigned char extended_mode,
++                                     unsigned char native_register) {
++    if (palette_enabled && extended_mode != 0)
++        return extended_mode & 0x0f;
++    return native_register & 0x07;
++}
++
++/* Native 64-column color bits occupy $FF bits 3..5. PAPER is their
++ * complement. BRIGHT/FLASH are zero; mode/control bits are not colors.
++ */
++PV_INLINE unsigned char pv_64_attribute(unsigned char native_register) {
++    return ((~native_register) & 0x38) | ((native_register >> 3) & 7);
++}
++
++/* ULAplus BORDER uses PAPER in CLUT 0, not its INK entries. */
++PV_INLINE unsigned char pv_ula_border(unsigned char border_register) {
++    return 8 | (border_register & 7);
++}
++
++/* TS2068 FLASH changes phase every 32 frames (about 1.879 swaps/s on
++ * the native 60.1145 Hz display). VGA is independently clocked.
++ */
++PV_INLINE void pv_flash_frame(unsigned short *frames, unsigned char *mask) {
++    if (++*frames == 32) {
++        *frames = 0;
++        *mask ^= 0xff;
++    }
++}
++
++#undef PV_INLINE
++#endif

@@ -1,0 +1,107 @@
+--- a/picoCode/CMakeLists.txt
++++ b/picoCode/CMakeLists.txt
+@@ -16,6 +16,7 @@
+ 
+ # Set the name of the project (as PROJECT_NAME) and C/C++ standards
+ project(picoTsVid C CXX ASM)
++option(PICOVIDEO_PHOTO_PALETTE "Use the optional camera-matched normal palette" OFF)
+ set(CMAKE_C_STANDARD 11)
+ set(CMAKE_CXX_STANDARD 17)
+ 
+@@ -36,6 +37,10 @@
+ #    coreV/col80.c
+ )
+ 
++if(PICOVIDEO_PHOTO_PALETTE)
++    target_compile_definitions(picoTsVid PRIVATE PICOVIDEO_PHOTO_PALETTE=1)
++endif()
++
+ pico_generate_pio_header(picoTsVid ${CMAKE_CURRENT_LIST_DIR}/coreV/vgaPioSm.pio)
+ 
+ # Link to the library functions (stdlib, etc)
+--- a/picoCode/globals.c
++++ b/picoCode/globals.c
+@@ -1,21 +1,19 @@
+ #include "macros.h"
++#include "palette_profile.h"
+ 
+ // standard TS2068 palette
+-const unsigned char tsColors[16] = {BLACK, BLUE, RED, MAGEN,
+-                                    GREEN, CYAN, YELLOW, WHITE,
++const unsigned char tsColors[16] = {PV_NORMAL_COLORS,
+                                     BBLACK, BBLUE, BRED, BMAGEN,
+                                     BGREEN, BCYAN, BYELLOW, BRWHITE};
+ 
+-const unsigned char speccyColors[16] = {BLACK, BLUE, RED, MAGEN,
+-                                    GREEN, CYAN, YELLOW, WHITE,
++const unsigned char speccyColors[16] = {PV_NORMAL_COLORS,
+                                     BLACK, BBLUE, BRED, BMAGEN,
+                                     BGREEN, BCYAN, BYELLOW, BRWHITE};
+ 
+-unsigned char speccyBlack = 0;
++unsigned char speccyBlack = PV_DEFAULT_SPECCY_BLACK;
+ unsigned char biColor[4] = {0x00, 0xFF, 0xE0, 0xFC};
+ 
+-unsigned char borderColors[8] = {BLACK, BLUE, RED, MAGEN, 
+-                                    GREEN, CYAN, YELLOW, WHITE};
++unsigned char borderColors[8] = {PV_NORMAL_COLORS};
+ 
+ 
+ // ULA Plus palette array
+@@ -34,7 +32,7 @@
+ unsigned char gFlashMask = 0;
+ 
+ unsigned char gVidMode = 0;
+-unsigned char gBorder = WHITE;
++unsigned char gBorder = PV_DEFAULT_BORDER;
+ 
+ unsigned char gTextPort;
+ unsigned char gTextStat     = 0;
+@@ -316,4 +314,4 @@
+ 	0x7C, 0x0E, 0x3C, 0x60,	0x7E, 0x00, 0x00, 0x00, 
+ 	0x00, 0x00, 0x7C, 0x7C, 0x7C, 0x7C, 0x7C, 0x7C,
+ 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+-};
+\ No newline at end of file
++};
+--- /dev/null
++++ b/picoCode/palette_profile.h
+@@ -0,0 +1,18 @@
++#ifndef PICOVIDEO_PALETTE_PROFILE_H
++#define PICOVIDEO_PALETTE_PROFILE_H
++
++/* Optional camera-matched normal palette for one TS2068 edge-RGB board,
++ * LEVELHIKE converter and display chain. Bright colors remain stock.
++ * See PHOTO-PALETTE.md in the patch proposal for method and limitations.
++ */
++#ifdef PICOVIDEO_PHOTO_PALETTE
++#define PV_NORMAL_COLORS 0, 3, 28, 31, 233, 231, 221, 219
++#define PV_DEFAULT_SPECCY_BLACK 1
++#define PV_DEFAULT_BORDER 219
++#else
++#define PV_NORMAL_COLORS BLACK, BLUE, RED, MAGEN, GREEN, CYAN, YELLOW, WHITE
++#define PV_DEFAULT_SPECCY_BLACK 0
++#define PV_DEFAULT_BORDER WHITE
++#endif
++
++#endif
+--- a/tests/run.py
++++ b/tests/run.py
+@@ -5,7 +5,9 @@
+ parser=argparse.ArgumentParser()
+ parser.add_argument('--cc',default=os.environ.get('CC'))
+ parser.add_argument('--upstream-dir',type=Path,help='Unmodified picoCode directory, for the expected-failure control')
++parser.add_argument('--photo',action='store_true',help='Test the optional photo palette')
+ args=parser.parse_args()
++if args.photo and args.upstream_dir:parser.error('--photo is not used for the unchanged-source control')
+ compiler=shlex.split(args.cc) if args.cc else [next((c for c in ['cl','cc','gcc','clang'] if shutil.which(c)),'')]
+ if not compiler[0]:parser.error('No C compiler found; use --cc or run from a compiler command prompt')
+ msvc=Path(compiler[0]).stem.lower()=='cl'
+@@ -19,6 +21,7 @@
+   command=compiler+['/nologo','/TC','/std:c11','/O2','/W3',f'/I{HERE/"stubs"}',f'/I{headers}',f'/Fe:{exe}']+list(map(str,sources))
+  else:
+   command=compiler+['-std=c11','-O2','-Wall','-Wextra','-I'+str(HERE/'stubs'),'-I'+str(headers),'-o',str(exe)]+list(map(str,sources))
++ if args.photo:command.insert(len(compiler),'/DPICOVIDEO_PHOTO_PALETTE=1' if msvc else '-DPICOVIDEO_PHOTO_PALETTE=1')
+  subprocess.run(command,cwd=build,check=True)
+  return subprocess.run([str(exe)],cwd=build,text=True,capture_output=True)
+ result=compile_run('video_regression',HERE/'video_regression.c',[source/'coreB/busMain.c',source/'coreV/displayProc80.c'])
