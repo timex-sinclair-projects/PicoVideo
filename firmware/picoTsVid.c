@@ -40,7 +40,7 @@
 #include "macros.h"
 
 // video memory
-extern unsigned char gDfRam[16384];
+extern unsigned char gDfRam[DF_RAM_SIZE];
 extern unsigned char gBorder;
 extern unsigned char gVidMode;
 extern unsigned short bmapOffset[192];

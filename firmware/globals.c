@@ -41,7 +41,7 @@ unsigned char gTextStat     = 0;
 unsigned char gTextAttr     = 0;
 
 // Timex video memory
-unsigned char gDfRam[16384 * 3];
+unsigned char gDfRam[DF_RAM_SIZE];
 
 // These buffers are used by the PIO FSM to output the
 //  color bytes in real time

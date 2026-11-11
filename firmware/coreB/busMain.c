@@ -90,7 +90,7 @@ extern unsigned char gUlaEna;
 extern unsigned char gUlaVmode;
 extern unsigned char gUlaAdrReg;
 
-extern unsigned char gDfRam[16384];
+extern unsigned char gDfRam[DF_RAM_SIZE];
 
 extern unsigned char gTextPort;
 extern unsigned char gTextStat;
@@ -333,7 +333,8 @@ uint16_t fontAdr;
                         break;
                     case HIRES_DAT:
                         if (gVidMode == VID_HIRES8){
-                            gDfRam[gHiresAdr] = gZ80Data;
+                            if (gHiresAdr < DF_RAM_SIZE)
+                                gDfRam[gHiresAdr] = gZ80Data;
                             ++gHiresAdr;
                         }
                         break;

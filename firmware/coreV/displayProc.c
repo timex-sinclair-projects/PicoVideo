@@ -12,7 +12,7 @@ extern unsigned char gBorder;
 extern unsigned char gUlaEna;
 extern unsigned char gTsCol64Ink;
 extern unsigned char gRegFE;
-extern unsigned char gDfRam[16384];
+extern unsigned char gDfRam[DF_RAM_SIZE];
 extern unsigned char gLbuf0[640];     // VGA line buffer 0
 extern unsigned char gLbuf1[640];     // VGA line buffer 1
 extern unsigned char biColor[4];

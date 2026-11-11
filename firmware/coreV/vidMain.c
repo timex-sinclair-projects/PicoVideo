@@ -65,7 +65,7 @@ void __not_in_flash_func(makeScanLine)(unsigned char *outBuf, unsigned int lineN
 extern unsigned char gBorder;
 extern unsigned char gCol64Ink;
 extern unsigned char gRegFE;
-extern unsigned char gDfRam[16384];
+extern unsigned char gDfRam[DF_RAM_SIZE];
 extern unsigned char gLbuf0[642];     // VGA line buffer 0
 extern unsigned char gLbuf1[642];     // VGA line buffer 1
 
