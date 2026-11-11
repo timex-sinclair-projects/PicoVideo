@@ -135,8 +135,8 @@ unsigned char charCode, charBmap, charAttr;
         case VID_QCOLOR:
         // quad color mode
     //        bmapOfs = bmapOffset[lineNr];
-            pLine   = &gDfRam[DF1_OFFSET];
-            pLine1  = &gDfRam[DF2_OFFSET];
+            pLine   = &gDfRam[DF1_OFFSET + lineNr * 32];
+            pLine1  = &gDfRam[DF2_OFFSET + lineNr * 32];
 
             for (i = 0; i < 32; i++){
                 gBmap = *pLine++;
@@ -166,7 +166,6 @@ unsigned char charCode, charBmap, charAttr;
                 *pBuf++ = biColor[gAttr & 0x03];
                 *pBuf++ = biColor[gAttr & 0x03];
 
-                pBuf += 16;
             }
             break;
 
