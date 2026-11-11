@@ -1,0 +1,1 @@
+/* Host bus tests need no hardware clock API. */
