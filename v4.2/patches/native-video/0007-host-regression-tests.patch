@@ -1,0 +1,432 @@
+--- /dev/null
++++ b/tests/extract_video_state.py
+@@ -0,0 +1,80 @@
++"""Test actual controller/ISR bodies without stubbing the entire Pico SDK.
++
++Only platform initialization is omitted. The switch and interrupt bodies
++are extracted verbatim, so the tests do not reimplement their behavior.
++"""
++from pathlib import Path
++
++HERE = Path(__file__).resolve().parent
++SOURCE = HERE.parent/'picoCode/coreV/vidMain.c'
++text = SOURCE.read_text()
++
++
++def block(start):
++    begin = text.index('{',start)
++    depth = 1
++    end = begin+1
++    while depth:
++        depth += (text[end]=='{')-(text[end]=='}')
++        end += 1
++    return text[begin:end]
++
++
++state = 'switch (vidState)'+block(text.index('switch (vidState)'))
++irq = 'void pixDmaHandler(void)'+block(text.index('void pixDmaHandler(void){'))
++assert 'volatile int doLineFlag' in text
++program = r'''
++#include <assert.h>
++#include <stdio.h>
++#include <string.h>
++#include "macros.h"
++#define BUF_IDLE 0
++#define BUF1_FREE 1
++#define BUF0_FREE 2
++extern unsigned char gLbuf0[642],gLbuf1[642],gBorder,gVidMode;
++void makeScanLine(unsigned char *,unsigned int);
++void topBottBorder(unsigned char *);
++void waitForVsync(void) {}
++volatile int doLineFlag;
++unsigned int vidState,lineCtr;
++unsigned int dmaState;
++unsigned int rgb_chan_1=1;
++char *lineBuf;
++struct { unsigned int ints0; } registers;
++#define dma_hw (&registers)
++void step(void) { STATE }
++IRQ
++int main(void) {
++    unsigned char before0[642],before1[642];
++    gBorder=0x5a; gVidMode=0;
++    for(unsigned int free=1;free<=2;++free)
++    for(unsigned int test=0;test<4;++test) {
++        memset(gLbuf0,0xa1,642); memset(gLbuf1,0xb2,642);
++        gLbuf0[640]=gLbuf0[641]=gLbuf1[640]=gLbuf1[641]=0;
++        memcpy(before0,gLbuf0,642); memcpy(before1,gLbuf1,642);
++        doLineFlag=free;
++        vidState=test==0?1:test==3?3:2;
++        lineCtr=test==2?192:test==1?191:0;
++        step();
++        if(free==BUF1_FREE) assert(memcmp(before0,gLbuf0,642)==0);
++        else assert(memcmp(before1,gLbuf1,642)==0);
++        unsigned char *filled=free==BUF1_FREE?gLbuf1:gLbuf0;
++        assert(filled[0]==0x5a && filled[639]==0x5a);
++        assert(filled[640]==0 && filled[641]==0);
++        assert(doLineFlag==BUF_IDLE);
++    }
++    unsigned int expected[]={BUF_IDLE,BUF0_FREE,BUF_IDLE,BUF1_FREE};
++    dmaState=0;
++    for(unsigned int i=0;i<12;++i) {
++        pixDmaHandler();
++        assert(doLineFlag==expected[i%4]);
++        assert(lineBuf==(char *)((i%4)<2?gLbuf1:gLbuf0));
++        assert(registers.ints0==2);
++    }
++    puts("PASS: actual video-state/IRQ bodies preserve busy buffers, blanking guards and double-line ownership.");
++    return 0;
++}
++'''.replace('STATE',state).replace('IRQ\n',irq+'\n')
++out = HERE/'build'
++out.mkdir(exist_ok=True)
++(out/'video_state_regression.c').write_text(program)
+--- /dev/null
++++ b/tests/run.py
+@@ -0,0 +1,35 @@
++"""Run host assertions using actual bus, renderer, controller and ISR code."""
++import argparse,os,shlex,shutil,subprocess,sys
++from pathlib import Path
++HERE=Path(__file__).resolve().parent
++parser=argparse.ArgumentParser()
++parser.add_argument('--cc',default=os.environ.get('CC'))
++parser.add_argument('--upstream-dir',type=Path,help='Unmodified picoCode directory, for the expected-failure control')
++args=parser.parse_args()
++compiler=shlex.split(args.cc) if args.cc else [next((c for c in ['cl','cc','gcc','clang'] if shutil.which(c)),'')]
++if not compiler[0]:parser.error('No C compiler found; use --cc or run from a compiler command prompt')
++msvc=Path(compiler[0]).stem.lower()=='cl'
++build=HERE/'build';build.mkdir(exist_ok=True)
++source=(args.upstream_dir or HERE.parent/'picoCode').resolve()
++headers=HERE.parent/'picoCode'
++def compile_run(name,unit,extra):
++ exe=build/(name+('.exe' if os.name=='nt' else ''))
++ sources=[unit,source/'globals.c',*extra]
++ if msvc:
++  command=compiler+['/nologo','/TC','/std:c11','/O2','/W3',f'/I{HERE/"stubs"}',f'/I{headers}',f'/Fe:{exe}']+list(map(str,sources))
++ else:
++  command=compiler+['-std=c11','-O2','-Wall','-Wextra','-I'+str(HERE/'stubs'),'-I'+str(headers),'-o',str(exe)]+list(map(str,sources))
++ subprocess.run(command,cwd=build,check=True)
++ return subprocess.run([str(exe)],cwd=build,text=True,capture_output=True)
++result=compile_run('video_regression',HERE/'video_regression.c',[source/'coreB/busMain.c',source/'coreV/displayProc80.c'])
++print(result.stdout,end='');print(result.stderr,end='',file=sys.stderr)
++if args.upstream_dir:
++ if result.returncode==0 or 'writes[gameplay].mode==2' not in result.stdout+result.stderr:
++  raise SystemExit('Expected the unchanged source to fail the native-mode transition assertion')
++ print('PASS: unchanged-source control detects the native-mode transition difference')
++else:
++ if result.returncode:raise SystemExit(result.returncode)
++ subprocess.run([sys.executable,str(HERE/'extract_video_state.py')],check=True)
++ result=compile_run('video_state_regression',build/'video_state_regression.c',[source/'coreV/displayProc80.c'])
++ print(result.stdout,end='');print(result.stderr,end='',file=sys.stderr)
++ raise SystemExit(result.returncode)
+--- /dev/null
++++ b/tests/run_windows.cmd
+@@ -0,0 +1,10 @@
++@echo off
++setlocal
++if defined VSCMD_VER goto run
++for /f "usebackq delims=" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do set "PV_VS=%%i"
++if not defined PV_VS exit /b 2
++call "%PV_VS%\Common7\Tools\VsDevCmd.bat" -arch=x64 >nul
++if errorlevel 1 exit /b 1
++:run
++python "%~dp0run.py" --cc cl %*
++exit /b %errorlevel%
+--- /dev/null
++++ b/tests/stubs/hardware/clocks.h
+@@ -0,0 +1 @@
++/* Host bus tests need no hardware clock API. */
+--- /dev/null
++++ b/tests/stubs/hardware/irq.h
+@@ -0,0 +1,3 @@
++#include <stdbool.h>
++#include <stdint.h>
++void irq_set_mask_enabled(uint32_t mask, bool enabled);
+--- /dev/null
++++ b/tests/stubs/pico/stdlib.h
+@@ -0,0 +1,18 @@
++#ifndef TEST_PICO_STDLIB_H
++#define TEST_PICO_STDLIB_H
++#include <stdbool.h>
++#include <stdint.h>
++#define __not_in_flash_func(name) name
++#define GPIO_IN 0
++#define GPIO_OUT 1
++void gpio_init(unsigned int pin);
++void gpio_set_dir(unsigned int pin, bool output);
++void gpio_put(unsigned int pin, bool value);
++void gpio_put_masked(uint32_t mask, uint32_t value);
++void gpio_init_mask(uint32_t mask);
++void gpio_set_dir_out_masked(uint32_t mask);
++void gpio_set_dir_in_masked(uint32_t mask);
++bool gpio_get(unsigned int pin);
++uint32_t gpio_get_all(void);
++void sleep_us(uint64_t delay);
++#endif
+--- /dev/null
++++ b/tests/video_regression.c
+@@ -0,0 +1,264 @@
++#include <assert.h>
++#include <setjmp.h>
++#include <stdio.h>
++#include <string.h>
++#include <stdlib.h>
++#include "pico/stdlib.h"
++#include "macros.h"
++#include "video_decode.h"
++
++extern unsigned char gUlaColors[64], gUlaEna, gUlaVmode, gUlaAdrReg;
++extern unsigned char gTsRegFF, gTsRegFE, gTsRegF4, gTsCol64Ink;
++extern unsigned char gVidMode, gBorder, speccyBlack, gDfRam[];
++extern unsigned short gHiresAdr;
++extern unsigned char biColor[4];
++extern unsigned char gAttr, gBmap, gPalInk, gPalPaper, gFlashMask;
++extern const unsigned char tsColors[], speccyColors[];
++void busMain(void);
++void getInkPaper(void);
++void makeScanLine(unsigned char *, unsigned int);
++
++typedef struct {
++    unsigned short address;
++    unsigned char data, mode, border, attribute;
++    bool memory;
++} Write;
++static Write writes[1024];
++static unsigned int count, current, selects;
++static uint32_t page;
++static jmp_buf complete;
++
++static void add(unsigned short address, unsigned char data) {
++    writes[count].address = address;
++    writes[count].memory = false;
++    writes[count++].data = data;
++    assert(count < 1024);
++}
++static void reg(unsigned char index, unsigned char value) {
++    add(ULA_ADR_REG,index); add(ULA_DAT_REG,value);
++}
++static void mem(unsigned short address, unsigned char value) {
++    add(address,value); writes[count-1].memory=true;
++}
++static void run(void) {
++    current=0; selects=0;
++    if(setjmp(complete)==0) busMain();
++    assert(current==count);
++}
++void gpio_init(unsigned int p) {(void)p;}
++void gpio_set_dir(unsigned int p,bool b) {(void)p;(void)b;}
++void gpio_put(unsigned int p,bool b) {(void)p;(void)b;}
++void gpio_init_mask(uint32_t m) {(void)m;}
++void gpio_set_dir_out_masked(uint32_t m) {(void)m;}
++void gpio_set_dir_in_masked(uint32_t m) {(void)m;}
++void gpio_put_masked(uint32_t mask,uint32_t value) {
++    if(mask==0x18000000u) page=value;
++}
++void sleep_us(uint64_t t) {(void)t;}
++void irq_set_mask_enabled(uint32_t m,bool b) {(void)m;(void)b;}
++bool gpio_get(unsigned int pin) {
++    if(pin==13) return true;  /* Z80 write */
++    if(pin==12) return writes[current].memory;
++    if(pin!=10) return false;
++    if(current==count) longjmp(complete,1);
++    if(++selects<3) return true;
++    selects=0;
++    writes[current].mode=gVidMode;
++    writes[current].border=gBorder;
++    writes[current].attribute=gTsCol64Ink;
++    ++current;
++    return false;
++}
++uint32_t gpio_get_all(void) {
++    unsigned int value;
++    assert(current<count);
++    if(page==0) value=writes[current].address&255;
++    else if(page==0x08000000u) value=writes[current].address>>8;
++    else { assert(page==0x10000000u); value=writes[current].data; }
++    return value<<15;
++}
++
++static void test_bus_modes(void) {
++    count=0;
++    reg(0x41,0); reg(0x40,1);
++    add(0xff,0x42); /* r130 gameplay: ECM + IRQ inhibited */
++    unsigned int gameplay=count-1;
++    add(0xff,2);    /* ECM, IRQ enabled */
++    add(0xfe,5);    /* ordinary border write must preserve ECM */
++    add(0xff,0);    /* menu */
++    add(0xff,0x41); /* alternate HOME display while loading */
++    unsigned int loading=count-1;
++    add(0xff,0x42); /* gameplay again */
++    unsigned int resume=count-1;
++    reg(0x41,5); add(0xff,2); /* explicit 80-column custom mode */
++    unsigned int text=count-1;
++    reg(0x41,2); add(0xff,0); /* explicit legacy ECM selection */
++    unsigned int fixed_ecm=count-1;
++    reg(0x41,0x80); add(0xff,2); /* explicit fixed normal */
++    unsigned int fixed_normal=count-1;
++    reg(0x41,0); /* back to native mode tracking immediately */
++    unsigned int follow=count-1;
++    reg(0x40,0); add(0xff,1);
++    unsigned int native=count-1;
++    run();
++    assert(writes[gameplay].mode==2);
++    assert(writes[gameplay+1].mode==2 && writes[gameplay+2].mode==2);
++    assert(writes[loading].mode==1 && writes[resume].mode==2);
++    assert(writes[text].mode==5 && writes[fixed_ecm].mode==2);
++    assert(writes[fixed_normal].mode==0 && writes[follow].mode==2);
++    assert(writes[native].mode==1);
++}
++
++static void test_bus_colors(void) {
++    count=0;
++    for(unsigned int i=0;i<64;++i) reg(i,(unsigned char)i);
++    reg(0x41,0); reg(0x40,1);
++    unsigned int first=count;
++    for(unsigned int i=0;i<8;++i) add(0xfe,(unsigned char)(0xa0|i));
++    unsigned int colors=count;
++    for(unsigned int i=0;i<256;++i) add(0xff,(unsigned char)i);
++    run();
++    for(unsigned int i=0;i<8;++i) assert(writes[first+i].border==8+i);
++    for(unsigned int i=0;i<256;++i) {
++        unsigned int ink=(i>>3)&7, paper=7-ink;
++        assert(writes[colors+i].attribute==ink+8*paper);
++    }
++}
++
++static void test_renderer(void) {
++    for(unsigned int i=0;i<64;++i) gUlaColors[i]=(unsigned char)(i+32);
++    for(unsigned int ula=0;ula<2;++ula)
++    for(unsigned int black=0;black<2;++black)
++    for(unsigned int flash=0;flash<2;++flash)
++    for(unsigned int attr=0;attr<256;++attr) {
++        gUlaEna=(unsigned char)ula; speccyBlack=(unsigned char)black;
++        gFlashMask=flash?255:0; gAttr=(unsigned char)attr; gBmap=0xa5;
++        getInkPaper();
++        unsigned int ink=attr&7, paper=(attr>>3)&7, bright=(attr>>6)&1;
++        if(ula) {
++            unsigned int bank=16*(attr>>6);
++            assert(gPalInk==gUlaColors[bank+ink]);
++            assert(gPalPaper==gUlaColors[bank+8+paper]);
++            assert(gBmap==0xa5); /* FLASH is a palette selector in ULAplus. */
++        } else {
++            const unsigned char *palette=black?speccyColors:tsColors;
++            assert(gPalInk==palette[8*bright+ink]);
++            assert(gPalPaper==palette[8*bright+paper]);
++            assert(gBmap==(unsigned char)(0xa5^((attr&128)?gFlashMask:0)));
++        }
++    }
++    unsigned char output[640];
++    unsigned char used[6144]={0};
++    memset(gDfRam,0,16384);
++    gUlaEna=1; gBorder=17; gVidMode=2;
++    for(unsigned int y=0;y<192;++y) {
++        unsigned int offset=((y&192)<<5)|((y&56)<<2)|((y&7)<<8);
++        for(unsigned int x=0;x<32;++x) {
++            assert(!used[offset+x]); used[offset+x]=1;
++            gDfRam[offset+x]=(unsigned char)((x+y)&1?0x55:0xaa);
++            /* A different attribute per scanline, deliberately unlike DF1. */
++            gDfRam[8192+offset+x]=(unsigned char)((y*7+x*11)&255);
++        }
++        makeScanLine(output,y);
++        for(unsigned int x=0;x<32;++x) {
++            unsigned int attr=gDfRam[8192+offset+x], bank=16*(attr>>6);
++            unsigned int bits=gDfRam[offset+x];
++            for(unsigned int bit=0;bit<8;++bit) {
++                unsigned char color=gUlaColors[bank+((bits&(128>>bit))?(attr&7):(8+((attr>>3)&7)))];
++                assert(output[64+16*x+2*bit]==color);
++                assert(output[65+16*x+2*bit]==color);
++            }
++        }
++        for(unsigned int i=0;i<64;++i) assert(output[i]==17 && output[576+i]==17);
++    }
++    for(unsigned int i=0;i<6144;++i) assert(used[i]);
++}
++
++static void test_banking(void) {
++    memset(gDfRam,0xcc,16384);
++    count=0;
++    reg(0x43,0); /* no DF1->DF2 write mirror */
++    add(0xe1,0x34); add(0xe2,0x12);
++    add(0xf4,0); /* this must not fall through to the E1 address register */
++    mem(0x4000,0x11); mem(0x5fff,0x22);
++    mem(0x6000,0x33); mem(0x77ff,0x44);
++    add(0xf4,0x0c); /* both display chunks banked away */
++    mem(0x4000,0x91); mem(0x6000,0x92);
++    add(0xff,0x82); /* EXROM selection does not make banked chunks HOME */
++    mem(0x4000,0x93); mem(0x6000,0x94);
++    add(0xf4,0x04); /* only DF2 is HOME */
++    mem(0x4000,0x95); mem(0x6001,0x55);
++    add(0xf4,0x08); /* only DF1 is HOME */
++    mem(0x4001,0x66); mem(0x6000,0x96);
++    add(0xf4,0);
++    reg(0x43,1);
++    mem(0x4100,0x77); /* mirror writes to DF2; leave DF1 alone */
++    mem(0x6101,0x88);
++    run();
++    assert(gHiresAdr==0x1234);
++    assert(gDfRam[0]==0x11 && gDfRam[0x1fff]==0x22);
++    assert(gDfRam[8192]==0x33 && gDfRam[8192+0x17ff]==0x44);
++    assert(gDfRam[1]==0x66 && gDfRam[8193]==0x55);
++    assert(gDfRam[0x100]==0xcc && gDfRam[8192+0x100]==0x77);
++    assert(gDfRam[8192+0x101]==0x88);
++}
++
++static void test_quad_and_extended_bounds(void) {
++    count=0;
++    reg(0x43,0); reg(0x41,9); reg(0x40,1);
++    add(0xe1,0xff); add(0xe2,0xbf); add(0xe0,0x5a);
++    add(0xe0,0xa5); /* $C000 is beyond the allocated 48 KiB. */
++    add(0xe1,0xff); add(0xe2,0xff); add(0xe0,0x91);
++    add(0xe0,0x6b); /* address wraps to zero */
++    run();
++    assert(gDfRam[DF_RAM_SIZE-1]==0x5a);
++    assert(gDfRam[0]==0x6b && gHiresAdr==1);
++    unsigned char guarded[1100];
++    unsigned char *output=guarded+16;
++    for(unsigned int i=0;i<4;++i) biColor[i]=(unsigned char)(0x30+i);
++    gVidMode=VID_QCOLOR; gBorder=0x7a;
++    for(unsigned int y=0;y<192;++y) {
++        for(unsigned int x=0;x<32;++x) {
++            gDfRam[y*32+x]=(unsigned char)(y*17+x*11);
++            gDfRam[DF2_OFFSET+y*32+x]=(unsigned char)(y*13+x*7);
++        }
++        memset(guarded,0xce,sizeof guarded);
++        makeScanLine(output,y);
++        for(unsigned int x=0;x<32;++x)
++        for(unsigned int half=0;half<2;++half)
++        for(unsigned int pair=0;pair<4;++pair) {
++            unsigned int byte=gDfRam[(half?DF2_OFFSET:0)+y*32+x];
++            unsigned int offset=64+x*16+half*8+pair*2;
++            unsigned char expected=biColor[(byte>>(6-2*pair))&3];
++            assert(output[offset]==expected && output[offset+1]==expected);
++        }
++        for(unsigned int i=0;i<16;++i) assert(guarded[i]==0xce);
++        for(unsigned int i=656;i<sizeof guarded;++i) assert(guarded[i]==0xce);
++        for(unsigned int i=0;i<64;++i) assert(output[i]==0x7a && output[576+i]==0x7a);
++    }
++}
++
++int main(void) {
++#if defined(_WIN32)
++    _set_error_mode(_OUT_TO_STDERR);
++    _set_abort_behavior(0,_WRITE_ABORT_MSG | _CALL_REPORTFAULT);
++#endif
++    for(unsigned int ena=0;ena<2;++ena)
++    for(unsigned int mode=0;mode<256;++mode)
++    for(unsigned int native=0;native<256;++native)
++        assert(pv_video_mode(ena,mode,native)==((ena && mode)?(mode%16):(native%8)));
++    test_bus_modes();
++    test_bus_colors();
++    test_banking();
++    test_renderer();
++    test_quad_and_extended_bounds();
++    unsigned short frames=0;
++    unsigned char mask=0;
++    for(unsigned int i=1;i<=128;++i) {
++        pv_flash_frame(&frames,&mask);
++        assert(frames==i%32);
++        assert(mask==((i/32)%2?255:0));
++    }
++    puts("PASS: actual bus writes, r130 modes, border, native 64-column colors, banking/mirroring, 256 attributes, 192 ECM scanlines, quad-color bounds/rows, extended-write bounds, and 32-frame FLASH.");
++    return 0;
++}

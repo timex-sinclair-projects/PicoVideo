@@ -36,3 +36,9 @@ This file.
 
 
 
+
+## Proposed native-video updates
+
+An optional, reviewable [patch series](patches/native-video/README.md) provides
+native/ULA+ mode tracking and related display updates, with host tests and a
+validation record. The archive and existing firmware images are unchanged.
