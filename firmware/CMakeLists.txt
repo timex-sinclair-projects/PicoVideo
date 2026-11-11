@@ -17,6 +17,7 @@ include(${PICO_SDK_PATH}/external/pico_sdk_import.cmake)
 
 # Set the name of the project (as PROJECT_NAME) and C/C++ standards
 project(picoTsVid C CXX ASM)
+option(PICOVIDEO_PHOTO_PALETTE "Use the optional camera-matched normal palette" OFF)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -36,6 +37,10 @@ add_executable(picoTsVid
 #    coreV/displayProc.c
 #    coreV/col80.c
 )
+
+if(PICOVIDEO_PHOTO_PALETTE)
+    target_compile_definitions(picoTsVid PRIVATE PICOVIDEO_PHOTO_PALETTE=1)
+endif()
 
 pico_generate_pio_header(picoTsVid ${CMAKE_CURRENT_LIST_DIR}/coreV/vgaPioSm.pio)
 

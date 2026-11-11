@@ -5,7 +5,9 @@ HERE=Path(__file__).resolve().parent
 parser=argparse.ArgumentParser()
 parser.add_argument('--cc',default=os.environ.get('CC'))
 parser.add_argument('--upstream-dir',type=Path,help='Unmodified firmware directory, for the expected-failure control')
+parser.add_argument('--photo',action='store_true',help='Test the optional photo palette')
 args=parser.parse_args()
+if args.photo and args.upstream_dir:parser.error('--photo is not used for the unchanged-source control')
 compiler=shlex.split(args.cc) if args.cc else [next((c for c in ['cl','cc','gcc','clang'] if shutil.which(c)),'')]
 if not compiler[0]:parser.error('No C compiler found; use --cc or run from a compiler command prompt')
 msvc=Path(compiler[0]).stem.lower()=='cl'
@@ -19,6 +21,7 @@ def compile_run(name,unit,extra):
   command=compiler+['/nologo','/TC','/std:c11','/O2','/W3',f'/I{HERE/"stubs"}',f'/I{headers}',f'/Fe:{exe}']+list(map(str,sources))
  else:
   command=compiler+['-std=c11','-O2','-Wall','-Wextra','-I'+str(HERE/'stubs'),'-I'+str(headers),'-o',str(exe)]+list(map(str,sources))
+ if args.photo:command.insert(len(compiler),'/DPICOVIDEO_PHOTO_PALETTE=1' if msvc else '-DPICOVIDEO_PHOTO_PALETTE=1')
  subprocess.run(command,cwd=build,check=True)
  return subprocess.run([str(exe)],cwd=build,text=True,capture_output=True)
 result=compile_run('video_regression',HERE/'video_regression.c',[source/'coreB/busMain.c',source/'coreV/displayProc80.c'])
