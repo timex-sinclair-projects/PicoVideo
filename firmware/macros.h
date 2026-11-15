@@ -1,7 +1,7 @@
 #ifndef PICOVIDEO_MACROS_H
 #define PICOVIDEO_MACROS_H
 
-#define SOFTWARE_VER 0x42
+#define SOFTWARE_VER 0x43
 
 #define ATTR_BLACK 0x00
 #define ATTR_BLUE 0x01
