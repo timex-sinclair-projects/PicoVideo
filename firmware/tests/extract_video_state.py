@@ -20,14 +20,18 @@ def block(start):
     return text[begin:end]
 
 
-state = 'switch (vidState)'+block(text.index('switch (vidState)'))
-irq = 'void pixDmaHandler(void)'+block(text.index('void pixDmaHandler(void){'))
+line_sig = 'static void __not_in_flash_func(videoLine)(int flag)'
+line = line_sig+block(text.index(line_sig+'{'))
+irq_sig = 'void __not_in_flash_func(pixDmaHandler)(void)'
+irq = irq_sig+block(text.index(irq_sig+'{'))
 assert 'volatile int doLineFlag' in text
 program = r'''
 #include <assert.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 #include "macros.h"
+#define __not_in_flash_func(name) name
 #define BUF_IDLE 0
 #define BUF1_FREE 1
 #define BUF0_FREE 2
@@ -36,13 +40,16 @@ void makeScanLine(unsigned char *,unsigned int);
 void topBottBorder(unsigned char *);
 void waitForVsync(void) {}
 volatile int doLineFlag;
-unsigned int vidState,lineCtr;
+static unsigned int vidState,lineCtr;
+static uint32_t save_and_disable_interrupts(void) { return 0; }
+static void restore_interrupts(uint32_t state) { (void)state; }
 unsigned int dmaState;
 unsigned int rgb_chan_1=1;
 char *lineBuf;
 struct { unsigned int ints0; } registers;
 #define dma_hw (&registers)
-void step(void) { STATE }
+LINE
+void step(void) { videoLine(doLineFlag); }
 IRQ
 int main(void) {
     unsigned char before0[642],before1[642];
@@ -71,10 +78,14 @@ int main(void) {
         assert(lineBuf==(char *)((i%4)<2?gLbuf1:gLbuf0));
         assert(registers.ints0==2);
     }
-    puts("PASS: actual video-state/IRQ bodies preserve busy buffers, blanking guards and double-line ownership.");
+    /* A newer free-buffer report posted while a line is drawn must survive. */
+    vidState=2; lineCtr=0; doLineFlag=BUF0_FREE;
+    videoLine(BUF1_FREE);
+    assert(doLineFlag==BUF0_FREE);
+    puts("PASS: actual video-state/IRQ bodies preserve busy buffers, blanking guards, double-line ownership and late ISR reports.");
     return 0;
 }
-'''.replace('STATE',state).replace('IRQ\n',irq+'\n')
+'''.replace('LINE\n',line+'\n').replace('IRQ\n',irq+'\n')
 out = HERE/'build'
 out.mkdir(exist_ok=True)
 (out/'video_state_regression.c').write_text(program)

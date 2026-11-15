@@ -1,5 +1,6 @@
 #include "macros.h"
 #include "palette_profile.h"
+#include "globals.h"
 
 // standard TS2068 palette
 const unsigned char tsColors[16] = {PV_NORMAL_COLORS,
@@ -43,8 +44,8 @@ unsigned char gDfRam[DF_RAM_SIZE];
 
 // These buffers are used by the PIO FSM to output the
 //  color bytes in real time
-unsigned char gLbuf0[642];     // VGA line buffer 0
-unsigned char gLbuf1[642];     // VGA line buffer 1
+unsigned char gLbuf0[LINE_BUF_SIZE];     // VGA line buffer 0
+unsigned char gLbuf1[LINE_BUF_SIZE];     // VGA line buffer 1
 
 unsigned short gHiresAdr = 0;
 

@@ -2,31 +2,8 @@
 #include "string.h"
 #include "../macros.h"
 
-extern unsigned char testBits[33];
-extern unsigned char testAttr[33];
+#include "../globals.h"
 
-
-// program global declarations
-extern unsigned char gVidMode;
-extern unsigned char gBorder;
-extern unsigned char gUlaEna;
-extern unsigned char gTsCol64Ink;
-extern unsigned char gRegFE;
-extern unsigned char gDfRam[DF_RAM_SIZE];
-extern unsigned char gLbuf0[640];     // VGA line buffer 0
-extern unsigned char gLbuf1[640];     // VGA line buffer 1
-extern unsigned char biColor[4];
-extern unsigned char gUlaColors[];
-extern const unsigned char tsColors[];
-extern const unsigned char ts64Colors[];
-extern const unsigned char speccyColors[];
-extern unsigned short bmapOffset[192];
-extern unsigned char vgaFont[2048];
-extern unsigned char speccyBlack;
-
-extern int fillCmd;
-
-extern unsigned char gFlashMask;
 
 unsigned char gPaper, gInk, gAttr, gBmap;
 unsigned char *gpPalette;

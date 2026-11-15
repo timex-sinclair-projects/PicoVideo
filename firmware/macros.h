@@ -1,3 +1,6 @@
+#ifndef PICOVIDEO_MACROS_H
+#define PICOVIDEO_MACROS_H
+
 #define SOFTWARE_VER 0x42
 
 #define ATTR_BLACK 0x00
@@ -77,4 +80,4 @@
 #define VID_64A     0x07        // new TS 64 column mode that uses the attributes
 #define VID_HIRES8  0x09
 
-
+#endif

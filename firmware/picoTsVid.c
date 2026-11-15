@@ -39,12 +39,7 @@
 #include "vgaPioSm.pio.h"
 #include "macros.h"
 
-// video memory
-extern unsigned char gDfRam[DF_RAM_SIZE];
-extern unsigned char gBorder;
-extern unsigned char gVidMode;
-extern unsigned short bmapOffset[192];
-extern unsigned char speccyBlack;
+#include "globals.h"
 
 
 void corevMain(void);
@@ -56,8 +51,8 @@ int main() {
 // set the system clock to 250MHz
     set_sys_clock_khz(250000, true);
 
-// Initialize stdio
-    stdio_init_all();
+// No stdio: busSetup() disables the interrupts USB serial would need,
+//  and core 0 never returns to service it.
 
     gpio_init(25);
     gpio_set_dir(25, GPIO_OUT);

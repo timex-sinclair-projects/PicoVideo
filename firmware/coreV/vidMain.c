@@ -40,11 +40,13 @@
 #include "hardware/pio.h"
 #include "hardware/dma.h"
 #include "hardware/irq.h"
+#include "hardware/sync.h"
 #include "string.h"
 // Our assembled PIO programs:
 #include "vgaPioSm.pio.h"
 #include "../macros.h"
 #include "../video_decode.h"
+#include "../globals.h"
 
 void doTextMode(void);
 
@@ -55,27 +57,10 @@ void doTextMode(void);
 void testFillDf0(void);
 void testLines(void);
 
-void pixDmaHandler(void);
+void __not_in_flash_func(pixDmaHandler)(void);
 void topBottBorder(unsigned char *bordBuf);
-void waitForVsync(void);
+void __not_in_flash_func(waitForVsync)(void);
 void __not_in_flash_func(makeScanLine)(unsigned char *outBuf, unsigned int lineNr);
-
-
-// program global declarations
-extern unsigned char gBorder;
-extern unsigned char gCol64Ink;
-extern unsigned char gRegFE;
-extern unsigned char gDfRam[DF_RAM_SIZE];
-extern unsigned char gLbuf0[642];     // VGA line buffer 0
-extern unsigned char gLbuf1[642];     // VGA line buffer 1
-
-extern unsigned short gFlashCtr;
-extern unsigned char gFlashMask;
-
-extern unsigned char gVidMode;
-extern unsigned char gTextPort;
-extern unsigned char gTextStat;
-extern unsigned char gTextAttr;
 
 
 // DMA channels - 0 sends color data, 1 reconfigures and restarts 0
@@ -97,11 +82,17 @@ volatile int doLineFlag = BUF1_FREE;
 // a pointer to the ADDRESS of this color array.
 // Note that this array is automatically initialized to all 0's (black)
 // This variable is initialized to point to the first line buffer
-char *lineBuf = &gLbuf0[0];
+char *lineBuf = (char *)&gLbuf0[0];
+
+// video state machine position, advanced once per free line buffer
+static unsigned int vidState = 0;
+static unsigned int lineCtr  = 0;
+
+static void __not_in_flash_func(videoLine)(int flag);
 
 
 
-void corevMain(void) {
+void __not_in_flash_func(corevMain)(void) {
 unsigned int i;
 
 // These locations are initialized to set the color value
@@ -213,12 +204,6 @@ unsigned int i;
 
 
 
-unsigned int attrAdr        = 6144;
-unsigned int vidState       = 0;
-unsigned int lineCtr        = 0;
-unsigned int lineAdr        = 0;
-
-
 // Wait until we know we won't contend with the doLineFlag
     waitForVsync();
 
@@ -226,80 +211,77 @@ unsigned int lineAdr        = 0;
     doLineFlag              = BUF1_FREE;
 
     while(true){
-        if (doLineFlag != BUF_IDLE){
-            switch (vidState){
-            case 0:
-            // spin until we know we are not in the active video time
-                waitForVsync();
-                lineCtr     = 0;
-        // Due to the way the PIO FSMs work, we know that there will be
-        //  30-ish line periods available for this initialization.
-        //  This means there will be no contention for the doLineFlag
-                doLineFlag  = BUF_IDLE;
-            // wait for the next interrupt
-                vidState    = 1;
-                break;
-            case 1:
-    // This state handles the top border period
-                if (lineCtr < 22){
-                    lineCtr++;
-                    if (doLineFlag == BUF1_FREE){
-                        topBottBorder(&gLbuf1[0]);
-                    } else {
-                        topBottBorder(&gLbuf0[0]);
-                    }
-                } else {
-                    lineCtr     = 0;
-                    vidState    = 2;
-                }
-                doLineFlag  = BUF_IDLE;
-                break;
-
-            case 2:
-        // output the bit map data
-                if (lineCtr < 192){
-                    if (doLineFlag == BUF1_FREE){
-                        makeScanLine(&gLbuf1[0], lineCtr);
-                    } else {
-                        makeScanLine(&gLbuf0[0], lineCtr);
-                    }
-                    lineCtr++;
-                } else {
-                    if (doLineFlag == BUF1_FREE) {
-                        topBottBorder(&gLbuf1[0]);
-                    } else {
-                        topBottBorder(&gLbuf0[0]);
-                    }
-                    lineCtr     = 0;
-                    vidState    = 3;
-                }
-                doLineFlag  = BUF_IDLE;
-                break;
-
-            case 3:
-    // This state handles the bottom border period
-                if (lineCtr < 8){
-                    if (doLineFlag == BUF1_FREE){
-                        topBottBorder(&gLbuf1[0]);
-                    } else {
-                        topBottBorder(&gLbuf0[0]);
-                    }
-                    lineCtr++;
-                } else {
-                    lineCtr = 0;
-                    vidState = 0;
-                }
-                doLineFlag  = BUF_IDLE;
-                break;
-            }
-        }
+    // read the flag once: the DMA ISR can change it at any moment
+        int flag = doLineFlag;
+        if (flag != BUF_IDLE) videoLine(flag);
     }
+}
+
+
+// Fill the line buffer the ISR reported free (flag) with the next line of
+//  the frame, then mark that report handled.
+static void __not_in_flash_func(videoLine)(int flag){
+unsigned char *buf = (flag == BUF1_FREE) ? &gLbuf1[0] : &gLbuf0[0];
+uint32_t irqState;
+
+    switch (vidState){
+    case 0:
+    // spin until we know we are not in the active video time
+        waitForVsync();
+        lineCtr     = 0;
+    // Due to the way the PIO FSMs work, we know that there will be
+    //  30-ish line periods available for this initialization.
+    // Discard any report that arrived while waiting and start the
+    //  frame on the next interrupt.
+        doLineFlag  = BUF_IDLE;
+        vidState    = 1;
+        return;
+    case 1:
+    // This state handles the top border period
+        if (lineCtr < 22){
+            lineCtr++;
+            topBottBorder(buf);
+        } else {
+            lineCtr     = 0;
+            vidState    = 2;
+        }
+        break;
+
+    case 2:
+    // output the bit map data
+        if (lineCtr < 192){
+            makeScanLine(buf, lineCtr);
+            lineCtr++;
+        } else {
+            topBottBorder(buf);
+            lineCtr     = 0;
+            vidState    = 3;
+        }
+        break;
+
+    case 3:
+    // This state handles the bottom border period
+        if (lineCtr < 8){
+            topBottBorder(buf);
+            lineCtr++;
+        } else {
+            lineCtr = 0;
+            vidState = 0;
+        }
+        break;
+    }
+
+// Clear the report only if the ISR has not posted a newer one meanwhile;
+//  otherwise that line would be skipped and the frame would shift.
+    irqState = save_and_disable_interrupts();
+    if (doLineFlag == flag) doLineFlag = BUF_IDLE;
+    restore_interrupts(irqState);
 }
 
 
 
 // Spin here until we detect a falling edge on the VSync line
-void waitForVsync(void){
+void __not_in_flash_func(waitForVsync)(void){
 // spin until VSync is high
     while(!gpio_get(9)){
     };
@@ -318,7 +300,7 @@ void waitForVsync(void){
 //
 unsigned char dmaState = 0;
 unsigned int dmaLineCtr = 0;
-void pixDmaHandler(void){
+void __not_in_flash_func(pixDmaHandler)(void){
 // Clear the interrupt request.
     dma_hw->ints0 = (1u << rgb_chan_1);
 
