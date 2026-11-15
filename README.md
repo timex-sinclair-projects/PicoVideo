@@ -26,7 +26,7 @@ board, hold **BOOTSEL** on the Pico while you plug in USB, then drag the
 |---|---|
 | [`firmware/`](firmware/) | Pico C source (Pico SDK, CMake). Core 0 handles the TS2068 bus and core 1 generates VGA. |
 | [`pld/`](pld/) | WinCUPL source and JEDEC file for the GAL16V8/ATF16V8 bus-decode PLD. |
-| [`hardware/`](hardware/) | Altium schematics and PCB, plus Gerbers, drill files, BOM and a schematic PDF. |
+| [`hardware/`](hardware/) | Current SMD board in EasyEDA Pro (schematic, PCB, BOM), plus the earlier Altium design and its Gerbers. |
 | [`docs/`](docs/) | Programmer's reference for the 4.2 features. |
 | [`examples/`](examples/) | 80-column text routines for the TS2068 (z88dk C and Z80 assembler). |
 | [`V4/`](V4/) | The V4 firmware image and flashing guide, kept at this path so existing links keep working. |
