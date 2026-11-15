@@ -34,8 +34,6 @@ add_executable(picoTsVid
     coreV/vidMain.c
     coreV/vgaPioSm.pio
     coreV/displayProc80.c
-#    coreV/displayProc.c
-#    coreV/col80.c
 )
 
 if(PICOVIDEO_PHOTO_PALETTE)
@@ -53,7 +51,7 @@ target_link_libraries(picoTsVid
     pico_multicore
     )
 
-pico_enable_stdio_usb(picoTsVid 1)
+pico_enable_stdio_usb(picoTsVid 0)
 pico_enable_stdio_uart(picoTsVid 0)
 
 # Create the output file

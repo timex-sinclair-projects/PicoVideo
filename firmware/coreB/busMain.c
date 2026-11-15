@@ -67,39 +67,11 @@
 #define CTLSIG PG3
 
 // Convenience macro to fetch the data bits
-#define GETDATA ((unsigned short)((gpio_get_all() >> 15) & 0xff));
+#define GETDATA ((unsigned short)((gpio_get_all() >> 15) & 0xff))
 
 
-// globals used throughout the progam
-extern unsigned char gTsVidMode;
-extern unsigned char gTsRegFE;
-extern unsigned char gTsRegFF;
-extern unsigned char gTsRegF4;
-extern unsigned char gTsVidMode;
-extern unsigned char gTsCol64Ink;
-
-extern unsigned char speccyBlack;
-extern unsigned char gVidMode;
-extern unsigned char gBorder;
-
-extern const unsigned char tsColors[16];
-extern unsigned char borderColors[8];
-
-extern unsigned char gUlaColors[64];
-extern unsigned char gUlaEna;
-extern unsigned char gUlaVmode;
-extern unsigned char gUlaAdrReg;
-
-extern unsigned char gDfRam[DF_RAM_SIZE];
-
-extern unsigned char gTextPort;
-extern unsigned char gTextStat;
-
-extern unsigned short gHiresAdr;
-
-extern unsigned int gfontIndex;
-extern unsigned char vgaFont[2048];
-extern unsigned char biColor[4];
+// shared state lives in globals.c
+#include "../globals.h"
 
 
 unsigned char gZ80Ctl;          // selected bits from the Z80 control bus
@@ -116,10 +88,6 @@ unsigned char testPort;
 unsigned char xPort = 0;
 
 unsigned char memMirror = 0;
-
-// test registers
-extern unsigned short gTestMemAdr;
-extern unsigned short gTestCrlReg;
 
 void mySerOut(unsigned short myVal){
 unsigned char i;
@@ -233,6 +201,7 @@ uint16_t fontAdr;
                         if (gUlaAdrReg == 0x43) gOutVal = memMirror;
                     // read a byte from font memory
                         if (gUlaAdrReg == 0x46){
+                            gfontIndex &= 2047;
                             gOutVal = vgaFont[gfontIndex++];
                             gfontIndex &= 2047;
                         }
@@ -242,9 +211,11 @@ uint16_t fontAdr;
                             gOutVal = biColor[gfontIndex++];
                             gfontIndex &= 3;
                         }
+                    // read a byte from video memory
                         if (gUlaAdrReg == 0x48){
+                            if (gfontIndex >= DF_RAM_SIZE) gfontIndex = 0;
                             gOutVal = gDfRam[gfontIndex++];
-                            gfontIndex &= 16383;
+                            if (gfontIndex >= DF_RAM_SIZE) gfontIndex = 0;
                         }                           
                         if (gUlaAdrReg == 0x7F) gOutVal = SOFTWARE_VER;
                         if (gUlaAdrReg < 0x40) gOutVal = gUlaColors[(gUlaAdrReg & 0x3F)];
