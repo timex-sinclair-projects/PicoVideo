@@ -4,14 +4,14 @@ from pathlib import Path
 HERE=Path(__file__).resolve().parent
 parser=argparse.ArgumentParser()
 parser.add_argument('--cc',default=os.environ.get('CC'))
-parser.add_argument('--upstream-dir',type=Path,help='Unmodified picoCode directory, for the expected-failure control')
+parser.add_argument('--upstream-dir',type=Path,help='Unmodified firmware directory, for the expected-failure control')
 args=parser.parse_args()
 compiler=shlex.split(args.cc) if args.cc else [next((c for c in ['cl','cc','gcc','clang'] if shutil.which(c)),'')]
 if not compiler[0]:parser.error('No C compiler found; use --cc or run from a compiler command prompt')
 msvc=Path(compiler[0]).stem.lower()=='cl'
 build=HERE/'build';build.mkdir(exist_ok=True)
-source=(args.upstream_dir or HERE.parent/'picoCode').resolve()
-headers=HERE.parent/'picoCode'
+source=(args.upstream_dir or HERE.parent).resolve()
+headers=HERE.parent
 def compile_run(name,unit,extra):
  exe=build/(name+('.exe' if os.name=='nt' else ''))
  sources=[unit,source/'globals.c',*extra]

@@ -6,7 +6,7 @@ are extracted verbatim, so the tests do not reimplement their behavior.
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-SOURCE = HERE.parent/'picoCode/coreV/vidMain.c'
+SOURCE = HERE.parent/'coreV/vidMain.c'
 text = SOURCE.read_text()
 
 
