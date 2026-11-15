@@ -83,6 +83,7 @@ unsigned int tempAdr;
 	if (y > 23) y = 23;
 	if (x > 79) x = 79;
 	gTxtAdr80 = (y * 80) + (unsigned int)(x) + 16384;
+	return gTxtAdr80;
 }
 
 
@@ -101,6 +102,7 @@ unsigned int tempAdr;
 */
 unsigned int adrXYAttr80(unsigned char x, unsigned char y){
 	gAttrAdr80 = adrXYChar80(x, y) + ATTROFFSET;
+	return gAttrAdr80;
 }
 
 
@@ -207,7 +209,7 @@ unsigned char flashOff80(unsigned char attr){
 void setModeText80(void){
 unsigned char vMode;
 
-	vMode = (inp(0xFF) & 0x07) | VID_80C;
+	vMode = (inp(0xFF) & 0xF8) | VID_80C;	// keep bits 3-7, set the mode
 	outp(0xFF, vMode);
 }
 
