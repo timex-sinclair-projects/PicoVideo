@@ -53,6 +53,7 @@
 // Offset for the display files in our local 16k memory
 #define DF1_OFFSET 0
 #define DF2_OFFSET 8192
+#define DF_RAM_SIZE (16384 * 3)
 
 // #define TEXTSCRN_SIZE 2048
 // #define TEXTCHAR_OFFSET ((48 * 1024) - (2 * TEXTSCRN_SIZE))

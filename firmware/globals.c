@@ -1,21 +1,19 @@
 #include "macros.h"
+#include "palette_profile.h"
 
 // standard TS2068 palette
-const unsigned char tsColors[16] = {BLACK, BLUE, RED, MAGEN,
-                                    GREEN, CYAN, YELLOW, WHITE,
+const unsigned char tsColors[16] = {PV_NORMAL_COLORS,
                                     BBLACK, BBLUE, BRED, BMAGEN,
                                     BGREEN, BCYAN, BYELLOW, BRWHITE};
 
-const unsigned char speccyColors[16] = {BLACK, BLUE, RED, MAGEN,
-                                    GREEN, CYAN, YELLOW, WHITE,
+const unsigned char speccyColors[16] = {PV_NORMAL_COLORS,
                                     BLACK, BBLUE, BRED, BMAGEN,
                                     BGREEN, BCYAN, BYELLOW, BRWHITE};
 
-unsigned char speccyBlack = 0;
+unsigned char speccyBlack = PV_DEFAULT_SPECCY_BLACK;
 unsigned char biColor[4] = {0x00, 0xFF, 0xE0, 0xFC};
 
-unsigned char borderColors[8] = {BLACK, BLUE, RED, MAGEN, 
-                                    GREEN, CYAN, YELLOW, WHITE};
+unsigned char borderColors[8] = {PV_NORMAL_COLORS};
 
 
 // ULA Plus palette array
@@ -25,7 +23,7 @@ unsigned char gUlaVmode = 0;
 unsigned char gUlaAdrReg = 0;
 
 unsigned char gTsVidMode = 0;
-unsigned char gTsCol64Ink = ATTR_BRIGHT | ATTR_BLUE | ATTR_WHITE;
+unsigned char gTsCol64Ink = ATTR_WHITE << 3;
 unsigned char gTsRegFE = 7;
 unsigned char gTsRegFF = 0;
 unsigned char gTsRegF4 = 0;
@@ -34,14 +32,14 @@ unsigned short gFlashCtr = 0;
 unsigned char gFlashMask = 0;
 
 unsigned char gVidMode = 0;
-unsigned char gBorder = BRWHITE;
+unsigned char gBorder = PV_DEFAULT_BORDER;
 
 unsigned char gTextPort;
 unsigned char gTextStat     = 0;
 unsigned char gTextAttr     = 0;
 
 // Timex video memory
-unsigned char gDfRam[16384 * 3];
+unsigned char gDfRam[DF_RAM_SIZE];
 
 // These buffers are used by the PIO FSM to output the
 //  color bytes in real time

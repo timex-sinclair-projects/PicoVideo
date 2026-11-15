@@ -44,6 +44,7 @@
 // Our assembled PIO programs:
 #include "vgaPioSm.pio.h"
 #include "../macros.h"
+#include "../video_decode.h"
 
 void doTextMode(void);
 
@@ -64,7 +65,7 @@ void __not_in_flash_func(makeScanLine)(unsigned char *outBuf, unsigned int lineN
 extern unsigned char gBorder;
 extern unsigned char gCol64Ink;
 extern unsigned char gRegFE;
-extern unsigned char gDfRam[16384];
+extern unsigned char gDfRam[DF_RAM_SIZE];
 extern unsigned char gLbuf0[642];     // VGA line buffer 0
 extern unsigned char gLbuf1[642];     // VGA line buffer 1
 
@@ -82,7 +83,7 @@ int rgb_chan_0  = 0;
 int rgb_chan_1  = 1;
 
 int fillCmd     = 0;
-int doLineFlag  = BUF1_FREE;
+volatile int doLineFlag = BUF1_FREE;
 
 
 
@@ -264,7 +265,11 @@ unsigned int lineAdr        = 0;
                     }
                     lineCtr++;
                 } else {
-                    topBottBorder(&gLbuf1[0]);
+                    if (doLineFlag == BUF1_FREE) {
+                        topBottBorder(&gLbuf1[0]);
+                    } else {
+                        topBottBorder(&gLbuf0[0]);
+                    }
                     lineCtr     = 0;
                     vidState    = 3;
                 }
@@ -302,11 +307,7 @@ void waitForVsync(void){
     while(gpio_get(9)){
     };
 
-    gFlashCtr++;
-    if (gFlashCtr == 29){
-        gFlashMask = ~gFlashMask;
-        gFlashCtr = 0;
-    } 
+    pv_flash_frame(&gFlashCtr, &gFlashMask);
 }
 
 

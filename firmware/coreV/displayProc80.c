@@ -12,7 +12,7 @@ extern unsigned char gBorder;
 extern unsigned char gUlaEna;
 extern unsigned char gTsCol64Ink;
 extern unsigned char gRegFE;
-extern unsigned char gDfRam[16384];
+extern unsigned char gDfRam[DF_RAM_SIZE];
 extern unsigned char gLbuf0[640];     // VGA line buffer 0
 extern unsigned char gLbuf1[640];     // VGA line buffer 1
 extern unsigned char biColor[4];
@@ -135,8 +135,8 @@ unsigned char charCode, charBmap, charAttr;
         case VID_QCOLOR:
         // quad color mode
     //        bmapOfs = bmapOffset[lineNr];
-            pLine   = &gDfRam[DF1_OFFSET];
-            pLine1  = &gDfRam[DF2_OFFSET];
+            pLine   = &gDfRam[DF1_OFFSET + lineNr * 32];
+            pLine1  = &gDfRam[DF2_OFFSET + lineNr * 32];
 
             for (i = 0; i < 32; i++){
                 gBmap = *pLine++;
@@ -166,7 +166,6 @@ unsigned char charCode, charBmap, charAttr;
                 *pBuf++ = biColor[gAttr & 0x03];
                 *pBuf++ = biColor[gAttr & 0x03];
 
-                pBuf += 16;
             }
             break;
 

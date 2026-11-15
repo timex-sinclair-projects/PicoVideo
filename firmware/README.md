@@ -32,3 +32,26 @@ Released images were built on Windows with Pico SDK 1.5.1 in a Debug build.
 The source also builds cleanly with Pico SDK 2.1.1 and GCC 13.3. A build with
 a different SDK, compiler or build type will not match the released `.uf2`
 byte for byte, so test it on real hardware before you share it.
+
+### Build options
+
+| Option | Default | Effect |
+|---|---|---|
+| `PICOVIDEO_PHOTO_PALETTE` | `ON` | Uses the camera-matched normal colors and starts with Speccy Black on ([details](../docs/photo-palette.md)). Set it to `OFF` for the original stock colors. |
+
+## Tests
+
+Host-side regression tests compile the real bus handler, renderer and video
+interrupt code with a desktop C compiler, using stub Pico headers:
+
+```bash
+python3 firmware/tests/run.py
+```
+
+```bash
+python3 firmware/tests/run.py --photo
+```
+
+The first command tests the stock palette and the second tests the photo
+palette. On Windows, `firmware\tests\run_windows.cmd` runs the same tests
+with MSVC.
