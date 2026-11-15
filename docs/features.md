@@ -73,3 +73,17 @@ OUT 65339
 Note: the font address auto increments for each byte written.
 
 Note: the size of the font table is 2048 bytes (256 characters * 8 bytes per character)
+
+### Video mode control register ($41)
+
+When ULA+ is enabled (register `$40` non-zero), register `$41` decides where the video mode comes from:
+
+| `$41` | Video mode |
+|---|---|
+| `0` | Follows port `$FF`, so native mode changes work while a ULA+ palette is loaded. |
+| `$80` | Forced to normal mode 0. |
+| other | Forced to the mode in the low nibble (for example `5` selects 80 columns). |
+
+When ULA+ is off, port `$FF` always sets the mode.
+
+Before the native-video fixes, `$41 = 0` forced mode 0. Software that relied on that should write `$80` instead.

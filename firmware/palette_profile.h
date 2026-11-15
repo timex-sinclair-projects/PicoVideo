@@ -1,9 +1,10 @@
 #ifndef PICOVIDEO_PALETTE_PROFILE_H
 #define PICOVIDEO_PALETTE_PROFILE_H
 
-/* Optional camera-matched normal palette for one TS2068 edge-RGB board,
- * LEVELHIKE converter and display chain. Bright colors remain stock.
- * See PHOTO-PALETTE.md in the patch proposal for method and limitations.
+/* Camera-matched normal palette, measured on one TS2068 edge-RGB board
+ * through a LEVELHIKE converter and display. Bright colors remain stock.
+ * This is the default; build with -DPICOVIDEO_PHOTO_PALETTE=OFF for the
+ * original stock colors. See docs/photo-palette.md for the method.
  */
 #ifdef PICOVIDEO_PHOTO_PALETTE
 #define PV_NORMAL_COLORS 0, 3, 28, 31, 233, 231, 221, 219
