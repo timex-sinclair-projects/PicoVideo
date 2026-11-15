@@ -1,0 +1,26 @@
+# CMake / Pico SDK build output
+build/
+cmake-build-*/
+
+# Editor and OS clutter
+.vscode/
+.idea/
+*.swp
+*~
+*~[0-9]*
+.DS_Store
+Thumbs.db
+
+# z88dk / zmac intermediate output (keep the .tap demos)
+zout/
+*.c.asm
+*.lst
+*.bin
+*.o
+
+# Altium scratch
+History/
+__Previews/
+*.SchDocPreview
+*.PcbDocPreview
+Project Logs for */

@@ -1,0 +1,7 @@
+[OutputStatus]
+OutputFileNames0=E:\GitRepositories\sinclairComputers\ts2068\tsPicoVid_A\PCB_V3\Default Configuration\Outputs\NC Drill\tsPicoVid-RoundHoles.TXT
+OutputFileNames1=E:\GitRepositories\sinclairComputers\ts2068\tsPicoVid_A\PCB_V3\Default Configuration\Outputs\NC Drill\tsPicoVid-SlotHoles.TXT
+OutputFileNames2=E:\GitRepositories\sinclairComputers\ts2068\tsPicoVid_A\PCB_V3\Default Configuration\Outputs\NC Drill\tsPicoVid.LDP
+OutputFileNames3=E:\GitRepositories\sinclairComputers\ts2068\tsPicoVid_A\PCB_V3\Default Configuration\Outputs\NC Drill\tsPicoVid.DRR
+Success=1
+HasRun=1

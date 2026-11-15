@@ -1,0 +1,41 @@
+Name     PICOVID ;
+PartNo   0001 ;
+Date     9/12/2023 ;
+Revision 01 ;
+Designer J Burrell ;
+Company  none ;
+Assembly None ;
+Location  ;
+Device   g16v8a
+
+/* *************** INPUT PINS *********************/
+PIN 1    = TSCLK     ; /* Z80 clock		*/ 
+PIN 2    = A14       ; /* Z80 address        */ 
+PIN 3    = A15       ; /* Z80 address        */ 
+PIN 4    = NMREQ     ; /* Z80 control        */ 
+PIN 5    = NIORQ     ; /* Z80 control        */ 
+PIN 6    = NRD       ; /* Z80 control        */ 
+PIN 7    = NM1       ; /* Z80 control        */ 
+PIN 8    = NRFSH     ; /* Z80 control       */ 
+PIN 9    = PG0       ; /* Pico select        */ 
+PIN 12   = PG1       ; /* Pico select       */ 
+
+PIN 13   = Z1        ; /* unused             */
+PIN 14   = Z0        ; /* unused             */  
+
+/* *************** OUTPUT PINS *********************/
+PIN 15   = BG3       ; /* input buffer select  	*/ 
+PIN 16   = BG2       ; /*                          	*/ 
+PIN 17   = BG1       ; /*                          	*/ 
+PIN 18   = BG0       ; /*                          	*/ 
+PIN 19   = PSEL      ; /* I/O or Mem req operation 	*/ 
+
+/* Assign the 74LVC245 selects */
+BG0 =  PG1 #  PG0 ;
+BG1 =  PG1 # !PG0 ;
+BG2 = !PG1 #  PG0 ;
+BG3 = !PG1 # !PG0 ;
+
+VMREQ = NM1 & NRFSH & !NMREQ & NRD & !A15 & A14 ;
+VIORQ = !NIORQ & NM1;
+PSEL = VMREQ # VIORQ ;

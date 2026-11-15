@@ -1,5 +1,7 @@
 This version of the Pico code corrects rogue pixels when using Atmel PLDs
 
+This is the current stable firmware. Newer beta builds are on the [Releases page](https://github.com/timex-sinclair-projects/PicoVideo/releases). The source is in [`../firmware`](../firmware/).
+
 # Upgrading the firmware in your PicoVideo
 
 Updated: April 8, 2024
@@ -19,8 +21,8 @@ For the sake completeness, here are the same instructions but tailored just for 
 3. Press and hold the white button on the Pico labeled "BOOTSEL".
 4. Plug the Micro B end into the Pico chip.
 5. If you don't have a file finder open on your computer, open one now.
-6. The Pico will show up on the computer as RPI-PI2 or similar.
-7. Drag the picoTsVid.uf2 from your computer to the RPI-PI2 drive.
+6. The Pico will show up on the computer as RPI-RP2 or similar.
+7. Drag the picoTsVid.uf2 from your computer to the RPI-RP2 drive.
 8. After a few seconds, the Pico will disconnect. If you have a Mac, it'll likely complain about the disconnect.
 9. Plug your PicoVideo board back into your 2068 expansion slot.
 10. Power up your 2068: the video should show up just fine with no glitches.

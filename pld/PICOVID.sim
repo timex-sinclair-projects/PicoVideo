@@ -1,0 +1,50 @@
+%SIGNAL
+PIN   2 =  A14 
+PIN   3 =  A15 
+PIN  18 =  BG0 
+PIN  17 =  BG1 
+PIN  16 =  BG2 
+PIN  15 =  BG3 
+PIN   5 =  NIORQ 
+PIN   7 =  NM1 
+PIN   4 =  NMREQ 
+PIN   6 =  NRD 
+PIN   8 =  NRFSH 
+PIN   9 =  PG0 
+PIN  12 =  PG1 
+PIN  19 =  PSEL 
+PIN  14 =  Z0 
+PIN  13 =  Z1 
+%END
+
+%FIELD
+%END
+
+%EQUATION
+BG0 =>
+    PG1
+  # PG0
+
+BG1 =>
+    PG1
+  # !PG0
+
+BG2 =>
+    !PG1
+  # PG0
+
+BG3 =>
+    !PG1
+  # !PG0
+
+PSEL =>
+    A14 & !A15 & NM1 & !NMREQ & NRD & NRFSH
+  # !NIORQ & NM1
+
+VIORQ =>
+    !NIORQ & NM1
+
+VMREQ =>
+    A14 & !A15 & NM1 & !NMREQ & NRD & NRFSH
+
+%END
