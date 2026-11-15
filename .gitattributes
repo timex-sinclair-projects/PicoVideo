@@ -4,7 +4,8 @@
 
 # Board fab outputs and PLD programming files must stay byte-exact
 # (JEDEC checksums cover the CR/LF bytes).
-hardware/** -text -diff
+hardware/fab/** -text -diff
+hardware/altium/** binary
 pld/*.jed -text
 pld/*.abs -text
 
