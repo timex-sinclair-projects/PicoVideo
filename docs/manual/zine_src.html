@@ -6,6 +6,7 @@
 @page{size:5.5in 8.5in;margin:0.5in 0.45in 0.55in 0.45in;
   @bottom-center{content:counter(page);font-family:"IBM Plex Mono",monospace;font-size:7.5pt;color:#565c53}}
 @page cover{margin:0;@bottom-center{content:none}}
+@page blank{@bottom-center{content:none}}
 @page back{margin:0.45in;@bottom-center{content:none}}
 :root{--paper:#fff;--ink:#1c1f1b;--muted:#565c53;--rule:#c9ccc2;--panel:#eceee7;--accent:#1d3fb8;
   --display:"Barlow Condensed","Arial Narrow",sans-serif;--body:"Source Serif 4",Georgia,serif;--mono:"IBM Plex Mono",Menlo,monospace}
@@ -70,6 +71,9 @@ figure{margin:0}
 
 /* back cover quick ref */
 .back{page:back;break-before:page}
+.blank{page:blank;break-before:page;break-after:page;height:1px}
+.contents-shot{margin:6pt auto 0;width:64%}
+.contents-shot figcaption{font-size:6.3pt}
 .back h2{font-size:18pt}
 .qr{display:grid;grid-template-columns:1fr 1fr;gap:0 12pt}
 .qr table{font-size:7.9pt}
@@ -115,14 +119,7 @@ pre code{background:none;padding:0;font-size:inherit}
   <div class="site"><a href="https://timexsinclair.com">timexsinclair.com</a></div>
 </div>
 
-<section class="inside">
-  <figure class="shot photo">{{img:board_render}}<figcaption>The PicoVideo SMD board, v3.1, rendered from its design files. The Raspberry Pi Pico is top left, the VGA connector and audio jack are on the right, and the gold fingers plug into the TS2068 bus.</figcaption></figure>
-  <div class="credits">
-    <p><strong>PicoVideo</strong> was designed and programmed by Jeff Burrell, building on V. Hunter Adams' PIO VGA driver for the RP2040. Photo-matched palette and 4.3 fixes by jon0x0. Thanks to the TS-Pico team.</p>
-    <p>Open source under the MIT License, published by Timex Sinclair Projects: github.com/timex-sinclair-projects/PicoVideo. This manual covers firmware 4.3 and was written from the firmware source in 2026. Every example was run on an emulated TS2068, and every screenshot was drawn by PicoVideo's own rendering code.</p>
-    <p class="mono">Ports $BF3B / $FF3B (48955 / 65339) · version register $7F reads $43</p>
-  </div>
-</section>
+<div class="blank"></div>
 
 <section id="s-contents">
   <h2>Contents</h2>
@@ -143,6 +140,7 @@ pre code{background:none;padding:0;font-size:inherit}
     <li><span class="n">14</span>Reference<a class="pg" href="#reference"></a></li>
     <li><span class="n">15</span>About this edition<a class="pg" href="#about"></a></li>
   </ol>
+  <figure class="shot photo contents-shot">{{img:board_render}}<figcaption>The PicoVideo SMD board, v3.1, rendered from its design files.</figcaption></figure>
 </section>
 
 <section id="installing">
@@ -434,19 +432,11 @@ OUT 48955,71: OUT 65339,2: OUT 65339,199: OUT 65339,59: OUT 65339,252</code></pr
   </table>
   <p>This manual was written in 2026 for firmware 4.3, from the firmware source, and replaces the earlier user manual for V4. Firmware 4.3 is a beta: if your board does something this manual doesn't describe, report it on the project's GitHub page.</p>
   <p>ULAplus is a ZX Spectrum standard. PicoVideo follows its palette registers (0–64); registers 65 and up are PicoVideo's own.</p>
+  <p><strong>PicoVideo</strong> was designed and programmed by Jeff Burrell, building on V. Hunter Adams' PIO VGA driver for the RP2040. Photo-matched palette and 4.3 fixes by jon0x0. Thanks to the TS-Pico team.</p>
+  <p>Open source under the MIT License, published by Timex Sinclair Projects: github.com/timex-sinclair-projects/PicoVideo.</p>
 </section>
 
-<section id="screens">
-  <h2>Screens</h2>
-  <div class="gal">
-    <figure class="shot">{{img:mode3}}<figcaption>Mode 3: quad color.</figcaption></figure>
-    <figure class="shot">{{img:mode7}}<figcaption>Mode 7: 64 columns with attributes.</figcaption></figure>
-    <figure class="shot">{{img:ulaplus}}<figcaption>The ULAplus palette.</figcaption></figure>
-    <figure class="shot">{{img:mode2}}<figcaption>Mode 2: extended color.</figcaption></figure>
-    <figure class="shot">{{img:t80test}}<figcaption>Mode 5: 80 columns.</figcaption></figure>
-    <figure class="shot">{{img:mode6}}<figcaption>Mode 6: 64 columns, one color pair.</figcaption></figure>
-  </div>
-</section>
+ <div class="blank"></div>
 
 <div class="back" id="back">
   <h2>Quick reference</h2>
