@@ -13,7 +13,7 @@
 #define PV_INDEX_LO     0x44
 #define PV_INDEX_HI     0x45
 #define PV_FONT_DATA    0x46
-#define PV_QUAD_COLOR  0x47
+#define PV_QUAD_COLOR   0x47
 #define PV_VIDEO_READ   0x48
 #define PV_VERSION      0x7F
 

@@ -125,7 +125,7 @@ pre code{background:none;padding:0;font-size:inherit}
   <h2>Contents</h2>
   <ol class="toc">
     <li><span class="n">01</span>Installing the board<a class="pg" href="#installing"></a></li>
-    <li><span class="n">02</span>Updating the firmware<a class="pg" href="#firmware"></a></li>
+    <li><span class="n">02</span>Everyday use<a class="pg" href="#everyday"></a></li>
     <li><span class="n">03</span>How PicoVideo works<a class="pg" href="#how"></a></li>
     <li><span class="n">04</span>Talking to PicoVideo<a class="pg" href="#registers"></a></li>
     <li><span class="n">05</span>The TS2068 modes<a class="pg" href="#native"></a></li>
@@ -138,9 +138,9 @@ pre code{background:none;padding:0;font-size:inherit}
     <li><span class="n">12</span>Mirroring and readback<a class="pg" href="#mirror"></a></li>
     <li><span class="n">13</span>Pinning the mode<a class="pg" href="#pin"></a></li>
     <li><span class="n">14</span>Reference<a class="pg" href="#reference"></a></li>
-    <li><span class="n">15</span>About this edition<a class="pg" href="#about"></a></li>
+    <li><span class="n">15</span>Updating the firmware<a class="pg" href="#firmware"></a></li>
+    <li><span class="n">16</span>About this edition<a class="pg" href="#about"></a></li>
   </ol>
-  <figure class="shot photo contents-shot">{{img:board_render}}<figcaption>The PicoVideo SMD board, v3.1, rendered from its design files.</figcaption></figure>
 </section>
 
 <section id="installing">
@@ -155,31 +155,25 @@ pre code{background:none;padding:0;font-size:inherit}
     <li>Switch on the monitor, then the TS2068.</li>
   </ol>
   <div class="note"><b>Off before you plug</b>Never plug PicoVideo in or out with the TS2068 switched on.</div>
+  <figure class="shot photo">{{img:board_render}}<figcaption>The PicoVideo SMD board, v3.1, rendered from its design files. The Pico is top left, the VGA connector and audio jack are on the right, and the gold fingers plug into the bus.</figcaption></figure>
 </section>
 
-<section id="firmware">
-  <h2><span class="n">02</span>Updating the firmware</h2>
-  <p>PicoVideo's behavior lives in the Pico's firmware, a single <code>.uf2</code> file, published on the project's GitHub releases page.</p>
-  <table>
-    <tr><th>Version</th><th>Status</th><th>What it has</th></tr>
-    <tr><td class="k">V4 (4.0)</td><td>Stable</td><td>TS2068 modes and ULAplus; fixes stray pixels with Atmel PLDs. Version reads <code>$10</code>.</td></tr>
-    <tr><td class="k">4.2</td><td>Beta</td><td>Adds Speccy Black, mirroring, readback and modes 3, 5 and 7.</td></tr>
-    <tr><td class="k">4.3</td><td>Beta</td><td>Fixes native modes under ULAplus, the ULAplus border and 64-column colors; photo-matched palette. Version reads <code>$43</code>.</td></tr>
-  </table>
-  <p>This manual describes 4.3. Sections 6 and 8–13 need 4.2 or later.</p>
-  <h3>Flashing the Pico</h3>
-  <ol>
-    <li>Switch the TS2068 off and take PicoVideo out of the bus.</li>
-    <li>Hold down <kbd>BOOTSEL</kbd> on the Pico while you plug a Micro-B USB cable into the Pico and your computer, then let go.</li>
-    <li>Drag the <code>.uf2</code> file onto the <code>RPI-RP2</code> drive that appears.</li>
-    <li>When the drive disappears by itself, unplug the cable and put the board back.</li>
-  </ol>
-  <p>The program in section 4 prints the version, so you can check it.</p>
-  <h3>Building it yourself</h3>
-  <p>You need the Pico SDK, an <code>arm-none-eabi</code> GCC toolchain, CMake and Ninja:</p>
-<pre><code>cmake -S firmware -B build -G Ninja -DPICO_SDK_PATH=/path/to/pico-sdk
-ninja -C build</code></pre>
-  <p>That makes <code>build/picoTsVid.uf2</code> with the photo-matched palette. Add <code>-DPICOVIDEO_PHOTO_PALETTE=OFF</code> to the <code>cmake</code> line for the original colors.</p>
+<section id="everyday">
+  <h2><span class="n">02</span>Everyday use</h2>
+  <p>You don't have to do anything. There is no driver to load and no mode to set. PicoVideo copies the picture as the TS2068 draws it, so BASIC, games, utilities and Spectrum programs run through an emulator all appear on the monitor as they are. Load them the way you always have. The TS2068's own video output keeps working.</p>
+  <ul>
+    <li><strong>Every TS2068 mode</strong> shows as it does on a television: the second display file, extended color and 64 columns (section 5).</li>
+    <li><strong>Spectrum programs:</strong> Speccy Black starts on, so BRIGHT black looks black, not dark gray (section 6).</li>
+    <li><strong>Sound</strong> comes out of the audio jack, including the <code>LOAD</code> and <code>SAVE</code> tones.</li>
+  </ul>
+  <h3>What can look different</h3>
+  <p>PicoVideo draws 60 pictures a second at its own pace, not in step with the TS2068's television scan.</p>
+  <ul>
+    <li><strong><code>LOAD</code> and <code>SAVE</code>:</strong> the border still changes color, but the stripes are a different width and move differently.</li>
+    <li><strong>Effects timed to the beam:</strong> demos and games that change the border or colors partway down the screen show without those effects.</li>
+    <li><strong>Paged banks:</strong> writes to the screen area while a dock or EXROM bank is paged over it don't show. Few programs do this.</li>
+  </ul>
+  <div class="note"><b>If the picture looks wrong</b>PicoVideo keeps its settings until it is switched off. If a program leaves it in an odd mode or colors, switch the TS2068 off and on again.</div>
 </section>
 
 <section id="how">
@@ -188,7 +182,7 @@ ninja -C build</code></pre>
   <ul>
     <li><strong>It sees writes, not reads.</strong> Its copy changes only when the Z80 writes. Register 72 reads the copy back (section 12).</li>
     <li><strong>It copies only the home bank.</strong> While a program pages a dock or EXROM bank into <code>4000h</code>–<code>5FFFh</code> or <code>6000h</code>–<code>7FFFh</code> (port <code>$F4</code> bits 2 and 3), PicoVideo ignores writes there.</li>
-    <li><strong>Its timing is its own.</strong> Effects timed to the TV beam, such as loading stripes in the border and some interrupt-driven demos, don't appear.</li>
+    <li><strong>Its timing is its own.</strong> Effects timed to the TV beam, such as border stripes and mid-screen color changes, don't line up (section 2).</li>
     <li><strong>It keeps its settings.</strong> <code>NEW</code> and the end of a program don't clear its registers. A program that changes one should put it back.</li>
   </ul>
   <h3>The screen</h3>
@@ -198,7 +192,7 @@ ninja -C build</code></pre>
 
 <section id="registers">
   <h2><span class="n">04</span>Talking to PicoVideo</h2>
-  <p>PicoVideo uses the two ULAplus ports. Write a register number to port <code>$BF3B</code> (48955), then read or write its value at <code>$FF3B</code> (65339). Both are decoded on all 16 address bits.</p>
+  <p>PicoVideo uses the two ULAplus ports, decoded on all 16 address bits. Write a register number to <code>$BF3B</code> (48955), then read or write its value at <code>$FF3B</code> (65339).</p>
   <table>
     <tr><th>Port</th><th class="num">Dec</th><th>Write</th><th>Read</th></tr>
     <tr><td class="k"><code>$BF3B</code></td><td class="num">48955</td><td>Select a register</td><td>The selected register number</td></tr>
@@ -211,13 +205,27 @@ OUT 48955,64: PRINT IN 65339: REM read register 64</code></pre>
   <p class="ln">detect.bas</p>
 <pre><code>{{file:examples/detect.bas}}</code></pre>
   <h3>From machine code</h3>
-  <p>Both ports have <code>$3B</code> as the low byte, so with <code>C=$3B</code> only <code>B</code> changes. Don't send blocks with <code>OTIR</code> or <code>INIR</code>: they count in <code>B</code>, the top half of the port address.</p>
+  <p>Both ports have <code>$3B</code> as the low byte, so with <code>C=$3B</code> only <code>B</code> changes. Don't use <code>OTIR</code> or <code>INIR</code>: they count in <code>B</code>.</p>
   <p class="ln">picovideo.asm</p>
 <pre><code>{{file:examples/asm/picovideo.asm}}</code></pre>
   <h3>From C</h3>
-  <p>The C examples use <code>picovideo.h</code>, for z88dk. Build each with <code>zcc +ts2068 -create-app -o name name.c</code>.</p>
+  <p>For z88dk. Build with <code>zcc +ts2068 -create-app -o name name.c</code>.</p>
   <p class="ln">picovideo.h</p>
-<pre><code>{{file:examples/c/picovideo.h}}</code></pre>
+<pre><code>/* picovideo.h, shortened: the full file in examples/c/ also
+   defines each register, PV_ULA_ENABLE 0x40, PV_MODE 0x41,
+   PV_SPECCY_BLACK 0x42, PV_MIRROR 0x43, PV_INDEX_LO 0x44,
+   PV_INDEX_HI 0x45, PV_FONT_DATA 0x46, PV_QUAD_COLOR 0x47,
+   PV_VIDEO_READ 0x48 and PV_VERSION 0x7F, and the pointers
+   DF1 (0x4000) and DF2 (0x6000). */
+#define PV_SELECT  0xBF3B   /* write the register number here */
+#define PV_DATA    0xFF3B   /* then read or write its value here */
+void pv_write(unsigned char reg, unsigned char value) {
+    outp(PV_SELECT, reg); outp(PV_DATA, value); }
+unsigned char pv_read(unsigned char reg) {
+    outp(PV_SELECT, reg); return inp(PV_DATA); }
+/* Set the video mode in port $FF, keeping bits 3-7. */
+void pv_mode(unsigned char mode) {
+    outp(0xFF, (inp(0xFF) &amp; 0xF8) | mode); }</code></pre>
 </section>
 
 <section id="native">
@@ -412,8 +420,33 @@ OUT 48955,71: OUT 65339,2: OUT 65339,199: OUT 65339,59: OUT 65339,252</code></pr
   <p>Bits 7–5 green, 4–2 red, 1–0 blue: <code>32*green + 4*red + blue</code>. Black 0, blue 3, red 28, magenta 31, green 224, cyan 227, yellow 252, white 255, gray 146.</p>
 </section>
 
+<section id="firmware">
+  <h2><span class="n">15</span>Updating the firmware</h2>
+  <p>PicoVideo's behavior lives in the Pico's firmware, a single <code>.uf2</code> file, published on the project's GitHub releases page.</p>
+  <table>
+    <tr><th>Version</th><th>Status</th><th>What it has</th></tr>
+    <tr><td class="k">V4 (4.0)</td><td>Stable</td><td>TS2068 modes and ULAplus; fixes stray pixels with Atmel PLDs. Version reads <code>$10</code>.</td></tr>
+    <tr><td class="k">4.2</td><td>Beta</td><td>Adds Speccy Black, mirroring, readback and modes 3, 5 and 7.</td></tr>
+    <tr><td class="k">4.3</td><td>Beta</td><td>Fixes native modes under ULAplus, the ULAplus border and 64-column colors; photo-matched palette. Version reads <code>$43</code>.</td></tr>
+  </table>
+  <p>This manual describes 4.3. Sections 6 and 8–13 need 4.2 or later.</p>
+  <h3>Flashing the Pico</h3>
+  <ol>
+    <li>Switch the TS2068 off and take PicoVideo out of the bus.</li>
+    <li>Hold down <kbd>BOOTSEL</kbd> on the Pico while you plug a Micro-B USB cable into the Pico and your computer, then let go.</li>
+    <li>Drag the <code>.uf2</code> file onto the <code>RPI-RP2</code> drive that appears.</li>
+    <li>When the drive disappears by itself, unplug the cable and put the board back.</li>
+  </ol>
+  <p>The program in section 4 prints the version, so you can check it.</p>
+  <h3>Building it yourself</h3>
+  <p>You need the Pico SDK, an <code>arm-none-eabi</code> GCC toolchain, CMake and Ninja:</p>
+<pre><code>cmake -S firmware -B build -G Ninja -DPICO_SDK_PATH=/path/to/pico-sdk
+ninja -C build</code></pre>
+  <p>That makes <code>build/picoTsVid.uf2</code> with the photo-matched palette. Add <code>-DPICOVIDEO_PHOTO_PALETTE=OFF</code> to the <code>cmake</code> line for the original colors.</p>
+</section>
+
 <section id="about">
-  <h2><span class="n">15</span>About this edition</h2>
+  <h2><span class="n">16</span>About this edition</h2>
   <p>Every program in this manual is in <code>docs/manual/examples/</code> in the PicoVideo repository, as source and as a <code>.tap</code> file. Each was run on an emulated TS2068, and every screenshot was made by passing the emulator's memory through PicoVideo's own drawing code, so the pictures are what the firmware draws.</p>
   <table>
     <tr><th>File</th><th>Shows</th><th class="num">Section</th></tr>
