@@ -10,7 +10,7 @@ sets `SOFTWARE_VER` (currently `0x43`; read it back from ULA+ register `$7F`).
 | `coreV/vidMain.c` | Core 1. Runs the VGA timing and DMA. |
 | `coreV/vgaPioSm.pio` | PIO state machines for the VGA output. |
 | `coreV/displayProc80.c` | Scanline renderer for all modes, including 80 columns. This is the file the build uses. |
-| `globals.c`, `globals.h` | Shared state, colour tables and the built-in font (CP437 8×8). Every file gets the shared variables from `globals.h`, so don't declare them with a hand-written `extern`. |
+| `globals.c`, `globals.h` | Shared state, color tables and the built-in font (CP437 8×8). Every file gets the shared variables from `globals.h`, so don't declare them with a hand-written `extern`. |
 
 ## Building
 

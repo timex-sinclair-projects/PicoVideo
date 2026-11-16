@@ -1,0 +1,449 @@
+<title>PicoVideo Manual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+:root{
+  --paper:#f2f3ee; --panel:#e6e8e0; --ink:#1c1f1b; --muted:#565c53; --rule:#c9ccc2;
+  --sea:#1d3fb8; --land:#1f8a2e; --yel:#b88a00; --red:#b3261e; --accent:#1d3fb8;
+  --code-bg:#e3e6dc; --key-bg:#fbfbf8;
+  --shot-bg:#000;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#15171a; --panel:#1f2226; --ink:#e7e8e3; --muted:#a3a89f; --rule:#34383d;
+    --sea:#7f9bff; --land:#5ccb6a; --yel:#e3b92c; --red:#ff7a70; --accent:#8aa4ff;
+    --code-bg:#23272c; --key-bg:#2a2e33;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#15171a; --panel:#1f2226; --ink:#e7e8e3; --muted:#a3a89f; --rule:#34383d;
+  --sea:#7f9bff; --land:#5ccb6a; --yel:#e3b92c; --red:#ff7a70; --accent:#8aa4ff;
+  --code-bg:#23272c; --key-bg:#2a2e33;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6;padding-inline:20px;padding-block:0 64px}
+.wrap{max-width:1060px;margin:0 auto}
+header.cover{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:40px;align-items:center;padding-block:48px 40px;border-bottom:3px solid var(--ink)}
+.eyebrow{font-family:var(--mono);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(56px,9vw,104px);line-height:.9;letter-spacing:.01em;margin:.25em 0 .2em;text-transform:uppercase}
+.lede{font-size:19px;max-width:34em;margin:0}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:18px;font-family:var(--mono);font-size:13px;color:var(--muted)}
+.site{margin:14px 0 0;font-family:var(--mono);font-size:12px;letter-spacing:.1em}
+.site a{color:var(--muted);text-decoration:none;border-bottom:1px solid currentColor}
+.site a:hover{color:var(--ink)}
+.shot{background:var(--shot-bg);border:1px solid var(--rule);padding:10px;margin:0}
+.shot img{display:block;width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges}
+.shot.photo img{image-rendering:auto}
+.shot figcaption,figure figcaption{font-family:var(--mono);font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.45}
+.shot figcaption{color:#b9bdb3}
+nav.toc{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 24px;padding-block:22px;border-bottom:1px solid var(--rule);font-family:var(--display);font-size:19px;font-weight:600}
+nav.toc a{color:var(--ink);text-decoration:none;display:flex;gap:10px}
+nav.toc a span{font-family:var(--mono);font-weight:400;font-size:13px;color:var(--muted);padding-top:4px;min-width:1.6em}
+nav.toc a:hover{color:var(--accent)}
+section{padding-block:34px 8px;border-bottom:1px solid var(--rule)}
+h2{font-family:var(--display);font-weight:700;font-size:40px;line-height:1;text-transform:uppercase;letter-spacing:.01em;margin:0 0 16px;display:flex;gap:14px;align-items:baseline;text-wrap:balance}
+h2 .n{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--accent);letter-spacing:0}
+h3{font-family:var(--display);font-weight:600;font-size:24px;margin:28px 0 8px;text-transform:uppercase;letter-spacing:.02em;text-wrap:balance}
+p,li{max-width:42em}
+p{margin:0 0 14px}
+ul,ol{padding-left:1.3em;margin:0 0 14px}
+li{margin-bottom:5px}
+a{color:var(--accent)}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+code,.mono{font-family:var(--mono);font-size:.86em}
+code{background:var(--code-bg);padding:1px 5px;border-radius:3px}
+pre{font-family:var(--mono);font-size:13.5px;line-height:1.5;background:var(--code-bg);border-left:3px solid var(--accent);padding:12px 16px;margin:6px 0 18px;overflow-x:auto;max-width:100%;tab-size:4}
+pre code{background:none;padding:0;font-size:inherit}
+.listing-name{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:16px 0 0}
+kbd{font-family:var(--mono);font-size:.82em;background:var(--key-bg);border:1px solid var(--rule);border-bottom-width:3px;border-radius:4px;padding:0 6px;white-space:nowrap;color:var(--ink)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;align-items:start}
+.two.wide-left{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}
+.tbl{overflow-x:auto;margin:6px 0 18px;border-top:2px solid var(--ink)}
+table{border-collapse:collapse;width:100%;font-size:15.5px}
+th,td{text-align:left;padding:7px 12px 7px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:14px}
+td.k{white-space:nowrap}
+.note{background:var(--panel);padding:14px 18px;margin:8px 0 18px;max-width:46em;border-radius:2px}
+.note b:first-child{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:4px;color:var(--muted);font-weight:500}
+figure{margin:0}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px;margin:10px 0 18px}
+.swatch{display:inline-block;width:14px;height:14px;border:1px solid var(--rule);vertical-align:-2px;margin-right:6px}
+footer{padding-block:28px;font-size:14px;color:var(--muted)}
+@media (max-width:760px){
+  header.cover,.two,.two.wide-left{grid-template-columns:minmax(0,1fr);gap:24px}
+  h2{font-size:32px}
+  body{font-size:16px}
+  pre{font-size:12.5px}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+
+<div class="wrap">
+<header class="cover">
+  <div>
+    <div class="eyebrow">Timex/Sinclair 2068 · Jeff Burrell · Firmware 4.3</div>
+    <h1>PicoVideo</h1>
+    <p class="lede">PicoVideo is a TS2068 expansion board that watches the computer's bus and redraws its screen as clean VGA, using a Raspberry Pi Pico. On top of the TS2068's own video modes it adds a 64-color ULAplus palette, a four-color mode, 64 columns with full color and an 80-column text screen with a font you can change.</p>
+    <div class="meta"><span>VGA 640×480</span><span>ULAplus</span><span>modes 0–7</span><span>BASIC, C and Z80 examples</span></div>
+    <p class="site"><a href="https://timexsinclair.com">timexsinclair.com</a></p>
+  </div>
+  <figure class="shot photo">{{img:board_render}}<figcaption>The PicoVideo SMD board, v3.1, rendered from its design files. The Raspberry Pi Pico is top left, the VGA connector and audio jack are on the right, and the gold fingers plug into the TS2068 bus.</figcaption></figure>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <a href="#installing"><span>1</span>Installing the board</a>
+  <a href="#firmware"><span>2</span>Updating the firmware</a>
+  <a href="#how"><span>3</span>How PicoVideo works</a>
+  <a href="#registers"><span>4</span>Talking to PicoVideo</a>
+  <a href="#native"><span>5</span>The TS2068 modes</a>
+  <a href="#color"><span>6</span>Colors and Speccy Black</a>
+  <a href="#ulaplus"><span>7</span>The ULAplus palette</a>
+  <a href="#quad"><span>8</span>Quad color (mode 3)</a>
+  <a href="#col64"><span>9</span>64 columns in color (mode 7)</a>
+  <a href="#text80"><span>10</span>80-column text (mode 5)</a>
+  <a href="#font"><span>11</span>Changing the font</a>
+  <a href="#mirror"><span>12</span>Mirroring and readback</a>
+  <a href="#pin"><span>13</span>Pinning the mode</a>
+  <a href="#reference"><span>14</span>Reference</a>
+  <a href="#about"><span>15</span>About this edition</a>
+</nav>
+
+<section id="installing">
+  <h2><span class="n">01</span>Installing the board</h2>
+  <div class="two wide-left">
+  <div>
+  <p>PicoVideo needs no software to work. Once it is plugged in, every program you run on the TS2068 appears on the VGA monitor.</p>
+  <ol>
+    <li>Switch the TS2068 off.</li>
+    <li>Plug PicoVideo into a slot on your expansion bus. It is easiest to do this with the bus off the computer.</li>
+    <li>Plug the bus firmly into the TS2068's expansion connector.</li>
+    <li>Connect PicoVideo's VGA connector to a VGA monitor, or to a VGA-to-HDMI converter.</li>
+    <li>For sound, run a 3.5&nbsp;mm cable from PicoVideo's audio jack to the monitor, converter or speakers. The jack carries the TS2068's own audio.</li>
+    <li>Switch on the monitor, then the TS2068. The copyright screen appears on the monitor.</li>
+  </ol>
+  <div class="note"><b>Off before you plug</b>Never plug PicoVideo in or out with the TS2068 switched on.</div>
+  </div>
+  <figure class="shot">{{img:spblack_off}}<figcaption>Every screen goes through PicoVideo, including BASIC. This one is the Speccy Black example from section 6.</figcaption></figure>
+  </div>
+</section>
+
+<section id="firmware">
+  <h2><span class="n">02</span>Updating the firmware</h2>
+  <p>PicoVideo's behavior lives in the Pico's firmware, a single <code>.uf2</code> file. Releases are on the project's <a href="https://github.com/timex-sinclair-projects/PicoVideo/releases">GitHub releases page</a>.</p>
+  <div class="tbl"><table>
+    <tr><th>Version</th><th>Status</th><th>What it has</th></tr>
+    <tr><td class="k">V4 (4.0)</td><td>Stable, on production boards</td><td>TS2068 modes and ULAplus. Fixes stray pixels on boards with Atmel PLDs. Version register reads <code>$10</code>.</td></tr>
+    <tr><td class="k">4.2</td><td>Beta</td><td>Adds Speccy Black, DF2 mirroring, readback, and modes 3, 5 and 7.</td></tr>
+    <tr><td class="k">4.3</td><td>Beta</td><td>Fixes for native modes under ULAplus, the ULAplus border and 64-column colors; adds the photo-matched palette. Version register reads <code>$43</code>.</td></tr>
+  </table></div>
+  <p>This manual describes 4.3. Everything in sections 6 and 8 to 13 needs 4.2 or later.</p>
+  <h3>Flashing the Pico</h3>
+  <p>You need a USB cable with a Micro-B plug for the Pico.</p>
+  <ol>
+    <li>Switch the TS2068 off and take PicoVideo out of the bus.</li>
+    <li>Hold down the <kbd>BOOTSEL</kbd> button on the Pico.</li>
+    <li>Keep holding it while you plug the USB cable into the Pico and your computer, then let go.</li>
+    <li>A drive called <code>RPI-RP2</code> appears on the computer. Drag the <code>.uf2</code> file onto it.</li>
+    <li>The drive disappears by itself when the copy is finished. Unplug the cable and put the board back in the bus.</li>
+  </ol>
+  <div class="note"><b>Check the result</b>The program in section 4 prints the firmware version, so you can see that the new firmware is running.</div>
+  <h3>Building the firmware yourself</h3>
+  <p>The source is in the <code>firmware/</code> folder of the repository. You need the Raspberry Pi Pico SDK, an <code>arm-none-eabi</code> GCC toolchain, CMake and Ninja:</p>
+<pre><code>cmake -S firmware -B build -G Ninja -DPICO_SDK_PATH=/path/to/pico-sdk
+ninja -C build</code></pre>
+  <p>That makes <code>build/picoTsVid.uf2</code>. The build uses the photo-matched palette (section 6). Add <code>-DPICOVIDEO_PHOTO_PALETTE=OFF</code> to the <code>cmake</code> line for the original colors.</p>
+</section>
+
+<section id="how">
+  <h2><span class="n">03</span>How PicoVideo works</h2>
+  <p>PicoVideo never takes over the TS2068's video. It watches the bus. A PLD on the board passes every write to video memory (<code>4000h</code>–<code>7FFFh</code>) and every I/O request to the Pico. One core of the Pico keeps its own copy of video memory and of ports <code>$FE</code>, <code>$FF</code> and <code>$F4</code>. The other core reads that copy and draws a 640×480 VGA picture from it, 60 times a second.</p>
+  <p>This tells you what PicoVideo can and can't show:</p>
+  <ul>
+    <li><strong>It sees writes, not reads.</strong> PicoVideo's copy of video memory only changes when the Z80 writes to it. Register <code>$48</code> (section 12) reads the copy back.</li>
+    <li><strong>It only copies the home bank.</strong> If a program pages a dock or EXROM bank into <code>4000h</code>–<code>5FFFh</code> or <code>6000h</code>–<code>7FFFh</code> (bits 2 and 3 of port <code>$F4</code>), PicoVideo ignores writes to that part of memory until it is paged back.</li>
+    <li><strong>Its timing is its own.</strong> The picture is redrawn by the Pico, not in step with the TS2068's television scan. Tricks that change the border or attributes in time with the beam don't appear: loading stripes on the border, and some demos that use interrupts for raster effects.</li>
+    <li><strong>It keeps its settings.</strong> PicoVideo's registers aren't cleared by <code>NEW</code> or by a program ending. If a program changes a register, it should put it back when it is done.</li>
+  </ul>
+  <h3>The screen</h3>
+  <p>PicoVideo shows the 256×192 TS2068 screen at 2× (512×384), centered in the 640×480 VGA picture, with the border color around it. Modes 6 and 7 use the same area at 512 pixels across. Mode 5 (80 columns) is 640 pixels wide and fills the screen from side to side.</p>
+  <p><code>FLASH</code> swaps INK and PAPER every 32 VGA frames, about once every half second. With the ULAplus palette on, the FLASH bit picks colors instead and nothing flashes.</p>
+</section>
+
+<section id="registers">
+  <h2><span class="n">04</span>Talking to PicoVideo</h2>
+  <p>PicoVideo answers on two ports, the same ones a ULAplus Spectrum uses. Write a register number to port <code>$BF3B</code> (48955), then read or write the register's value at port <code>$FF3B</code> (65339). Both ports are decoded on all 16 address bits, so they don't clash with anything else on the bus.</p>
+  <div class="tbl"><table>
+    <tr><th>Port</th><th class="num">Decimal</th><th>Write</th><th>Read</th></tr>
+    <tr><td class="k"><code>$BF3B</code></td><td class="num">48955</td><td>Select a register</td><td>The selected register number</td></tr>
+    <tr><td class="k"><code>$FF3B</code></td><td class="num">65339</td><td>Set the selected register</td><td>The selected register's value, or 255 if it can't be read</td></tr>
+  </table></div>
+  <p>In BASIC this is a pair of <code>OUT</code>s. Here register 66 is set to 1:</p>
+<pre><code>OUT 48955,66: OUT 65339,1</code></pre>
+  <p>and register 64 is read:</p>
+<pre><code>OUT 48955,64: PRINT IN 65339</code></pre>
+  <h3>Finding the board and its version</h3>
+  <p>Register 127 (<code>$7F</code>) holds the firmware version as two hex digits: <code>$43</code> (67) is 4.3. A board that's present also reads the selected register back from port 48955, which an empty bus does not.</p>
+  <p class="listing-name">detect.bas</p>
+<pre><code>{{file:examples/detect.bas}}</code></pre>
+  <p>Firmware V4 (4.0) reports 1.0 here, because its version register was never updated.</p>
+  <h3>From C</h3>
+  <p>The C examples in this manual use a small header, <code>picovideo.h</code>, written for z88dk. Build each example with <code>zcc +ts2068 -create-app -o name name.c</code>; that makes a <code>.tap</code> with a BASIC loader.</p>
+  <p class="listing-name">picovideo.h</p>
+<pre><code>{{file:examples/c/picovideo.h}}</code></pre>
+  <h3>From machine code</h3>
+  <p>Both ports have <code>$3B</code> as the low byte, so <code>OUT (C),r</code> with <code>C=$3B</code> reaches either one; only <code>B</code> changes. Don't use <code>OTIR</code> or <code>INIR</code> to send blocks: they count in <code>B</code>, which is the top half of the port address.</p>
+  <p class="listing-name">picovideo.asm</p>
+<pre><code>{{file:examples/asm/picovideo.asm}}</code></pre>
+</section>
+
+<section id="native">
+  <h2><span class="n">05</span>The TS2068 modes</h2>
+  <p>A program picks the video mode with the low three bits of port <code>$FF</code>. PicoVideo watches the same port, so the TS2068's own modes work as they always have, and PicoVideo adds three new ones in the numbers the TS2068 doesn't use.</p>
+  <div class="tbl"><table>
+    <tr><th class="num">Mode</th><th>Shows</th><th>Memory used</th><th>Section</th></tr>
+    <tr><td class="num">0</td><td>Normal 32-column screen</td><td>DF1: pixels <code>4000h</code>, attributes <code>5800h</code></td><td>—</td></tr>
+    <tr><td class="num">1</td><td>Normal screen from the second display file</td><td>DF2: pixels <code>6000h</code>, attributes <code>7800h</code></td><td>—</td></tr>
+    <tr><td class="num">2</td><td>Extended color: an attribute for every pixel line of every cell</td><td>DF1 pixels; DF2 holds attributes at the same offsets</td><td>below</td></tr>
+    <tr><td class="num">3</td><td><strong>New:</strong> quad color, 256×192 in 4 colors</td><td>DF1 and DF2, linear</td><td>8</td></tr>
+    <tr><td class="num">4</td><td>Not used; shows mode 0</td><td>—</td><td>—</td></tr>
+    <tr><td class="num">5</td><td><strong>New:</strong> 80×24 text with attributes</td><td>DF1 only, linear</td><td>10</td></tr>
+    <tr><td class="num">6</td><td>64 columns, one INK and PAPER for the screen</td><td>DF1 even columns, DF2 odd columns</td><td>9</td></tr>
+    <tr><td class="num">7</td><td><strong>New:</strong> 64 columns with attributes</td><td>DF1 and DF2, each with its own attributes</td><td>9</td></tr>
+  </table></div>
+  <p>To change mode, keep the other bits of port <code>$FF</code> as they are. Bits 3–5 set the mode 6 colors, bit 6 turns the TS2068's interrupts off and bit 7 selects the dock or EXROM. In BASIC those bits are normally all 0, so <code>OUT 255,<i>mode</i></code> is safe; from machine code, read the port first, as <code>pv_mode()</code> and <code>pvMode</code> do in section 4.</p>
+  <h3>Mode 6 colors</h3>
+  <p>In mode 6 the whole screen has one INK and PAPER, set by bits 3–5 of port <code>$FF</code>: INK is that number and PAPER is 7 minus it. <code>OUT 255,6+8*<i>n</i></code> chooses INK <i>n</i>. BRIGHT is always off. With <i>n</i>=0, the default, the screen is black on white.</p>
+  <h3>Display file 2 and BASIC</h3>
+  <p>Modes 1, 2, 3, 6 and 7 read DF2, at <code>6000h</code>–<code>7AFFh</code>. In a TS2068 set up for one display file, that memory holds the machine stack, the system's RAM-resident code, the channel information and the start of your BASIC program. PicoVideo copies every write there, so in those modes you see BASIC's workings as noise on screen. To use DF2 from BASIC, the TS2068 must first be set up for two display files, which moves the BASIC areas up to <code>7B00h</code> (see Appendix C of the TS2068 Technical Manual). Machine code and C programs that start above <code>8000h</code> can simply write to DF2, as the examples here do.</p>
+  <div class="two">
+  <div>
+  <h3>Extended color example</h3>
+  <p>Mode 2 gives each 8-pixel line of each character cell its own attribute. The attribute for the pixel byte at DF1 address <i>a</i> is at <i>a</i>&nbsp;+&nbsp;<code>2000h</code>.</p>
+  </div>
+  <figure class="shot">{{img:mode2}}<figcaption>mode2.c: the INK changes every two pixel lines.</figcaption></figure>
+  </div>
+  <p class="listing-name">mode2.c</p>
+<pre><code>{{file:examples/c/mode2.c}}</code></pre>
+</section>
+
+<section id="color">
+  <h2><span class="n">06</span>Colors and Speccy Black</h2>
+  <p>Without the ULAplus palette, PicoVideo draws the TS2068's 16 colors (8, and 8 BRIGHT) from a built-in table.</p>
+  <h3>The photo-matched palette</h3>
+  <p>Firmware 4.3 is built with a palette measured from a real TS2068's RGB output on the same monitor, so the picture looks like the computer's own. It changes the eight normal colors and the border; the BRIGHT colors are unchanged. It also starts with Speccy Black on, and the border starts white. Firmware built with <code>PICOVIDEO_PHOTO_PALETTE=OFF</code> uses the original colors and starts with Speccy Black off.</p>
+  <div class="tbl"><table>
+    <tr><th>Color</th><th class="num">Photo</th><th class="num">Original</th><th class="num">Bright</th></tr>
+    <tr><td><span class="swatch" style="background:#000"></span>0 black</td><td class="num">0</td><td class="num">0</td><td class="num">37</td></tr>
+    <tr><td><span class="swatch" style="background:#0000ff"></span>1 blue</td><td class="num">3</td><td class="num">2</td><td class="num">3</td></tr>
+    <tr><td><span class="swatch" style="background:#ff0000"></span>2 red</td><td class="num">28</td><td class="num">16</td><td class="num">28</td></tr>
+    <tr><td><span class="swatch" style="background:#ff00ff"></span>3 magenta</td><td class="num">31</td><td class="num">18</td><td class="num">31</td></tr>
+    <tr><td><span class="swatch" style="background:#48ff55"></span>4 green</td><td class="num">233</td><td class="num">128</td><td class="num">224</td></tr>
+    <tr><td><span class="swatch" style="background:#24ffff"></span>5 cyan</td><td class="num">231</td><td class="num">130</td><td class="num">227</td></tr>
+    <tr><td><span class="swatch" style="background:#ffda55"></span>6 yellow</td><td class="num">221</td><td class="num">144</td><td class="num">252</td></tr>
+    <tr><td><span class="swatch" style="background:#dadaff"></span>7 white</td><td class="num">219</td><td class="num">146</td><td class="num">255</td></tr>
+  </table></div>
+  <p>The numbers are color bytes in PicoVideo's format; see <a href="#reference">Reference</a>.</p>
+  <h3>Speccy Black</h3>
+  <p>On a ZX Spectrum, BRIGHT black looks the same as black, and Spectrum programs often use it freely. A TS2068 shows BRIGHT black as dark gray, so those programs show gray patches and outlines. With Speccy Black on, PicoVideo draws BRIGHT black as black. Register 66 (<code>$42</code>) controls it: any value other than 0 turns it on, 0 turns it off.</p>
+<pre><code>OUT 48955,66: OUT 65339,1: REM Speccy Black on
+OUT 48955,66: OUT 65339,0: REM off: BRIGHT black is gray</code></pre>
+  <div class="gallery">
+    <figure class="shot">{{img:spblack_off}}<figcaption>Speccy Black off: the right-hand box is PAPER 0 with BRIGHT 1.</figcaption></figure>
+    <figure class="shot">{{img:spblack_on}}<figcaption>Speccy Black on: the same box disappears.</figcaption></figure>
+  </div>
+  <p class="listing-name">spblack.bas</p>
+<pre><code>{{file:examples/spblack.bas}}</code></pre>
+  <p>Register 66 can't be read back. Speccy Black has no effect while the ULAplus palette is on.</p>
+</section>
+
+<section id="ulaplus">
+  <h2><span class="n">07</span>The ULAplus palette</h2>
+  <p>PicoVideo follows the ULAplus standard used on the ZX Spectrum. With the palette on, each attribute picks its colors from a table of 64 that you load, instead of the fixed 16.</p>
+  <h3>How attributes pick colors</h3>
+  <p>The 64 entries are four color tables (CLUTs) of 16. The FLASH and BRIGHT bits of an attribute choose the table, so they no longer flash or brighten. Within a table, entries 0–7 are the eight INK colors and 8–15 the eight PAPER colors.</p>
+  <div class="tbl"><table>
+    <tr><th>FLASH</th><th>BRIGHT</th><th>Table</th><th>INK entries</th><th>PAPER entries</th></tr>
+    <tr><td>0</td><td>0</td><td>CLUT 0</td><td class="mono">0–7</td><td class="mono">8–15</td></tr>
+    <tr><td>0</td><td>1</td><td>CLUT 1</td><td class="mono">16–23</td><td class="mono">24–31</td></tr>
+    <tr><td>1</td><td>0</td><td>CLUT 2</td><td class="mono">32–39</td><td class="mono">40–47</td></tr>
+    <tr><td>1</td><td>1</td><td>CLUT 3</td><td class="mono">48–55</td><td class="mono">56–63</td></tr>
+  </table></div>
+  <p>So <code>INK 3; BRIGHT 1</code> uses entry 16+3 = 19, and <code>PAPER 2; FLASH 1</code> uses entry 32+8+2 = 42. The border uses the PAPER colors of CLUT 0: <code>BORDER 4</code> shows entry 12.</p>
+  <h3>Loading and switching on</h3>
+  <ul>
+    <li>Registers 0–63 are the palette entries. Each holds a color byte: 32×green + 4×red + blue, with green and red 0–7 and blue 0–3. They can be read back.</li>
+    <li>Register 64 (<code>$40</code>) switches the palette on (any value but 0) or off (0). It can be read back.</li>
+  </ul>
+  <div class="note"><b>Load first</b>Every palette entry is 0 (black) when PicoVideo starts. Switch the palette on before you load it and the whole screen goes black.</div>
+  <div class="two wide-left">
+  <div>
+  <p>This program fills the four tables, draws a bar for every entry and then switches the palette on. CLUT 0 and CLUT 1 are close to the TS2068's own colors; CLUT 2 is a gray ramp and CLUT 3 a rainbow and a sunset.</p>
+  </div>
+  <figure class="shot">{{img:ulaplus}}<figcaption>ulaplus.bas with the palette on: one row of PAPER and one of INK per table.</figcaption></figure>
+  </div>
+  <p class="listing-name">ulaplus.bas</p>
+<pre><code>{{file:examples/ulaplus.bas}}</code></pre>
+  <p>The palette applies to modes 0, 1, 2, 5, 6 and 7. Mode 3 has its own four colors (section 8). Register 65 (<code>$41</code>) only works while the palette is on; see section 13.</p>
+</section>
+
+<section id="quad">
+  <h2><span class="n">08</span>Quad color (mode 3)</h2>
+  <div class="two wide-left">
+  <div>
+  <p>Mode 3 draws a 256×192 screen where every pixel can be any of four colors. It has no attributes. Each pixel is two bits, and each line takes 32 bytes from DF1 and 32 from DF2:</p>
+  <ul>
+    <li>Pixel line <i>y</i> starts at <code>4000h</code>&nbsp;+&nbsp;32<i>y</i> in DF1 and <code>6000h</code>&nbsp;+&nbsp;32<i>y</i> in DF2. Memory is in order, top to bottom, without the TS2068's interleaving.</li>
+    <li>Pixels 0–3 of each 8-pixel group come from the DF1 byte, pixels 4–7 from the DF2 byte.</li>
+    <li>Within a byte, bits 7–6 are the leftmost pixel and bits 1–0 the rightmost.</li>
+  </ul>
+  </div>
+  <figure class="shot">{{img:mode3}}<figcaption>mode3.c: rings in four colors.</figcaption></figure>
+  </div>
+  <h3>The four colors</h3>
+  <p>Register 71 (<code>$47</code>) holds the four colors, as color bytes. Set the index to 0 with register 68 (<code>$44</code>), select register 71 and write four values; the index steps on after each one. They start as black (0), white (255), green (224) and yellow (252).</p>
+<pre><code>OUT 48955,68: OUT 65339,0
+OUT 48955,71: OUT 65339,2: OUT 65339,199: OUT 65339,59: OUT 65339,252</code></pre>
+  <p>Register 71 can be read back the same way. Mode 3 needs DF2, so draw in it from machine code or C (see section 5).</p>
+  <p class="listing-name">mode3.c</p>
+<pre><code>{{file:examples/c/mode3.c}}</code></pre>
+</section>
+
+<section id="col64">
+  <h2><span class="n">09</span>64 columns in color (mode 7)</h2>
+  <p>The TS2068's own 64-column mode (6) has 512 pixels across, but one INK and PAPER for the whole screen. Mode 7 uses the same pixel layout and adds the attribute areas of both display files, so every column has its own INK, PAPER and BRIGHT, like a 32-column screen.</p>
+  <ul>
+    <li>Even columns (0, 2, 4…) use DF1: column <i>c</i> is byte <i>c</i>/2 of a normal screen line at <code>4000h</code>, with its attribute at <code>5800h</code>.</li>
+    <li>Odd columns use DF2 in the same way, at <code>6000h</code> and <code>7800h</code>.</li>
+  </ul>
+  <div class="gallery">
+    <figure class="shot">{{img:mode7}}<figcaption>mode7.c in mode 7: each column has its own colors.</figcaption></figure>
+    <figure class="shot">{{img:mode6}}<figcaption>The same memory in mode 6: one color pair.</figcaption></figure>
+  </div>
+  <p>A program written for mode 6 shows in mode 7 with whatever happens to be in the attribute areas, so switch to mode 7 only when you have filled them. The example uses the ROM character set, found through the <code>CHARS</code> system variable at 23606.</p>
+  <p class="listing-name">mode7.c</p>
+<pre><code>{{file:examples/c/mode7.c}}</code></pre>
+</section>
+
+<section id="text80">
+  <h2><span class="n">10</span>80-column text (mode 5)</h2>
+  <p>Mode 5 is a text screen of 80 columns and 24 rows. You store character codes, not pixels; PicoVideo draws them with its own 8×8 font, which starts as the IBM PC (code page 437) set with box drawing, shading and accented letters. Each character has its own attribute, in the usual TS2068 format.</p>
+  <div class="tbl"><table>
+    <tr><th>What</th><th>Address</th><th>Formula</th></tr>
+    <tr><td>Character code</td><td><code>4000h</code>–<code>477Fh</code> (16384–18303)</td><td class="mono">16384 + 80×row + column</td></tr>
+    <tr><td>Attribute</td><td><code>4780h</code>–<code>4EFFh</code> (18304–20223)</td><td class="mono">18304 + 80×row + column</td></tr>
+  </table></div>
+  <p>Mode 5 uses only the first 3840 bytes of DF1, so it works from BASIC. It doesn't touch the bottom third of the TS2068's screen memory, where BASIC prints its reports. <code>CLS</code> fills the area with 0, which is a blank in black on black, so fill the attributes before you print. Text in this mode fills the full 640-pixel width of the monitor.</p>
+  <figure class="shot">{{img:text80_basic}}<figcaption>text80.bas: every character of the font, and some CP437 box drawing.</figcaption></figure>
+  <p class="listing-name">text80.bas</p>
+<pre><code>{{file:examples/text80.bas}}</code></pre>
+  <p>Filling 1920 attributes one <code>POKE</code> at a time takes BASIC a while; the example takes about half a minute to draw. For real programs, use machine code or C.</p>
+  <h3>The text80 library</h3>
+  <p>The repository's <code>examples/text80/</code> folder has a ready-made library for this mode, in z88dk C and in Z80 assembler: clear the screen, set the cursor, print characters and strings, change attributes and load the font. <code>text80.tap</code> there is a demo.</p>
+  <figure class="shot">{{img:t80test}}<figcaption>text80.tap, the demo from the repository.</figcaption></figure>
+</section>
+
+<section id="font">
+  <h2><span class="n">11</span>Changing the font</h2>
+  <p>The 80-column font is 2048 bytes in the Pico's memory: 256 characters of 8 bytes, top row first, with bit 7 as the leftmost pixel. Character <i>c</i> starts at byte 8<i>c</i>.</p>
+  <ol>
+    <li>Write the low byte of the start address to register 68 (<code>$44</code>) and the high byte to register 69 (<code>$45</code>).</li>
+    <li>Select register 70 (<code>$46</code>) and write the bytes. The address steps on after each one, and wraps from 2047 to 0.</li>
+  </ol>
+  <p>Reading register 70 returns font bytes the same way, so you can save a font or check one. This program redefines characters 128 and 129 as two halves of an arrow and reads a row back:</p>
+  <p class="listing-name">font80.bas</p>
+<pre><code>{{file:examples/font80.bas}}</code></pre>
+  <p>To load a complete font from memory, use <code>pvLoadFont</code> in <code>picovideo.asm</code> (section 4). The font is in the Pico's RAM: a change lasts until PicoVideo is switched off, and then it goes back to code page 437.</p>
+  <div class="note"><b>One index for three registers</b>Registers 70 (font), 71 (quad colors) and 72 (video memory) all share the index set by registers 68 and 69. Set the index again whenever you switch from one to another.</div>
+</section>
+
+<section id="mirror">
+  <h2><span class="n">12</span>Mirroring and readback</h2>
+  <h3>Writing DF2 through DF1</h3>
+  <p>Register 67 (<code>$43</code>) turns mirroring on (any value but 0) or off (0). While it is on, writes to <code>4000h</code>–<code>5FFFh</code> go into PicoVideo's copy of DF2 instead of DF1. The TS2068's own memory still changes as usual; only PicoVideo's copy is different. This lets routines that only know DF1, such as the ROM's <code>PRINT</code> and <code>PLOT</code>, draw into DF2 for modes 3, 6 and 7.</p>
+  <p>Mirroring chooses where writes go, not what is shown: set the display mode separately. Writes to <code>6000h</code>–<code>7FFFh</code> still reach DF2, so the warning about BASIC in section 5 still applies. Register 67 can be read back.</p>
+  <h3>Reading video memory</h3>
+  <p>The TS2068 can't read PicoVideo's copy of the screen with <code>PEEK</code>. Register 72 (<code>$48</code>) can: set the index with registers 68 and 69, select 72, and each <code>IN</code> returns one byte and steps on. Index 0 is address <code>4000h</code>, index 8192 is <code>6000h</code>.</p>
+  <p>This program writes one byte with mirroring on, then compares PicoVideo's DF1, its DF2 and the TS2068's own memory. On a PicoVideo it prints 0, 170 and 170.</p>
+  <p class="listing-name">mirror.bas</p>
+<pre><code>{{file:examples/mirror.bas}}</code></pre>
+</section>
+
+<section id="pin">
+  <h2><span class="n">13</span>Pinning the mode</h2>
+  <p>Register 65 (<code>$41</code>) lets you fix the video mode so that writes to port <code>$FF</code> no longer change it. It only works while the ULAplus palette is on (register 64 not 0); with the palette off, port <code>$FF</code> always sets the mode.</p>
+  <div class="tbl"><table>
+    <tr><th>Register 65</th><th>Video mode</th></tr>
+    <tr><td class="mono">0</td><td>Follows port <code>$FF</code>, as normal. This is the starting value.</td></tr>
+    <tr><td class="mono">128 ($80)</td><td>Fixed at mode 0.</td></tr>
+    <tr><td>anything else</td><td>Fixed at the mode in the low four bits: 5 pins 80 columns, 7 pins 64 columns.</td></tr>
+  </table></div>
+  <p>Because the palette has to be on, load one first. This example loads the TS2068's own colors into all four tables, pins mode 5 and shows that <code>OUT 255,0</code> no longer changes the mode. Register 65 can be read back.</p>
+  <p class="listing-name">pinmode.bas</p>
+<pre><code>{{file:examples/pinmode.bas}}</code></pre>
+  <div class="note"><b>Older firmware</b>In 4.2 and earlier, with the palette on, register 65 always set the mode, so 0 meant mode 0. In 4.3, write 128 to get that.</div>
+</section>
+
+<section id="reference">
+  <h2><span class="n">14</span>Reference</h2>
+  <h3>Registers</h3>
+  <p>Select with port <code>$BF3B</code> (48955), then use port <code>$FF3B</code> (65339).</p>
+  <div class="tbl"><table>
+    <tr><th>Reg</th><th class="num">Dec</th><th>Name</th><th>Write</th><th>Read</th></tr>
+    <tr><td class="mono">$00–$3F</td><td class="num">0–63</td><td>ULAplus palette</td><td>Color byte for the entry</td><td>Yes</td></tr>
+    <tr><td class="mono">$40</td><td class="num">64</td><td>Palette on</td><td>0 off, other on</td><td>Yes</td></tr>
+    <tr><td class="mono">$41</td><td class="num">65</td><td>Mode pin</td><td>0 follow <code>$FF</code>, <code>$80</code> mode 0, other: mode in bits 0–3. Needs the palette on.</td><td>Yes</td></tr>
+    <tr><td class="mono">$42</td><td class="num">66</td><td>Speccy Black</td><td>0 off, other on</td><td>No</td></tr>
+    <tr><td class="mono">$43</td><td class="num">67</td><td>DF2 mirror</td><td>0 off, other on</td><td>Yes</td></tr>
+    <tr><td class="mono">$44</td><td class="num">68</td><td>Index, low byte</td><td>Sets bits 0–7 of the shared index</td><td>No</td></tr>
+    <tr><td class="mono">$45</td><td class="num">69</td><td>Index, high byte</td><td>Sets bits 8–15</td><td>No</td></tr>
+    <tr><td class="mono">$46</td><td class="num">70</td><td>Font data</td><td>Byte at index (0–2047), index +1</td><td>Yes, index +1</td></tr>
+    <tr><td class="mono">$47</td><td class="num">71</td><td>Quad colors</td><td>Color at index (0–3), index +1</td><td>Yes, index +1</td></tr>
+    <tr><td class="mono">$48</td><td class="num">72</td><td>Video memory</td><td>—</td><td>Byte at index, index +1</td></tr>
+    <tr><td class="mono">$7F</td><td class="num">127</td><td>Version</td><td>—</td><td><code>$43</code> for 4.3</td></tr>
+  </table></div>
+  <h3>Ports PicoVideo watches</h3>
+  <div class="tbl"><table>
+    <tr><th>Port</th><th>Use</th></tr>
+    <tr><td class="mono">$FE</td><td>Bits 0–2: border color</td></tr>
+    <tr><td class="mono">$FF</td><td>Bits 0–2: video mode. Bits 3–5: mode 6 INK.</td></tr>
+    <tr><td class="mono">$F4</td><td>Bits 2 and 3: when set, writes to <code>4000h</code>–<code>5FFFh</code> or <code>6000h</code>–<code>7FFFh</code> are ignored</td></tr>
+  </table></div>
+  <p>The firmware also has development ports at <code>$20</code>, <code>$21</code> and <code>$E0</code>–<code>$E2</code>, and a mode 9 for a future 8-bit high-resolution screen. None of them is finished: don't use them. <code>$20</code> and the even <code>$E0</code> and <code>$E2</code> are also seen by the TS2068 as port <code>$FE</code>.</p>
+  <h3>Color bytes</h3>
+  <p>Palette entries, quad colors and the color tables all use one byte per color, in the ULAplus layout: bits 7–5 green, 4–2 red, 1–0 blue.</p>
+<pre><code>color = 32*green + 4*red + blue     green 0-7, red 0-7, blue 0-3</code></pre>
+  <p>Some values: black 0, blue 3, red 28, magenta 31, green 224, cyan 227, yellow 252, white 255, mid gray 146.</p>
+  <h3>Example files</h3>
+  <p>All the programs in this manual are in <code>docs/manual/examples/</code> in the repository, as source and as <code>.tap</code> files. Every one was run on an emulated TS2068, and every screenshot here was made by feeding the emulator's memory through PicoVideo's own drawing code.</p>
+  <div class="tbl"><table>
+    <tr><th>File</th><th>Shows</th><th>Section</th></tr>
+    <tr><td class="mono">detect.bas</td><td>Finding the board and its version</td><td>4</td></tr>
+    <tr><td class="mono">c/picovideo.h, asm/picovideo.asm</td><td>Register routines</td><td>4</td></tr>
+    <tr><td class="mono">c/mode2.c</td><td>Extended color</td><td>5</td></tr>
+    <tr><td class="mono">spblack.bas</td><td>Speccy Black</td><td>6</td></tr>
+    <tr><td class="mono">ulaplus.bas</td><td>Loading the palette</td><td>7</td></tr>
+    <tr><td class="mono">c/mode3.c</td><td>Quad color</td><td>8</td></tr>
+    <tr><td class="mono">c/mode7.c</td><td>64 columns with attributes</td><td>9</td></tr>
+    <tr><td class="mono">text80.bas</td><td>80 columns from BASIC</td><td>10</td></tr>
+    <tr><td class="mono">font80.bas</td><td>Changing the font</td><td>11</td></tr>
+    <tr><td class="mono">mirror.bas</td><td>Mirroring and readback</td><td>12</td></tr>
+    <tr><td class="mono">pinmode.bas</td><td>Pinning the mode</td><td>13</td></tr>
+  </table></div>
+</section>
+
+<section id="about">
+  <h2><span class="n">15</span>About this edition</h2>
+  <p>PicoVideo was designed and programmed by Jeff Burrell, building on V. Hunter Adams' PIO VGA driver for the RP2040. The photo-matched palette and several 4.3 fixes are by jon0x0. Thanks to the TS-Pico team for their help and support. The hardware, PLD and firmware are open source under the MIT License, published by Timex Sinclair Projects at <a href="https://github.com/timex-sinclair-projects/PicoVideo">github.com/timex-sinclair-projects/PicoVideo</a>.</p>
+  <p>This manual was written in 2026 for firmware 4.3, from the firmware source rather than earlier documents. It replaces the earlier user manual, which covered firmware V4. Each register, address and mode it describes was checked against the code. Firmware 4.3 is a beta and hasn't yet been tested on every board; if your board does something this manual doesn't describe, report it on the project's GitHub page.</p>
+  <p>ULAplus is a ZX Spectrum standard. PicoVideo follows its palette registers (0–64); the registers from 65 up are PicoVideo's own.</p>
+</section>
+
+<footer>PicoVideo © Jeff Burrell and Timex Sinclair Projects, MIT License. Manual for firmware 4.3, 2026. <a href="https://timexsinclair.com">timexsinclair.com</a></footer>
+</div>

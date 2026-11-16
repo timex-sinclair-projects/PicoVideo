@@ -2,7 +2,7 @@
 
 PicoVideo is an expansion board for the Timex/Sinclair TS2068 that uses a
 Raspberry Pi Pico to generate VGA video. It gives a clearer picture than the
-stock video output and adds new video modes: four-colour, 64 columns with
+stock video output and adds new video modes: four-color, 64 columns with
 individual attributes, and 80 columns with a font you can load.
 
 > **Still in development. Use at your own risk.**
