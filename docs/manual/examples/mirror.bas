@@ -1,0 +1,13 @@
+10 REM DF2 mirroring and memory readback
+20 CLS
+30 OUT 48955,67: OUT 65339,1: REM mirror on
+40 POKE 16384,170
+50 OUT 48955,67: OUT 65339,0: REM mirror off
+60 LET o=0: GO SUB 900: PRINT AT 2,0;"PicoVideo DF1 byte 0: ";v
+70 LET o=8192: GO SUB 900: PRINT "PicoVideo DF2 byte 0: ";v
+80 PRINT "TS2068 RAM at 16384: ";PEEK 16384
+90 STOP
+900 REM read PicoVideo memory at offset o (0 = address 16384)
+910 OUT 48955,68: OUT 65339,o-256*INT (o/256)
+920 OUT 48955,69: OUT 65339,INT (o/256)
+930 OUT 48955,72: LET v=IN 65339: RETURN

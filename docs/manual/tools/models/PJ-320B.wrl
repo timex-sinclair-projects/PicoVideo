@@ -1,0 +1,8 @@
+#VRML V2.0 utf8
+# PJ-320B 3.5 mm jack, from the EasyEDA footprint dimensions
+Transform { translation 0.0000 -0.0200 0.9843 children [ Shape { appearance Appearance { material Material { diffuseColor 0.06 0.06 0.06 specularColor 0.3 0.3 0.3 shininess 0.1 } } geometry Box { size 2.3622 4.4400 1.9685 } } ] }
+Transform { translation 0.0000 2.7500 0.9843 children [ Shape { appearance Appearance { material Material { diffuseColor 0.06 0.06 0.06 specularColor 0.3 0.3 0.3 shininess 0.1 } } geometry Cylinder { radius 0.9843 height 1.1000 } } ] }
+Transform { translation 0.0000 3.3039 0.9843 children [ Shape { appearance Appearance { material Material { diffuseColor 0.0 0.0 0.0 specularColor 0.3 0.3 0.3 shininess 0.1 } } geometry Cylinder { radius 0.7087 height 0.0197 } } ] }
+Transform { translation -1.7520 -1.3779 0.0591 children [ Shape { appearance Appearance { material Material { diffuseColor 0.75 0.75 0.72 specularColor 0.3 0.3 0.3 shininess 0.6 } } geometry Box { size 0.6299 0.4724 0.1181 } } ] }
+Transform { translation 1.7520 0.5906 0.0591 children [ Shape { appearance Appearance { material Material { diffuseColor 0.75 0.75 0.72 specularColor 0.3 0.3 0.3 shininess 0.6 } } geometry Box { size 0.6299 0.4724 0.1181 } } ] }
+Transform { translation -1.7520 1.3780 0.0591 children [ Shape { appearance Appearance { material Material { diffuseColor 0.75 0.75 0.72 specularColor 0.3 0.3 0.3 shininess 0.6 } } geometry Box { size 0.6299 0.4724 0.1181 } } ] }

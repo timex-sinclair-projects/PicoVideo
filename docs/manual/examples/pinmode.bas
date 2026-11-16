@@ -1,0 +1,16 @@
+10 REM Pin the video mode with register 65 ($41)
+20 FOR c=0 TO 63
+30 LET i=c-8*INT (c/8): LET b=INT (c/16)-2*INT (c/32)
+40 RESTORE 200+10*b: FOR j=0 TO i: READ v: NEXT j
+50 OUT 48955,c: OUT 65339,v
+60 NEXT c
+70 OUT 48955,64: OUT 65339,1: REM ULAplus on, TS2068 colors loaded
+80 OUT 48955,65: OUT 65339,5: REM pin mode 5 (80 columns)
+90 OUT 255,0: REM ignored while the mode is pinned
+100 OUT 48955,65: PRINT "Register 65 = ";IN 65339
+110 PAUSE 0
+120 OUT 48955,65: OUT 65339,0: REM follow port 255 again
+130 OUT 48955,64: OUT 65339,0: REM ULAplus off
+140 STOP
+200 DATA 0,2,16,18,128,130,144,146
+210 DATA 0,3,28,31,224,227,252,255
