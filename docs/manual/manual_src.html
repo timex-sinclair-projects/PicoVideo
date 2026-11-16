@@ -99,7 +99,7 @@ footer{padding-block:28px;font-size:14px;color:var(--muted)}
 
 <nav class="toc" aria-label="Contents">
   <a href="#installing"><span>1</span>Installing the board</a>
-  <a href="#firmware"><span>2</span>Updating the firmware</a>
+  <a href="#everyday"><span>2</span>Everyday use</a>
   <a href="#how"><span>3</span>How PicoVideo works</a>
   <a href="#registers"><span>4</span>Talking to PicoVideo</a>
   <a href="#native"><span>5</span>The TS2068 modes</a>
@@ -112,7 +112,8 @@ footer{padding-block:28px;font-size:14px;color:var(--muted)}
   <a href="#mirror"><span>12</span>Mirroring and readback</a>
   <a href="#pin"><span>13</span>Pinning the mode</a>
   <a href="#reference"><span>14</span>Reference</a>
-  <a href="#about"><span>15</span>About this edition</a>
+  <a href="#firmware"><span>15</span>Updating the firmware</a>
+  <a href="#about"><span>16</span>About this edition</a>
 </nav>
 
 <section id="installing">
@@ -134,31 +135,24 @@ footer{padding-block:28px;font-size:14px;color:var(--muted)}
   </div>
 </section>
 
-<section id="firmware">
-  <h2><span class="n">02</span>Updating the firmware</h2>
-  <p>PicoVideo's behavior lives in the Pico's firmware, a single <code>.uf2</code> file. Releases are on the project's <a href="https://github.com/timex-sinclair-projects/PicoVideo/releases">GitHub releases page</a>.</p>
-  <div class="tbl"><table>
-    <tr><th>Version</th><th>Status</th><th>What it has</th></tr>
-    <tr><td class="k">V4 (4.0)</td><td>Stable, on production boards</td><td>TS2068 modes and ULAplus. Fixes stray pixels on boards with Atmel PLDs. Version register reads <code>$10</code>.</td></tr>
-    <tr><td class="k">4.2</td><td>Beta</td><td>Adds Speccy Black, DF2 mirroring, readback, and modes 3, 5 and 7.</td></tr>
-    <tr><td class="k">4.3</td><td>Beta</td><td>Fixes for native modes under ULAplus, the ULAplus border and 64-column colors; adds the photo-matched palette. Version register reads <code>$43</code>.</td></tr>
-  </table></div>
-  <p>This manual describes 4.3. Everything in sections 6 and 8 to 13 needs 4.2 or later.</p>
-  <h3>Flashing the Pico</h3>
-  <p>You need a USB cable with a Micro-B plug for the Pico.</p>
-  <ol>
-    <li>Switch the TS2068 off and take PicoVideo out of the bus.</li>
-    <li>Hold down the <kbd>BOOTSEL</kbd> button on the Pico.</li>
-    <li>Keep holding it while you plug the USB cable into the Pico and your computer, then let go.</li>
-    <li>A drive called <code>RPI-RP2</code> appears on the computer. Drag the <code>.uf2</code> file onto it.</li>
-    <li>The drive disappears by itself when the copy is finished. Unplug the cable and put the board back in the bus.</li>
-  </ol>
-  <div class="note"><b>Check the result</b>The program in section 4 prints the firmware version, so you can see that the new firmware is running.</div>
-  <h3>Building the firmware yourself</h3>
-  <p>The source is in the <code>firmware/</code> folder of the repository. You need the Raspberry Pi Pico SDK, an <code>arm-none-eabi</code> GCC toolchain, CMake and Ninja:</p>
-<pre><code>cmake -S firmware -B build -G Ninja -DPICO_SDK_PATH=/path/to/pico-sdk
-ninja -C build</code></pre>
-  <p>That makes <code>build/picoTsVid.uf2</code>. The build uses the photo-matched palette (section 6). Add <code>-DPICOVIDEO_PHOTO_PALETTE=OFF</code> to the <code>cmake</code> line for the original colors.</p>
+<section id="everyday">
+  <h2><span class="n">02</span>Everyday use</h2>
+  <p>You don't have to do anything. PicoVideo has no driver to load, no mode to set and no command to type. It copies the picture as the TS2068 draws it, so BASIC, games, utilities and Spectrum programs run through a Spectrum emulator all appear on the VGA monitor as they are. Load them from tape or disk the way you always have. The TS2068's own video output keeps working, so a television can stay connected too.</p>
+  <h3>What you see</h3>
+  <ul>
+    <li><strong>The picture.</strong> The 256×192 screen is shown at twice its size in the middle of the VGA picture, with the border around it. The colors are measured from a real TS2068's RGB output, so the picture looks like the computer's own.</li>
+    <li><strong>Every TS2068 mode.</strong> Programs that use the second display file, extended color or 64 columns show on PicoVideo just as they do on a television (section 5).</li>
+    <li><strong>Spectrum programs.</strong> PicoVideo starts with Speccy Black on, so BRIGHT black looks black, as it does on a Spectrum, instead of the TS2068's dark gray (section 6).</li>
+    <li><strong>Sound.</strong> The audio jack carries the TS2068's sound, including the tones you hear during <code>LOAD</code> and <code>SAVE</code>.</li>
+  </ul>
+  <h3>What can look different</h3>
+  <p>PicoVideo draws its picture at its own pace, 60 times a second, not in step with the TS2068's television scan. A few effects depend on that timing:</p>
+  <ul>
+    <li><strong>The border during <code>LOAD</code> and <code>SAVE</code>.</strong> The border still changes color, but the stripes don't line up the way they do on a television. They are a different width and move differently.</li>
+    <li><strong>Effects timed to the beam.</strong> Some demos and games change the border or the colors partway down the screen, in time with the television's beam. PicoVideo shows the screen without those effects.</li>
+    <li><strong>Drawing into a paged bank.</strong> A program that writes to the screen area while it has a dock or EXROM bank paged over it isn't drawing on the screen, and PicoVideo ignores those writes too. Most programs never do this.</li>
+  </ul>
+  <div class="note"><b>If the picture looks wrong</b>PicoVideo keeps its settings until it is switched off. If a program changes them and doesn't put them back, later programs can look wrong: in the wrong mode, or in the wrong colors. Switch the TS2068 off and on again to start fresh.</div>
 </section>
 
 <section id="how">
@@ -168,7 +162,7 @@ ninja -C build</code></pre>
   <ul>
     <li><strong>It sees writes, not reads.</strong> PicoVideo's copy of video memory only changes when the Z80 writes to it. Register <code>$48</code> (section 12) reads the copy back.</li>
     <li><strong>It only copies the home bank.</strong> If a program pages a dock or EXROM bank into <code>4000h</code>–<code>5FFFh</code> or <code>6000h</code>–<code>7FFFh</code> (bits 2 and 3 of port <code>$F4</code>), PicoVideo ignores writes to that part of memory until it is paged back.</li>
-    <li><strong>Its timing is its own.</strong> The picture is redrawn by the Pico, not in step with the TS2068's television scan. Tricks that change the border or attributes in time with the beam don't appear: loading stripes on the border, and some demos that use interrupts for raster effects.</li>
+    <li><strong>Its timing is its own.</strong> The picture is redrawn by the Pico, not in step with the TS2068's television scan. Tricks timed to the beam don't line up: the border stripes during LOAD and SAVE look different, and effects that change the border or colors partway down the screen don't appear (section 2).</li>
     <li><strong>It keeps its settings.</strong> PicoVideo's registers aren't cleared by <code>NEW</code> or by a program ending. If a program changes a register, it should put it back when it is done.</li>
   </ul>
   <h3>The screen</h3>
@@ -438,8 +432,35 @@ OUT 48955,71: OUT 65339,2: OUT 65339,199: OUT 65339,59: OUT 65339,252</code></pr
   </table></div>
 </section>
 
+<section id="firmware">
+  <h2><span class="n">15</span>Updating the firmware</h2>
+  <p>PicoVideo's behavior lives in the Pico's firmware, a single <code>.uf2</code> file. Releases are on the project's <a href="https://github.com/timex-sinclair-projects/PicoVideo/releases">GitHub releases page</a>.</p>
+  <div class="tbl"><table>
+    <tr><th>Version</th><th>Status</th><th>What it has</th></tr>
+    <tr><td class="k">V4 (4.0)</td><td>Stable, on production boards</td><td>TS2068 modes and ULAplus. Fixes stray pixels on boards with Atmel PLDs. Version register reads <code>$10</code>.</td></tr>
+    <tr><td class="k">4.2</td><td>Beta</td><td>Adds Speccy Black, DF2 mirroring, readback, and modes 3, 5 and 7.</td></tr>
+    <tr><td class="k">4.3</td><td>Beta</td><td>Fixes for native modes under ULAplus, the ULAplus border and 64-column colors; adds the photo-matched palette. Version register reads <code>$43</code>.</td></tr>
+  </table></div>
+  <p>This manual describes 4.3. Everything in sections 6 and 8 to 13 needs 4.2 or later.</p>
+  <h3>Flashing the Pico</h3>
+  <p>You need a USB cable with a Micro-B plug for the Pico.</p>
+  <ol>
+    <li>Switch the TS2068 off and take PicoVideo out of the bus.</li>
+    <li>Hold down the <kbd>BOOTSEL</kbd> button on the Pico.</li>
+    <li>Keep holding it while you plug the USB cable into the Pico and your computer, then let go.</li>
+    <li>A drive called <code>RPI-RP2</code> appears on the computer. Drag the <code>.uf2</code> file onto it.</li>
+    <li>The drive disappears by itself when the copy is finished. Unplug the cable and put the board back in the bus.</li>
+  </ol>
+  <div class="note"><b>Check the result</b>The program in section 4 prints the firmware version, so you can see that the new firmware is running.</div>
+  <h3>Building the firmware yourself</h3>
+  <p>The source is in the <code>firmware/</code> folder of the repository. You need the Raspberry Pi Pico SDK, an <code>arm-none-eabi</code> GCC toolchain, CMake and Ninja:</p>
+<pre><code>cmake -S firmware -B build -G Ninja -DPICO_SDK_PATH=/path/to/pico-sdk
+ninja -C build</code></pre>
+  <p>That makes <code>build/picoTsVid.uf2</code>. The build uses the photo-matched palette (section 6). Add <code>-DPICOVIDEO_PHOTO_PALETTE=OFF</code> to the <code>cmake</code> line for the original colors.</p>
+</section>
+
 <section id="about">
-  <h2><span class="n">15</span>About this edition</h2>
+  <h2><span class="n">16</span>About this edition</h2>
   <p>PicoVideo was designed and programmed by Jeff Burrell, building on V. Hunter Adams' PIO VGA driver for the RP2040. The photo-matched palette and several 4.3 fixes are by jon0x0. Thanks to the TS-Pico team for their help and support. The hardware, PLD and firmware are open source under the MIT License, published by Timex Sinclair Projects at <a href="https://github.com/timex-sinclair-projects/PicoVideo">github.com/timex-sinclair-projects/PicoVideo</a>.</p>
   <p>This manual was written in 2026 for firmware 4.3, from the firmware source rather than earlier documents. It replaces the earlier user manual, which covered firmware V4. Each register, address and mode it describes was checked against the code. Firmware 4.3 is a beta and hasn't yet been tested on every board; if your board does something this manual doesn't describe, report it on the project's GitHub page.</p>
   <p>ULAplus is a ZX Spectrum standard. PicoVideo follows its palette registers (0–64); the registers from 65 up are PicoVideo's own.</p>
