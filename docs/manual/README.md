@@ -8,7 +8,7 @@ The user and programmer's manual for PicoVideo firmware 4.3.
 | `PicoVideo Manual (half-letter).pdf` | The printed edition, 5.5 × 8.5 in, 28 pages. |
 | `PicoVideo Manual (booklet, print duplex).pdf` | The same pages imposed for a booklet. Print on letter paper, double-sided, flipping on the short edge, then fold and staple. |
 | `examples/` | Every program in the manual, as source and `.tap`: BASIC (`.bas`, built with zmakebas), C (`c/`, z88dk) and Z80 (`asm/`). |
-| `images/` | Screenshots and the board photo. |
+| `images/` | Screenshots and the board renders. |
 | `manual_src.html`, `zine_src.html` | Sources. `{{file:...}}` tokens pull in the example listings. |
 | `tools/` | Build and screenshot scripts. |
 
