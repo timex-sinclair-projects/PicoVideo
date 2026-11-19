@@ -87,3 +87,15 @@ When ULA+ is enabled (register `$40` non-zero), register `$41` decides where the
 When ULA+ is off, port `$FF` always sets the mode.
 
 Before the native-video fixes, `$41 = 0` forced mode 0. Software that relied on that should write `$80` instead.
+
+### TS-2068 Megabank
+
+PicoVideo follows the [TS-2068 Megabank](https://github.com/timex-sinclair-projects/TS-2068-Megabank)'s
+owner registers for the two screen chunks. `OUT 253,r` selects a Megabank
+register and `OUT 252,v` writes it; PicoVideo keeps `OWN2` (r = 2, chunk 2,
+`4000h`–`5FFFh`) and `OWN3` (r = 3, chunk 3, `6000h`–`7FFFh`). While either
+holds a bank number (1–253), writes to that chunk go to the bank, not the
+screen, and PicoVideo ignores them, as it does when port `$F4` pages a dock or
+EXROM bank there. 0, 254 and 255 mean "no bank". Like the board, PicoVideo
+decodes only the low byte of the port address. The Megabank ROM writes every
+owner register to 0 at boot, which also clears PicoVideo's copies.
