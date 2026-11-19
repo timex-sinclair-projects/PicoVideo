@@ -6,7 +6,7 @@ sets `SOFTWARE_VER` (currently `0x43`; read it back from ULA+ register `$7F`).
 | File | Role |
 |---|---|
 | `picoTsVid.c` | Entry point. Sets the system clock to 250 MHz, starts VGA on core 1, then runs the bus handler on core 0. |
-| `coreB/busMain.c` | Core 0. Snoops the TS2068 bus, mirrors video memory writes and handles the I/O ports (ULA+, mode `$FF`, PicoVideo control registers). |
+| `coreB/busMain.c` | Core 0. Snoops the TS2068 bus, mirrors video memory writes and handles the I/O ports (ULA+, mode `$FF`, PicoVideo control registers). Skips a screen write when port `$F4` pages the chunk away or a TS-2068 Megabank bank owns it (its registers `OWN2`/`OWN3`, written through ports `$FD`/`$FC`). |
 | `coreV/vidMain.c` | Core 1. Runs the VGA timing and DMA. |
 | `coreV/vgaPioSm.pio` | PIO state machines for the VGA output. |
 | `coreV/displayProc80.c` | Scanline renderer for all modes, including 80 columns. This is the file the build uses. |

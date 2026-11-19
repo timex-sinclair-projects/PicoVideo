@@ -89,6 +89,20 @@ unsigned char xPort = 0;
 
 unsigned char memMirror = 0;
 
+// The TS-2068 Megabank (github.com/timex-sinclair-projects/TS-2068-Megabank):
+//  OUT FDh selects one of its registers, OUT FCh writes it. Registers 02h and
+//  03h (OWN2, OWN3) say which expansion bank owns chunk 2 (4000h-5FFFh) or
+//  chunk 3 (6000h-7FFFh): 1-253 a bank, 0, FEh or FFh none. While a bank owns
+//  the chunk, a write there goes to the bank, not the 2068's screen, so it is
+//  not copied. The board decodes A7-A0 only, and so does this. Which 8K of the
+//  bank shows (SUB2, SUB3) does not matter here. The Megabank ROM writes every
+//  OWNn = 0 at boot, which resets these after a reset PicoVideo cannot see.
+unsigned char mbReg = 0;        // the register last selected with OUT FDh
+unsigned char mbOwn2 = 0;       // OWN2: chunk 2's owner
+unsigned char mbOwn3 = 0;       // OWN3: chunk 3's owner
+
+#define MB_OWNED(own) ((unsigned char)((own) - 1) < 253)    // a bank, 1-253
+
 void mySerOut(unsigned short myVal){
 unsigned char i;
 unsigned short mask = 0x0001;
@@ -312,6 +326,15 @@ uint16_t fontAdr;
                     case 0xFE:
                         gTsRegFE = gZ80Data;
                         break;
+                    case 0xFD:
+                    // Megabank: select a register
+                        mbReg = gZ80Data;
+                        break;
+                    case 0xFC:
+                    // Megabank: write the selected register; keep OWN2 and OWN3
+                        if (mbReg == 0x02) mbOwn2 = gZ80Data;
+                        if (mbReg == 0x03) mbOwn3 = gZ80Data;
+                        break;
                     case TEXT_PORT:
                         gTextPort   = gZ80Data;
                         gTextStat   = 1;
@@ -337,9 +360,10 @@ uint16_t fontAdr;
             // this code ensures that the video memory is updated only when the
             //  TS2068 HSR register is set to allow access to the home bank to
             //  the TS2068. this allows writing to the dock and EXROM banks
-            //  without munging the video memory
+            //  without munging the video memory. Nor when a Megabank bank owns
+            //  the chunk: the write goes to the bank.
 
-                if (((gTsRegF4 & 0x04) == 0) && ((gZ80Adr & 0x2000) == 0)){
+                if (((gTsRegF4 & 0x04) == 0) && !MB_OWNED(mbOwn2) && ((gZ80Adr & 0x2000) == 0)){
                 // writing to the low memory addresses
                     if (memMirror){
                     // we are mirroring the high memory here
@@ -349,7 +373,7 @@ uint16_t fontAdr;
                         gDfRam[gZ80Adr & 0x3fff] = gZ80Data;
                     }
                 }
-                if (((gTsRegF4 & 0x08) == 0) && ((gZ80Adr & 0x2000) != 0)) gDfRam[gZ80Adr & 0x3fff] = gZ80Data;
+                if (((gTsRegF4 & 0x08) == 0) && !MB_OWNED(mbOwn3) && ((gZ80Adr & 0x2000) != 0)) gDfRam[gZ80Adr & 0x3fff] = gZ80Data;
             }
         }
 

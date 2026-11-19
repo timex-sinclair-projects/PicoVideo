@@ -150,18 +150,18 @@ footer{padding-block:28px;font-size:14px;color:var(--muted)}
   <ul>
     <li><strong>The border during <code>LOAD</code> and <code>SAVE</code>.</strong> The border still changes color, but the stripes don't line up the way they do on a television. They are a different width and move differently.</li>
     <li><strong>Effects timed to the beam.</strong> Some demos and games change the border or the colors partway down the screen, in time with the television's beam. PicoVideo shows the screen without those effects.</li>
-    <li><strong>Drawing into a paged bank.</strong> A program that writes to the screen area while it has a dock or EXROM bank paged over it isn't drawing on the screen, and PicoVideo ignores those writes too. Most programs never do this.</li>
+    <li><strong>Drawing into a paged bank.</strong> A program that writes to the screen area while it has a dock or EXROM bank paged over it, or a TS-2068 Megabank bank, isn't drawing on the screen, and PicoVideo ignores those writes too. Most programs never do this.</li>
   </ul>
   <div class="note"><b>If the picture looks wrong</b>PicoVideo keeps its settings until it is switched off. If a program changes them and doesn't put them back, later programs can look wrong: in the wrong mode, or in the wrong colors. Switch the TS2068 off and on again to start fresh.</div>
 </section>
 
 <section id="how">
   <h2><span class="n">03</span>How PicoVideo works</h2>
-  <p>PicoVideo never takes over the TS2068's video. It watches the bus. A PLD on the board passes every write to video memory (<code>4000h</code>–<code>7FFFh</code>) and every I/O request to the Pico. One core of the Pico keeps its own copy of video memory and of ports <code>$FE</code>, <code>$FF</code> and <code>$F4</code>. The other core reads that copy and draws a 640×480 VGA picture from it, 60 times a second.</p>
+  <p>PicoVideo never takes over the TS2068's video. It watches the bus. A PLD on the board passes every write to video memory (<code>4000h</code>–<code>7FFFh</code>) and every I/O request to the Pico. One core of the Pico keeps its own copy of video memory and of ports <code>$FE</code>, <code>$FF</code> and <code>$F4</code>, and of a TS-2068 Megabank's owners of chunks 2 and 3. The other core reads that copy and draws a 640×480 VGA picture from it, 60 times a second.</p>
   <p>This tells you what PicoVideo can and can't show:</p>
   <ul>
     <li><strong>It sees writes, not reads.</strong> PicoVideo's copy of video memory only changes when the Z80 writes to it. Register <code>$48</code> (section 12) reads the copy back.</li>
-    <li><strong>It only copies the home bank.</strong> If a program pages a dock or EXROM bank into <code>4000h</code>–<code>5FFFh</code> or <code>6000h</code>–<code>7FFFh</code> (bits 2 and 3 of port <code>$F4</code>), PicoVideo ignores writes to that part of memory until it is paged back.</li>
+    <li><strong>It only copies the home bank.</strong> If a program pages a dock or EXROM bank into <code>4000h</code>–<code>5FFFh</code> or <code>6000h</code>–<code>7FFFh</code> (bits 2 and 3 of port <code>$F4</code>), PicoVideo ignores writes to that part of memory until it is paged back. The same goes for a TS-2068 Megabank: PicoVideo follows its owner registers for those two chunks (ports <code>$FD</code> and <code>$FC</code>) and ignores writes to a chunk while a bank owns it.</li>
     <li><strong>Its timing is its own.</strong> The picture is redrawn by the Pico, not in step with the TS2068's television scan. Tricks timed to the beam don't line up: the border stripes during LOAD and SAVE look different, and effects that change the border or colors partway down the screen don't appear (section 2).</li>
     <li><strong>It keeps its settings.</strong> PicoVideo's registers aren't cleared by <code>NEW</code> or by a program ending. If a program changes a register, it should put it back when it is done.</li>
   </ul>

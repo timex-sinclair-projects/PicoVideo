@@ -203,6 +203,57 @@ static void test_banking(void) {
     assert(gDfRam[8192+0x101]==0x88);
 }
 
+static void mb(unsigned char r, unsigned char v) { add(0xfd,r); add(0xfc,v); }
+
+static void test_megabank(void) {
+    memset(gDfRam,0xcc,16384);
+    count=0;
+    reg(0x43,0); add(0xf4,0);
+    mb(0x02,5);                     /* bank 5 owns chunk 2 */
+    mem(0x4000,0x11); mem(0x6000,0x12);
+    mb(0x03,7);                     /* and bank 7 chunk 3 */
+    mem(0x4001,0x13); mem(0x6001,0x14);
+    mb(0x0a,3); mb(0x0b,1);         /* SUB2, SUB3: still owned */
+    mem(0x4002,0x15); mem(0x6002,0x16);
+    mb(0x10,0xff); mb(0x04,0);      /* WPROT, OWN4: not chunks 2 or 3 */
+    mem(0x4003,0x17); mem(0x6003,0x18);
+    mb(0x02,0);                     /* chunk 2 back to the 2068 */
+    mem(0x4004,0x19); mem(0x6004,0x1a);
+    mb(0x03,0xfe);                  /* FEh is "none" */
+    mem(0x4005,0x1b); mem(0x6005,0x1c);
+    mb(0x03,0xfd);                  /* bank 253 */
+    mem(0x6006,0x1d);
+    mb(0x03,0xff);                  /* FFh is "none" */
+    mem(0x6007,0x1e);
+    mb(0x02,1);                     /* bank 1 */
+    mem(0x4008,0x1f);
+    add(0xfffd,0x05); add(0xbffd,0x42); /* a Spectrum 128 AY write: A7-A0 is FDh, FCh untouched */
+    mem(0x4009,0x20);
+    add(0xfc,0);                    /* FCh writes register 05h, not OWN2 */
+    mem(0x400a,0x21);
+    mb(0x02,0);
+    mem(0x400b,0x22);
+    mb(0x02,9); reg(0x43,1);        /* DF2 mirror: chunk 2 owned, not copied */
+    mem(0x4100,0x23);
+    mb(0x02,0); mem(0x4101,0x24);
+    reg(0x43,0); add(0xf4,0x04); mb(0x02,0); /* HSR still applies with no owner */
+    mem(0x400c,0x25);
+    add(0xf4,0);
+    run();
+    assert(gDfRam[0]==0xcc && gDfRam[8192]==0x12);
+    assert(gDfRam[1]==0xcc && gDfRam[8193]==0xcc);
+    assert(gDfRam[2]==0xcc && gDfRam[8194]==0xcc);
+    assert(gDfRam[3]==0xcc && gDfRam[8195]==0xcc);
+    assert(gDfRam[4]==0x19 && gDfRam[8196]==0xcc);
+    assert(gDfRam[5]==0x1b && gDfRam[8197]==0x1c);
+    assert(gDfRam[8198]==0xcc && gDfRam[8199]==0x1e);
+    assert(gDfRam[8]==0xcc && gDfRam[9]==0xcc && gDfRam[10]==0xcc);
+    assert(gDfRam[11]==0x22);
+    assert(gDfRam[8192+0x100]==0xcc && gDfRam[0x100]==0xcc);
+    assert(gDfRam[8192+0x101]==0x24);
+    assert(gDfRam[12]==0xcc);
+}
+
 static void test_quad_and_extended_bounds(void) {
     count=0;
     reg(0x43,0); reg(0x41,9); reg(0x40,1);
@@ -250,6 +301,7 @@ int main(void) {
     test_bus_modes();
     test_bus_colors();
     test_banking();
+    test_megabank();
     test_renderer();
     test_quad_and_extended_bounds();
     unsigned short frames=0;
@@ -259,6 +311,6 @@ int main(void) {
         assert(frames==i%32);
         assert(mask==((i/32)%2?255:0));
     }
-    puts("PASS: actual bus writes, r130 modes, border, native 64-column colors, banking/mirroring, 256 attributes, 192 ECM scanlines, quad-color bounds/rows, extended-write bounds, and 32-frame FLASH.");
+    puts("PASS: actual bus writes, r130 modes, border, native 64-column colors, banking/mirroring, Megabank chunk owners, 256 attributes, 192 ECM scanlines, quad-color bounds/rows, extended-write bounds, and 32-frame FLASH.");
     return 0;
 }
