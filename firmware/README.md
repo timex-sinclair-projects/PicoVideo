@@ -1,7 +1,7 @@
 # PicoVideo firmware
 
 This is the Raspberry Pi Pico (RP2040) firmware for PicoVideo. `macros.h`
-sets `SOFTWARE_VER` (currently `0x43`; read it back from ULA+ register `$7F`).
+sets `SOFTWARE_VER` (currently `0x44`; read it back from ULA+ register `$7F`).
 
 | File | Role |
 |---|---|

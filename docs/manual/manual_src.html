@@ -88,7 +88,7 @@ footer{padding-block:28px;font-size:14px;color:var(--muted)}
 <div class="wrap">
 <header class="cover">
   <div>
-    <div class="eyebrow">Timex/Sinclair 2068 · Jeff Burrell · Firmware 4.3</div>
+    <div class="eyebrow">Timex/Sinclair 2068 · Jeff Burrell · Firmware 4.4</div>
     <h1>PicoVideo</h1>
     <p class="lede">PicoVideo is a TS2068 expansion board that watches the computer's bus and redraws its screen as clean VGA, using a Raspberry Pi Pico. On top of the TS2068's own video modes it adds a 64-color ULAplus palette, a four-color mode, 64 columns with full color and an 80-column text screen with a font you can change.</p>
     <div class="meta"><span>VGA 640×480</span><span>ULAplus</span><span>modes 0–7</span><span>BASIC, C and Z80 examples</span></div>
@@ -183,7 +183,7 @@ footer{padding-block:28px;font-size:14px;color:var(--muted)}
   <p>and register 64 is read:</p>
 <pre><code>OUT 48955,64: PRINT IN 65339</code></pre>
   <h3>Finding the board and its version</h3>
-  <p>Register 127 (<code>$7F</code>) holds the firmware version as two hex digits: <code>$43</code> (67) is 4.3. A board that's present also reads the selected register back from port 48955, which an empty bus does not.</p>
+  <p>Register 127 (<code>$7F</code>) holds the firmware version as two hex digits: <code>$44</code> (68) is 4.4. A board that's present also reads the selected register back from port 48955, which an empty bus does not.</p>
   <p class="listing-name">detect.bas</p>
 <pre><code>{{file:examples/detect.bas}}</code></pre>
   <p>Firmware V4 (4.0) reports 1.0 here, because its version register was never updated.</p>
@@ -231,7 +231,7 @@ footer{padding-block:28px;font-size:14px;color:var(--muted)}
   <h2><span class="n">06</span>Colors and Speccy Black</h2>
   <p>Without the ULAplus palette, PicoVideo draws the TS2068's 16 colors (8, and 8 BRIGHT) from a built-in table.</p>
   <h3>The photo-matched palette</h3>
-  <p>Firmware 4.3 is built with a palette measured from a real TS2068's RGB output on the same monitor, so the picture looks like the computer's own. It changes the eight normal colors and the border; the BRIGHT colors are unchanged. It also starts with Speccy Black on, and the border starts white. Firmware built with <code>PICOVIDEO_PHOTO_PALETTE=OFF</code> uses the original colors and starts with Speccy Black off.</p>
+  <p>Since 4.3, the firmware is built with a palette measured from a real TS2068's RGB output on the same monitor, so the picture looks like the computer's own. It changes the eight normal colors and the border; the BRIGHT colors are unchanged. It also starts with Speccy Black on, and the border starts white. Firmware built with <code>PICOVIDEO_PHOTO_PALETTE=OFF</code> uses the original colors and starts with Speccy Black off.</p>
   <div class="tbl"><table>
     <tr><th>Color</th><th class="num">Photo</th><th class="num">Original</th><th class="num">Bright</th></tr>
     <tr><td><span class="swatch" style="background:#000"></span>0 black</td><td class="num">0</td><td class="num">0</td><td class="num">37</td></tr>
@@ -381,7 +381,7 @@ OUT 48955,71: OUT 65339,2: OUT 65339,199: OUT 65339,59: OUT 65339,252</code></pr
   <p>Because the palette has to be on, load one first. This example loads the TS2068's own colors into all four tables, pins mode 5 and shows that <code>OUT 255,0</code> no longer changes the mode. Register 65 can be read back.</p>
   <p class="listing-name">pinmode.bas</p>
 <pre><code>{{file:examples/pinmode.bas}}</code></pre>
-  <div class="note"><b>Older firmware</b>In 4.2 and earlier, with the palette on, register 65 always set the mode, so 0 meant mode 0. In 4.3, write 128 to get that.</div>
+  <div class="note"><b>Older firmware</b>In 4.2 and earlier, with the palette on, register 65 always set the mode, so 0 meant mode 0. In 4.3 and later, write 128 to get that.</div>
 </section>
 
 <section id="reference">
@@ -400,7 +400,7 @@ OUT 48955,71: OUT 65339,2: OUT 65339,199: OUT 65339,59: OUT 65339,252</code></pr
     <tr><td class="mono">$46</td><td class="num">70</td><td>Font data</td><td>Byte at index (0–2047), index +1</td><td>Yes, index +1</td></tr>
     <tr><td class="mono">$47</td><td class="num">71</td><td>Quad colors</td><td>Color at index (0–3), index +1</td><td>Yes, index +1</td></tr>
     <tr><td class="mono">$48</td><td class="num">72</td><td>Video memory</td><td>—</td><td>Byte at index, index +1</td></tr>
-    <tr><td class="mono">$7F</td><td class="num">127</td><td>Version</td><td>—</td><td><code>$43</code> for 4.3</td></tr>
+    <tr><td class="mono">$7F</td><td class="num">127</td><td>Version</td><td>—</td><td><code>$44</code> for 4.4</td></tr>
   </table></div>
   <h3>Ports PicoVideo watches</h3>
   <div class="tbl"><table>
@@ -440,8 +440,9 @@ OUT 48955,71: OUT 65339,2: OUT 65339,199: OUT 65339,59: OUT 65339,252</code></pr
     <tr><td class="k">V4 (4.0)</td><td>Stable, on production boards</td><td>TS2068 modes and ULAplus. Fixes stray pixels on boards with Atmel PLDs. Version register reads <code>$10</code>.</td></tr>
     <tr><td class="k">4.2</td><td>Beta</td><td>Adds Speccy Black, DF2 mirroring, readback, and modes 3, 5 and 7.</td></tr>
     <tr><td class="k">4.3</td><td>Beta</td><td>Fixes for native modes under ULAplus, the ULAplus border and 64-column colors; adds the photo-matched palette. Version register reads <code>$43</code>.</td></tr>
+    <tr><td class="k">4.4</td><td>Beta</td><td>Ignores screen writes to a chunk while a TS-2068 Megabank bank owns it. Version register reads <code>$44</code>.</td></tr>
   </table></div>
-  <p>This manual describes 4.3. Everything in sections 6 and 8 to 13 needs 4.2 or later.</p>
+  <p>This manual describes 4.4. Everything in sections 6 and 8 to 13 needs 4.2 or later.</p>
   <h3>Flashing the Pico</h3>
   <p>You need a USB cable with a Micro-B plug for the Pico.</p>
   <ol>
@@ -462,9 +463,9 @@ ninja -C build</code></pre>
 <section id="about">
   <h2><span class="n">16</span>About this edition</h2>
   <p>PicoVideo was designed and programmed by Jeff Burrell, building on V. Hunter Adams' PIO VGA driver for the RP2040. The photo-matched palette and several 4.3 fixes are by jon0x0. Thanks to the TS-Pico team for their help and support. The hardware, PLD and firmware are open source under the MIT License, published by Timex Sinclair Projects at <a href="https://github.com/timex-sinclair-projects/PicoVideo">github.com/timex-sinclair-projects/PicoVideo</a>.</p>
-  <p>This manual was written in 2026 for firmware 4.3, from the firmware source rather than earlier documents. It replaces the earlier user manual, which covered firmware V4. Each register, address and mode it describes was checked against the code. Firmware 4.3 is a beta and hasn't yet been tested on every board; if your board does something this manual doesn't describe, report it on the project's GitHub page.</p>
+  <p>This manual was written in 2026 for firmware 4.4, from the firmware source rather than earlier documents. It replaces the earlier user manual, which covered firmware V4. Each register, address and mode it describes was checked against the code. Firmware 4.4 is a beta and hasn't yet been tested on every board; if your board does something this manual doesn't describe, report it on the project's GitHub page.</p>
   <p>ULAplus is a ZX Spectrum standard. PicoVideo follows its palette registers (0–64); the registers from 65 up are PicoVideo's own.</p>
 </section>
 
-<footer>PicoVideo © Jeff Burrell and Timex Sinclair Projects, MIT License. Manual for firmware 4.3, 2026. <a href="https://timexsinclair.com">timexsinclair.com</a></footer>
+<footer>PicoVideo © Jeff Burrell and Timex Sinclair Projects, MIT License. Manual for firmware 4.4, 2026. <a href="https://timexsinclair.com">timexsinclair.com</a></footer>
 </div>
