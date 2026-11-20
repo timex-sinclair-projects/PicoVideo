@@ -17,7 +17,7 @@ include(${PICO_SDK_PATH}/external/pico_sdk_import.cmake)
 
 # Set the name of the project (as PROJECT_NAME) and C/C++ standards
 project(picoTsVid C CXX ASM)
-option(PICOVIDEO_PHOTO_PALETTE "Use the camera-matched normal palette (OFF = original stock colors)" ON)
+option(PICOVIDEO_PHOTO_PALETTE "Use the photo palette: half-light normal colors (OFF = original stock colors)" ON)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 

@@ -1,7 +1,7 @@
 # PicoVideo firmware
 
 This is the Raspberry Pi Pico (RP2040) firmware for PicoVideo. `macros.h`
-sets `SOFTWARE_VER` (currently `0x44`; read it back from ULA+ register `$7F`).
+sets `SOFTWARE_VER` (currently `0x45`; read it back from ULA+ register `$7F`).
 
 | File | Role |
 |---|---|
@@ -36,7 +36,7 @@ byte for byte, so test it on real hardware before you share it.
 
 | Option | Default | Effect |
 |---|---|---|
-| `PICOVIDEO_PHOTO_PALETTE` | `ON` | Uses the camera-matched normal colors and starts with Speccy Black on ([details](../docs/photo-palette.md)). Set it to `OFF` for the original stock colors. |
+| `PICOVIDEO_PHOTO_PALETTE` | `ON` | Uses the photo palette (normal colors at about half the light of BRIGHT) and starts with Speccy Black on ([details](../docs/photo-palette.md)). Set it to `OFF` for the original stock colors. |
 
 ## Tests
 

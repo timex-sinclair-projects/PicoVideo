@@ -289,6 +289,22 @@ static void test_quad_and_extended_bounds(void) {
     }
 }
 
+/* Every nonblack normal color must be dimmer than its BRIGHT version in
+ * each channel the BRIGHT color uses, and never the same color. */
+static void test_palette_headroom(void) {
+    static const unsigned char shift[3]={5,2,0}, mask[3]={7,7,3};
+    for(unsigned int c=1;c<8;++c) {
+        unsigned char normal=tsColors[c], bright=tsColors[c+8];
+        assert(normal!=bright);
+        assert(speccyColors[c]==normal && speccyColors[c+8]==bright);
+        for(unsigned int k=0;k<3;++k) {
+            unsigned int n=(normal>>shift[k])&mask[k], b=(bright>>shift[k])&mask[k];
+            assert(n<=b);
+            if(b) assert(n<b);
+        }
+    }
+}
+
 int main(void) {
 #if defined(_WIN32)
     _set_error_mode(_OUT_TO_STDERR);
@@ -298,6 +314,7 @@ int main(void) {
     for(unsigned int mode=0;mode<256;++mode)
     for(unsigned int native=0;native<256;++native)
         assert(pv_video_mode(ena,mode,native)==((ena && mode)?(mode%16):(native%8)));
+    test_palette_headroom();
     test_bus_modes();
     test_bus_colors();
     test_banking();
@@ -311,6 +328,6 @@ int main(void) {
         assert(frames==i%32);
         assert(mask==((i/32)%2?255:0));
     }
-    puts("PASS: actual bus writes, r130 modes, border, native 64-column colors, banking/mirroring, Megabank chunk owners, 256 attributes, 192 ECM scanlines, quad-color bounds/rows, extended-write bounds, and 32-frame FLASH.");
+    puts("PASS: normal/BRIGHT palette headroom, actual bus writes, r130 modes, border, native 64-column colors, banking/mirroring, Megabank chunk owners, 256 attributes, 192 ECM scanlines, quad-color bounds/rows, extended-write bounds, and 32-frame FLASH.");
     return 0;
 }
