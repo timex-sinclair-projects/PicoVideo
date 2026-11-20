@@ -1,4 +1,5 @@
 {
+  "superseded": "Revision 2 data, superseded by revision 3 (issue #10): normal codes 0, 2, 20, 22, 160, 162, 180, 182. See photo-palette.md.",
   "target": "TS2068 edge-RGB board -> LEVELHIKE GenesisCable -> display; normal colors only",
   "settings": {
     "iso": 50,
