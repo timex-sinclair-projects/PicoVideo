@@ -40,6 +40,8 @@ h1{font-family:var(--display);font-weight:700;font-size:clamp(56px,9vw,104px);li
 .shot{background:var(--shot-bg);border:1px solid var(--rule);padding:10px;margin:0}
 .shot img{display:block;width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges}
 .shot.photo img{image-rendering:auto}
+.cover-board{margin:0}
+.cover-board img{display:block;width:100%;height:auto}
 .shot figcaption,figure figcaption{font-family:var(--mono);font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.45}
 .shot figcaption{color:#b9bdb3}
 nav.toc{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 24px;padding-block:22px;border-bottom:1px solid var(--rule);font-family:var(--display);font-size:19px;font-weight:600}
@@ -94,7 +96,7 @@ footer{padding-block:28px;font-size:14px;color:var(--muted)}
     <div class="meta"><span>VGA 640×480</span><span>ULAplus</span><span>modes 0–7</span><span>BASIC, C and Z80 examples</span></div>
     <p class="site"><a href="https://timexsinclair.com">timexsinclair.com</a></p>
   </div>
-  <figure class="shot photo">{{img:board_render}}<figcaption>The PicoVideo SMD board, v3.1, rendered from its design files. The Raspberry Pi Pico is top left, the VGA connector and audio jack are on the right, and the gold fingers plug into the TS2068 bus.</figcaption></figure>
+  <figure class="cover-board">{{img:cover_board}}</figure>
 </header>
 
 <nav class="toc" aria-label="Contents">
@@ -131,7 +133,7 @@ footer{padding-block:28px;font-size:14px;color:var(--muted)}
   </ol>
   <div class="note"><b>Off before you plug</b>Never plug PicoVideo in or out with the TS2068 switched on.</div>
   </div>
-  <figure class="shot">{{img:spblack_off}}<figcaption>Every screen goes through PicoVideo, including BASIC. This one is the Speccy Black example from section 6.</figcaption></figure>
+  <figure class="shot photo">{{img:board_render}}<figcaption>The PicoVideo SMD board, v3.1, rendered from its design files. The Raspberry Pi Pico is top left, the VGA connector and audio jack are on the right, and the gold fingers plug into the TS2068 bus.</figcaption></figure>
   </div>
 </section>
 
