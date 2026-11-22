@@ -43,7 +43,7 @@ How the released images were built:
 | Release | Pico SDK | Build type | Note |
 |---|---|---|---|
 | V4 and 4.2 | 1.5.1, on Windows | Debug | |
-| 4.3 and 4.4 | 2.1.1, GCC 13.3 | Release | **Broken: don't use these images.** They read the bus too soon, and lose border, video mode and ULAplus writes. |
+| 4.3 and 4.4 | 2.1.1, GCC 13.3 | Release | Test builds, not released publicly. They read the bus too soon, and lose border, video mode and ULAplus writes. |
 | 4.5 | 2.1.1, GCC 13.3 | Release | `busMain.c` at `-Og`. The released image was tested on one board; its reads of `$46`–`$48` are too slow. |
 | 4.6 | 2.1.1, GCC 13.3 | Release | Register reads answered in time. A build of this change was tested on one board. |
 
