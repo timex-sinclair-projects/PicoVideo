@@ -26,15 +26,13 @@ ninja -C build
 ```
 
 This produces `build/picoTsVid.uf2`, a Release build unless you set
-`CMAKE_BUILD_TYPE`.
+`CMAKE_BUILD_TYPE`. In every build type, `CMakeLists.txt` compiles
+`coreB/busMain.c` with `-Og`, as V4 was. **Don't remove that setting:** the bus
+loop's repeated pin reads are its delays, and higher optimization packs them
+too tightly to work on a board.
 
-> [!CAUTION]
-> **Don't flash a Release, RelWithDebInfo or MinSizeRel build of this branch.**
-> They read the bus too soon. A Release build of it did not work on a board on
-> 22 Nov 2026. A Debug build has V4's bus timing, but hasn't been tested on a
-> board. `check_arm.py` passes all of them, because it doesn't model timing.
-
-To check the linked bus handler for lost writes:
+What `-Og` produces can change with the compiler, so check the linked bus
+handler before you flash or share a build:
 
 ```bash
 python3 firmware/tests/check_arm.py build/picoTsVid.elf
@@ -47,16 +45,19 @@ How the released images were built:
 | V4 and 4.2 | 1.5.1, on Windows | Debug | |
 | 4.3 and 4.4 | 2.1.1, GCC 13.3 | Release | **Broken: don't use these images.** They read the bus too soon, and lose border, video mode and ULAplus writes. |
 
-4.3 and 4.4 have two separate faults:
+4.3 and 4.4 have two separate faults, both fixed in the source:
 
-- **Bus timing.** The repeated reads that give the buffers time to switch
-  compile to back-to-back instructions. The address high byte is last sampled
-  12 ns after the switch, against 44 ns in V4 and 4.2, so it reads as the low
-  byte. This branch does not fix that. It was found by analyzing the linked
-  code and hasn't yet been confirmed on a board.
+- **Bus timing.** In those Release builds, the address high byte is last
+  sampled 12 ns after the buffers switch, against 44 ns in V4 and 4.2, so it
+  reads as the low byte. Building `busMain.c` with `-Og` restores V4's timing.
 - **Lost writes.** `busMain()` never returns, so without a memory barrier the
   compiler dropped its stores to globals that only the video core reads. The
-  barrier on this branch fixes that in simulation.
+  barrier at `endoFunc` keeps them.
+
+On 22 Nov 2026 a Release build of 4.5 with only the barrier did not work on a
+board, and the same build with the `-Og` setting added did (Pico SDK 2.1.1,
+GCC 13.3, photo palette, one board). Other build types, palettes and compilers
+have only been checked in simulation.
 
 The build embeds the date, so to reproduce an image byte for byte use the same
 SDK, compiler and build type, and set `SOURCE_DATE_EPOCH` to the day it was
@@ -94,7 +95,8 @@ build, also run:
 python3 firmware/tests/check_arm.py build/picoTsVid.elf
 ```
 
-It runs the linked `busMain()` in a small Cortex-M0+ interpreter, feeds it bus
-cycles and checks what the video core would find in RAM. It needs only Python.
-It doesn't model the PLD or signal timing, so it passes builds that read the
-bus too soon to work on a board.
+It runs the linked `busMain()` in a small Cortex-M0+ interpreter and feeds it
+bus cycles. It checks what the video core would find in RAM, and fails if the
+gaps between the bus accesses are shorter than in the V4 image that shipped.
+It needs only Python. It doesn't model the PLD, the Z80's signal timing or
+bus contention, so a pass is no substitute for a test on a board.

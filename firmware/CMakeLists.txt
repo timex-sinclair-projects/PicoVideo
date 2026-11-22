@@ -36,6 +36,12 @@ add_executable(picoTsVid
     coreV/displayProc80.c
 )
 
+# The bus loop's repeated pin reads are also its delays: they give the buffers
+# time to switch. -O2, -O3 and -Os pack them too tightly to work on a board, so
+# this file is always built -Og, as V4 was. tests/check_arm.py checks the
+# timing of the linked result, which can change with the compiler.
+set_source_files_properties(coreB/busMain.c PROPERTIES COMPILE_OPTIONS "-Og")
+
 if(PICOVIDEO_PHOTO_PALETTE)
     target_compile_definitions(picoTsVid PRIVATE PICOVIDEO_PHOTO_PALETTE=1)
 endif()

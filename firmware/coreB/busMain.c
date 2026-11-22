@@ -187,7 +187,8 @@ uint16_t fontAdr;
 
 // collect the bus data from the Z80
 // the double reads allow the data more time to settle after
-//  the buffer is activated.
+//  the buffer is activated. How long that is depends on the compiler, so
+//  CMakeLists.txt builds this file -Og and tests/check_arm.py times it.
         gZ80AdrL     = GETDATA;
         gZ80AdrL     = GETDATA;
         gpio_put_masked(PG_MASK, ADRH);                 // get the high byte of the address

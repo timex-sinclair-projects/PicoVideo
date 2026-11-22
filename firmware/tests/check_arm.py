@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the linked busMain() and check what it leaves in RAM for the video core.
+"""Run the linked busMain(): check what it leaves in RAM, and when it reads the bus.
 
     python3 firmware/tests/check_arm.py build/picoTsVid.elf
 
@@ -9,10 +9,17 @@ is inline and busMain() never returns, so without a barrier GCC -O3 drops
 stores that only the other core reads (that is how 4.3 and 4.4 lost the
 border, video mode and ULAplus).
 
+The repeated pin reads in busMain() are also delays, while the buffers switch
+the bus onto the data pins. An optimizer can pack them together: a Release
+build that stored everything correctly still failed on a board, because it
+read the address high byte 12 ns after the switch. So this also counts CPU
+cycles between those accesses and fails if any gap is shorter than in V4_TIMING.
+
 This interprets the Thumb code in the ELF and feeds it bus cycles through a
-model of the GPIO pins. It needs only Python, no toolchain. It does not model
-the PLD, signal timing or the flash cache: a pass is no substitute for a test
-on a board.
+model of the GPIO pins, which follow a switch instantly. It needs only Python,
+no toolchain. It does not model the PLD, the Z80's signal timing, bus
+contention or the flash cache, and it sets no upper limit on how slow the loop
+may be: a pass is no substitute for a test on a board.
 """
 import re
 import struct
@@ -25,6 +32,21 @@ PSEL, IOPORT, RDPORT = 1 << 10, 1 << 12, 1 << 13
 DATA_SHIFT, PAGE_SHIFT = 15, 27
 DATA_PINS = 0xff << DATA_SHIFT
 SELECT, DATA = 0xbf3b, 0xff3b  # register select and data ports
+PDDIR = 1 << 26
+NS_PER_CYCLE = 4  # at 250 MHz
+
+# The shortest gaps in the V4 image that shipped on production boards, in CPU
+# cycles, as measured by bus_timing() on its original ELF (picoPgmV4.zip in
+# the git history). 4.2's are the same. Don't lower one without a board test.
+V4_TIMING = {
+    'select filter': 5,         # between the two polls of PSEL
+    'address low settle': 16,   # PSEL seen to the last read of A7-A0
+    'address high settle': 11,  # buffer switch to the last read of A15-A8
+    'data settle': 23,          # buffer switch to the last read of D7-D0
+    'data after select': 72,    # PSEL seen to the last read of D7-D0
+    'turnaround out': 6,        # buffer turned to the Z80 to the Pico driving
+    'turnaround in': 6,         # Pico released to the buffer turned back
+}
 
 
 def signed(value, bits):
@@ -73,13 +95,19 @@ class Bus:
         self.cycle = None
         self.out = self.enable = 0
         self.replies = []
+        self.clock = 0
+        self.started = 0
+        self.events = []  # (bus cycle, clock, kind, value) for each pin access
 
     def pins(self):
         if self.cycle is None:
             if not self.waiting:
                 raise Idle
             self.cycle, self.paged = self.waiting.pop(0), False
-        elif self.cycle == 'ending':
+            self.started += 1
+        self.events.append((self.started, self.clock, 'read',
+                            (self.out >> PAGE_SHIFT) & 3))
+        if self.cycle == 'ending':
             self.cycle = None
             return IOPORT | RDPORT  # PSEL low
         io, reading, address, data = self.cycle
@@ -96,10 +124,13 @@ class Bus:
         return value | PSEL | (0 if io else IOPORT) | (0 if reading else RDPORT)
 
     def write(self, register, value):
+        before = self.out, self.enable
         if register in (0x10, 0x14, 0x18, 0x1c):
             self.out = self.update(self.out, register - 0x10, value)
         elif register in (0x20, 0x24, 0x28, 0x2c):
             self.enable = self.update(self.enable, register - 0x20, value)
+        self.events.append((self.started, self.clock, 'write',
+                            before + (self.out, self.enable)))
 
     @staticmethod
     def update(old, kind, value):
@@ -113,6 +144,7 @@ class Machine:
         self.memory = dict(image.memory)
         self.symbols = image.symbols
         self.bus = Bus(cycles)
+        self.sio = False
         self.r = [0] * 16
         self.n = self.z = self.c = self.v = 0
 
@@ -127,13 +159,18 @@ class Machine:
         pc = self.symbols['busMain'] & ~1
         try:
             for _ in range(limit):
+                self.sio = False
+                op, start = self.load(pc, 2), pc
                 pc = self.step(pc)
+                self.bus.clock += self.cost(op, pc != start + 2)
         except Idle:
             return self
         raise RuntimeError(f'busMain did not go idle; stopped at {pc:#x}')
 
     def load(self, address, size):
         address &= WORD
+        if SIO <= address < SIO + 0x100:
+            self.sio = True
         if address == SIO + 4:
             return self.bus.pins()
         if address == SIO + 0x10:
@@ -146,10 +183,25 @@ class Machine:
         address &= WORD
         value &= WORD
         if SIO <= address < SIO + 0x100:
+            self.sio = True
             self.bus.write(address - SIO, value)
             return
         for i in range(size):
             self.memory[address + i] = (value >> (8 * i)) & 0xff
+
+    def cost(self, op, branched):
+        """Cycles the instruction takes on an M0+ running from RAM."""
+        top = op >> 12
+        if top == 15:  # bl, msr, mrs and barriers
+            return 3
+        if (top == 4 and op & 0x0800) or top == 9:  # a literal or the stack
+            return 2
+        if top in (5, 6, 7, 8):  # SIO is on the single-cycle I/O port
+            return 1 if self.sio else 2
+        if top == 12 or (top == 11 and op & 0x0600 == 0x0400):  # several registers
+            count = bin(op & (0xff if top == 12 else 0x1ff)).count('1')
+            return count + (3 if branched else 1)
+        return 2 if branched else 1
 
     def flags(self, value):
         value &= WORD
@@ -346,6 +398,58 @@ def software_version():
     return int(re.search(r'#define\s+SOFTWARE_VER\s+(\w+)', text).group(1), 0)
 
 
+def bus_timing(image):
+    """The shortest gap of each kind in V4_TIMING, in CPU cycles."""
+    writes = [poke(0x4005, 0xaa), poke(0x6005, 0x55), poke(0x5823, 0x47),
+              out(0xfe, 2), out(0xff, 6), out(SELECT, 5), out(DATA, 0x5a)]
+    answered = [inp(SELECT), inp(DATA), inp(0x21)]
+    found = {name: [] for name in V4_TIMING}
+
+    for target in writes + answered:
+        # between two other cycles, so the loop is in its steady state
+        bus = Machine(image, poke(0x5f00, 0) + target + poke(0x5f00, 0)).run().bus
+        events = [event[1:] for event in bus.events if event[0] == 2]
+        reads = [(at, page) for at, kind, page in events if kind == 'read']
+        changes = [(at, value) for at, kind, value in events if kind == 'write']
+        switches = {}  # when each buffer was first switched in
+        for at, (out0, _, out1, _) in changes:
+            old, new = (out0 >> PAGE_SHIFT) & 3, (out1 >> PAGE_SHIFT) & 3
+            if old != new:
+                switches.setdefault(new, at)
+
+        selected = reads[0][0]
+        if len(reads) > 1:
+            found['select filter'].append(reads[1][0] - selected)
+        if 1 in switches:
+            low = [at for at, page in reads if page == 0 and at < switches[1]]
+            found['address low settle'].append(low[-1] - selected)
+            high = [at for at, page in reads if page == 1]
+            if high:
+                found['address high settle'].append(high[-1] - switches[1])
+
+        if target in writes:
+            # the RDPORT test, the reads of the data, then the IOPORT test
+            data = [at for at, page in reads if page == 2]
+            if 2 in switches and len(data) >= 3:
+                found['data settle'].append(data[-2] - switches[2])
+                found['data after select'].append(data[-2] - selected)
+        else:
+            turned = driving = released = None
+            for at, (out0, enable0, out1, enable1) in changes:
+                if out0 & PDDIR and not out1 & PDDIR:
+                    turned = at
+                if not enable0 & DATA_PINS and enable1 & DATA_PINS:
+                    driving = at
+                if enable0 & DATA_PINS and not enable1 & DATA_PINS:
+                    released = at
+                if not out0 & PDDIR and out1 & PDDIR and released is not None:
+                    found['turnaround in'].append(at - released)
+            if turned is not None and driving is not None:
+                found['turnaround out'].append(driving - turned)
+
+    return {name: min(gaps) if gaps else None for name, gaps in found.items()}
+
+
 def check(image):
     failures = []
     total = 0
@@ -411,6 +515,17 @@ def check(image):
     reads('mode pin', register(0x41, 5) + inp(DATA), [5])
     reads('mirror state', register(0x43, 1) + inp(DATA), [1])
     reads('video memory', poke(0x4000, 0xc3) + out(SELECT, 0x48) + inp(DATA), [0xc3])
+
+    measured = bus_timing(image)
+    for name, least in V4_TIMING.items():
+        total += 1
+        got = measured[name]
+        if got is None:
+            failures.append(f'timing, {name}: not found, so busMain no longer '
+                            'reads the bus the way this check expects')
+        elif got < least:
+            failures.append(f'timing, {name}: {got * NS_PER_CYCLE} ns, '
+                            f'V4 allows {least * NS_PER_CYCLE} ns')
 
     return total, failures
 
