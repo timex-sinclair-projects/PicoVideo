@@ -67,7 +67,8 @@ Debug), and compatibility with a range of existing software. Please
 | [`docs/`](docs/) | Programmer's reference for the 4.2 features. |
 | [`examples/`](examples/) | 80-column text routines for the TS2068 (z88dk C and Z80 assembler). |
 | [`V4/`](V4/) | The V4 firmware image and flashing guide, kept at this path so existing links keep working. |
-| `PicoVideo manual.pdf` | User manual. |
+| [`docs/manual/`](docs/manual/) | User and programmer's manual for 4.5: screen HTML, printable PDF and booklet PDF. |
+| [`PicoVideo manual.pdf`](PicoVideo%20manual.pdf) | Earlier user manual, for V4. |
 
 ## History
 
