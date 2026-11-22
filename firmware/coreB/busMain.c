@@ -379,6 +379,10 @@ uint16_t fontAdr;
 
 
 endoFunc:
+    // busMain never returns, so without this the compiler may keep globals in
+    //  registers and drop the stores that only core 1 reads (gBorder, gVidMode,
+    //  gUlaEna). tests/check_arm.py checks the linked code for this.
+        __compiler_memory_barrier();
 
     // spin while the PSEL line is high. We MUST complete all bus operations
     //  prior to PSEL going inactive so there is no chance a race condition

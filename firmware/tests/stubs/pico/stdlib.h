@@ -5,6 +5,9 @@
 #define __not_in_flash_func(name) name
 #define GPIO_IN 0
 #define GPIO_OUT 1
+/* The stubbed GPIO calls are external, so they already act as barriers here.
+ * That also hides a missing barrier from run.py: see check_arm.py. */
+#define __compiler_memory_barrier() ((void)0)
 void gpio_init(unsigned int pin);
 void gpio_set_dir(unsigned int pin, bool output);
 void gpio_put(unsigned int pin, bool value);

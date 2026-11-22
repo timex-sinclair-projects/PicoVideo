@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 # Locate the Pico SDK: pass -DPICO_SDK_PATH=... or set the PICO_SDK_PATH
-# environment variable. Released firmware was built with Pico SDK 1.5.1.
+# environment variable. See README.md for how each release was built.
 if(NOT DEFINED PICO_SDK_PATH)
     if(DEFINED ENV{PICO_SDK_PATH})
         set(PICO_SDK_PATH $ENV{PICO_SDK_PATH})
