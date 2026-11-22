@@ -25,12 +25,44 @@ cmake -S firmware -B build -G Ninja -DPICO_SDK_PATH=/path/to/pico-sdk
 ninja -C build
 ```
 
-This produces `build/picoTsVid.uf2`.
+This produces `build/picoTsVid.uf2`, a Release build unless you set
+`CMAKE_BUILD_TYPE`. In every build type, `CMakeLists.txt` compiles
+`coreB/busMain.c` with `-Og`, as V4 was. **Don't remove that setting:** the bus
+loop's repeated pin reads are its delays, and higher optimization packs them
+too tightly to work on a board.
 
-Released images were built on Windows with Pico SDK 1.5.1 in a Debug build.
-The source also builds cleanly with Pico SDK 2.1.1 and GCC 13.3. A build with
-a different SDK, compiler or build type will not match the released `.uf2`
-byte for byte, so test it on real hardware before you share it.
+What `-Og` produces can change with the compiler, so check the linked bus
+handler before you flash or share a build:
+
+```bash
+python3 firmware/tests/check_arm.py build/picoTsVid.elf
+```
+
+How the released images were built:
+
+| Release | Pico SDK | Build type | Note |
+|---|---|---|---|
+| V4 and 4.2 | 1.5.1, on Windows | Debug | |
+| 4.3 and 4.4 | 2.1.1, GCC 13.3 | Release | **Broken: don't use these images.** They read the bus too soon, and lose border, video mode and ULAplus writes. |
+
+4.3 and 4.4 have two separate faults, both fixed in the source:
+
+- **Bus timing.** In those Release builds, the address high byte is last
+  sampled 12 ns after the buffers switch, against 44 ns in V4 and 4.2, so it
+  reads as the low byte. Building `busMain.c` with `-Og` restores V4's timing.
+- **Lost writes.** `busMain()` never returns, so without a memory barrier the
+  compiler dropped its stores to globals that only the video core reads. The
+  barrier at `endoFunc` keeps them.
+
+On 22 Nov 2026 a Release build of 4.5 with only the barrier did not work on a
+board, and the same build with the `-Og` setting added did (Pico SDK 2.1.1,
+GCC 13.3, photo palette, one board). Other build types, palettes and compilers
+have only been checked in simulation.
+
+The build embeds the date, so to reproduce an image byte for byte use the same
+SDK, compiler and build type, and set `SOURCE_DATE_EPOCH` to the day it was
+built. The checks here are not hardware tests: try an image on a real board
+before you share it.
 
 ### Build options
 
@@ -54,3 +86,17 @@ python3 firmware/tests/run.py --photo
 The first command tests the stock palette and the second tests the photo
 palette. On Windows, `firmware\tests\run_windows.cmd` runs the same tests
 with MSVC.
+
+These tests can't show what the ARM compiler did to the bus loop, because
+their stubbed GPIO calls force every global to be stored. After each firmware
+build, also run:
+
+```bash
+python3 firmware/tests/check_arm.py build/picoTsVid.elf
+```
+
+It runs the linked `busMain()` in a small Cortex-M0+ interpreter and feeds it
+bus cycles. It checks what the video core would find in RAM, and fails if the
+gaps between the bus accesses are shorter than in the V4 image that shipped.
+It needs only Python. It doesn't model the PLD, the Z80's signal timing or
+bus contention, so a pass is no substitute for a test on a board.

@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 # Locate the Pico SDK: pass -DPICO_SDK_PATH=... or set the PICO_SDK_PATH
-# environment variable. Released firmware was built with Pico SDK 1.5.1.
+# environment variable. See README.md for how each release was built.
 if(NOT DEFINED PICO_SDK_PATH)
     if(DEFINED ENV{PICO_SDK_PATH})
         set(PICO_SDK_PATH $ENV{PICO_SDK_PATH})
@@ -35,6 +35,12 @@ add_executable(picoTsVid
     coreV/vgaPioSm.pio
     coreV/displayProc80.c
 )
+
+# The bus loop's repeated pin reads are also its delays: they give the buffers
+# time to switch. -O2, -O3 and -Os pack them too tightly to work on a board, so
+# this file is always built -Og, as V4 was. tests/check_arm.py checks the
+# timing of the linked result, which can change with the compiler.
+set_source_files_properties(coreB/busMain.c PROPERTIES COMPILE_OPTIONS "-Og")
 
 if(PICOVIDEO_PHOTO_PALETTE)
     target_compile_definitions(picoTsVid PRIVATE PICOVIDEO_PHOTO_PALETTE=1)
