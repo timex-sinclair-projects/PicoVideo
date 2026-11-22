@@ -14,12 +14,9 @@ individual attributes, and 80 columns with a font you can load.
 | Version | Status | Get it |
 |---|---|---|
 | **V4** | Stable. Shipped on production boards. Fixes stray "rogue" pixels on boards with the faster Atmel PLDs. | [`V4/picoTsVid.uf2`](V4/picoTsVid.uf2) |
-| **4.3** | Test build, not released publicly. Everything in 4.2 (Speccy Black, DF2 writes through DF1, video modes 3, 5 and 7: see [features](docs/features.md)), plus bug fixes and the first photo palette. | Not released |
-| **4.4** | Test build, not released publicly. Everything in 4.3, plus support for the [TS-2068 Megabank](https://github.com/timex-sinclair-projects/TS-2068-Megabank): it ignores screen writes that go to a Megabank bank. | Not released |
-| **4.5** | Beta. Everything in 4.4, plus a new photo palette: each normal color is now a darker version of its BRIGHT color, at about half its light ([details](docs/photo-palette.md)). Fixes both faults in 4.3 and 4.4. Replaced by 4.6: reads of registers `$46`–`$48` can return wrong values. | [Releases](https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.5) |
-| **4.6** | Beta. Everything in 4.5, with register reads fixed: reading back the font, quad colors and video memory now returns the right values. [Tested on one board](#what-was-tested-in-46). | [Releases](https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.6) |
+| **4.6** | Beta. Adds Speccy Black, DF2 writes through DF1, video modes 3, 5 and 7 ([features](docs/features.md)), [TS-2068 Megabank](https://github.com/timex-sinclair-projects/TS-2068-Megabank) support and a photo palette, where each normal color is a darker version of its BRIGHT color ([details](docs/photo-palette.md)). [Tested on one board](#what-was-tested-in-46). | [Releases](https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.6) |
 
-Older builds (V2.0, V3.0 RC1, 4.2) are on the [Releases page](https://github.com/timex-sinclair-projects/PicoVideo/releases) too.
+Older builds (V2.0, V3.0 RC1, 4.2, 4.5) are on the [Releases page](https://github.com/timex-sinclair-projects/PicoVideo/releases) too.
 
 To flash the board, follow [V4/readme.md](V4/readme.md). In short: remove the
 board, hold **BOOTSEL** on the Pico while you plug in USB, then drag the
