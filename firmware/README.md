@@ -1,7 +1,7 @@
 # PicoVideo firmware
 
 This is the Raspberry Pi Pico (RP2040) firmware for PicoVideo. `macros.h`
-sets `SOFTWARE_VER` (currently `0x45`; read it back from ULA+ register `$7F`).
+sets `SOFTWARE_VER` (currently `0x46`; read it back from ULA+ register `$7F`).
 
 | File | Role |
 |---|---|
@@ -98,7 +98,11 @@ python3 firmware/tests/check_arm.py build/picoTsVid.elf
 ```
 
 It runs the linked `busMain()` in a small Cortex-M0+ interpreter and feeds it
-bus cycles. It checks what the video core would find in RAM, and fails if the
-gaps between the bus accesses are shorter than in the V4 image that shipped.
+bus cycles. It checks what the video core would find in RAM and what the Z80
+reads back. It fails if the gaps between the bus accesses are shorter than in
+the V4 image that shipped, if a register read is answered later than 516 ns, or
+if a screen write keeps the loop busy for more than 760 ns. The 516 ns limit
+comes from a board test of 4.5: its reads of registers `$46`–`$48` took up to
+604 ns and often returned wrong values.
 It needs only Python. It doesn't model the PLD, the Z80's signal timing or
 bus contention, so a pass is no substitute for a test on a board.

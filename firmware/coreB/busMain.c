@@ -103,6 +103,29 @@ unsigned char mbOwn3 = 0;       // OWN3: chunk 3's owner
 
 #define MB_OWNED(own) ((unsigned char)((own) - 1) < 253)    // a bank, 1-253
 
+// What a read of the data port (ULA_DAT_REG) will return, worked out in
+//  advance. The Z80 samples an IN about 600 ns after it starts, and working the
+//  answer out during the read took up to 604 ns for registers $46-$48: on a
+//  board those reads returned stale or mixed values. datAnswer() runs after
+//  every bus cycle instead, so a read only has to put this byte on the bus.
+unsigned char gDatAnswer = 0;
+
+static inline __attribute__((always_inline)) unsigned char datAnswer(void){
+    unsigned char reg = gUlaAdrReg;
+
+    if (reg < 0x40) return gUlaColors[reg];
+    switch (reg){
+    case 0x40: return gUlaEna;
+    case 0x41: return gUlaVmode;
+    case 0x43: return memMirror;
+    case 0x46: return vgaFont[gfontIndex & 2047];
+    case 0x47: return biColor[gfontIndex & 3];
+    case 0x48: return gDfRam[(gfontIndex < DF_RAM_SIZE) ? gfontIndex : 0];
+    case 0x7F: return SOFTWARE_VER;
+    }
+    return 0xFF;
+}
+
 void mySerOut(unsigned short myVal){
 unsigned char i;
 unsigned short mask = 0x0001;
@@ -209,31 +232,8 @@ uint16_t fontAdr;
                     gOutVal = gUlaAdrReg;
                 } else {
                     if (gZ80Adr == ULA_DAT_REG){
-                        flag = 1;
-                        gOutVal = 0xFF;
-                        if (gUlaAdrReg == 0x40) gOutVal = gUlaEna;
-                        if (gUlaAdrReg == 0x41) gOutVal = gUlaVmode;
-                        if (gUlaAdrReg == 0x43) gOutVal = memMirror;
-                    // read a byte from font memory
-                        if (gUlaAdrReg == 0x46){
-                            gfontIndex &= 2047;
-                            gOutVal = vgaFont[gfontIndex++];
-                            gfontIndex &= 2047;
-                        }
-                    // read a byte from bicolor memory
-                        if (gUlaAdrReg == 0x47){
-                            gfontIndex &= 3;
-                            gOutVal = biColor[gfontIndex++];
-                            gfontIndex &= 3;
-                        }
-                    // read a byte from video memory
-                        if (gUlaAdrReg == 0x48){
-                            if (gfontIndex >= DF_RAM_SIZE) gfontIndex = 0;
-                            gOutVal = gDfRam[gfontIndex++];
-                            if (gfontIndex >= DF_RAM_SIZE) gfontIndex = 0;
-                        }                           
-                        if (gUlaAdrReg == 0x7F) gOutVal = SOFTWARE_VER;
-                        if (gUlaAdrReg < 0x40) gOutVal = gUlaColors[(gUlaAdrReg & 0x3F)];
+                        flag = 2;
+                        gOutVal = gDatAnswer;
                     } else {
                         if (gZ80AdrL == TEXT_PORT){
                             flag = 1;
@@ -248,15 +248,32 @@ uint16_t fontAdr;
                 if (flag){
 
                 // the data buffer is enabled when we arrive here
-                    // set the buffer data direction to send to the Z80
+                    // load the answer while the pins are still inputs, so
+                    //  they drive it as soon as they turn round
+                        gpio_put_masked(DATAPINS_MASK, gOutVal << 15);
+                    // set the buffer data direction to send to the Z80. The
+                    //  repeats give it time to turn before the pins drive it:
+                    //  check_arm.py holds this gap to at least V4's.
+                        gpio_put(PDDIR, 0);
+                        gpio_put(PDDIR, 0);
                         gpio_put(PDDIR, 0);
                         gpio_put(PDDIR, 0);
                         gpio_put(PDDIR, 0);
                         gpio_put(PDDIR, 0);
                     // make our data bus I/O pins outputs
                         gpio_set_dir_out_masked(DATAPINS_MASK);
-                    // output the data
-                        gpio_put_masked(DATAPINS_MASK, gOutVal << 15);
+                        if (flag == 2){
+                        // while the Z80 reads it, step the index past this
+                        //  byte and work out the next answer: once PSEL drops,
+                        //  the next bus cycle can come within a few hundred ns
+                            if (gUlaAdrReg == 0x46) gfontIndex = ((gfontIndex & 2047) + 1) & 2047;
+                            if (gUlaAdrReg == 0x47) gfontIndex = ((gfontIndex & 3) + 1) & 3;
+                            if (gUlaAdrReg == 0x48){
+                                if (gfontIndex >= DF_RAM_SIZE) gfontIndex = 0;
+                                if (++gfontIndex >= DF_RAM_SIZE) gfontIndex = 0;
+                            }
+                            gDatAnswer = datAnswer();
+                        }
                     // spin until the Z80 is done
                         while (gpio_get(PSEL));
                     // make the Pico pins input
@@ -269,7 +286,7 @@ uint16_t fontAdr;
                     // unslect the data buffer by enabling the address buffer
                         gpio_put_masked(PG_MASK, ADRL);
                 }
-                goto endoFunc;
+                goto endoRead;
         } else {
         // some sort of write operation
         //  get the data from the Z80 bus since we may need it
@@ -375,11 +392,22 @@ uint16_t fontAdr;
                     }
                 }
                 if (((gTsRegF4 & 0x08) == 0) && !MB_OWNED(mbOwn3) && ((gZ80Adr & 0x2000) != 0)) gDfRam[gZ80Adr & 0x3fff] = gZ80Data;
+            // only a video memory read can change with a screen write. Keep
+            //  this short: a PUSH writes twice, about 850 ns apart.
+                if (gUlaAdrReg == 0x48) gDatAnswer = gDfRam[(gfontIndex < DF_RAM_SIZE) ? gfontIndex : 0];
+                goto endoRead;
             }
         }
 
 
 endoFunc:
+    // an I/O cycle may have changed what the next read of the data port
+    //  returns. The Z80 holds IORQ for about 700 ns, so this is done before it
+    //  ends.
+        gDatAnswer = datAnswer();
+
+endoRead:
+
     // busMain never returns, so without this the compiler may keep globals in
     //  registers and drop the stores that only core 1 reads (gBorder, gVidMode,
     //  gUlaEna). tests/check_arm.py checks the linked code for this.
