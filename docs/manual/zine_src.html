@@ -110,7 +110,7 @@ pre code{background:none;padding:0;font-size:inherit}
 </style></head><body>
 
 <div class="cover">
-  <div class="eyebrow">Timex/Sinclair 2068 · Jeff Burrell · Firmware 4.5</div>
+  <div class="eyebrow">Timex/Sinclair 2068 · Jeff Burrell · Firmware 4.6</div>
   <h1>Pico&shy;Video</h1>
   <div class="sub">User and programmer's manual</div>
   <p class="lede">A TS2068 expansion board that redraws the computer's screen as clean VGA, with a 64-color ULAplus palette, a four-color mode, 64 columns in color and 80-column text.</p>
@@ -201,7 +201,7 @@ pre code{background:none;padding:0;font-size:inherit}
 <pre><code>OUT 48955,66: OUT 65339,1: REM set register 66 to 1
 OUT 48955,64: PRINT IN 65339: REM read register 64</code></pre>
   <h3>Finding the board and its version</h3>
-  <p>Register 127 holds the version as two hex digits: <code>$45</code> (69) is 4.5. A board that's present also reads the selected register back from port 48955. Firmware V4 reports 1.0.</p>
+  <p>Register 127 holds the version as two hex digits: <code>$46</code> (70) is 4.6. A board that's present also reads the selected register back from port 48955. Firmware V4 reports 1.0.</p>
   <p class="ln">detect.bas</p>
 <pre><code>{{file:examples/detect.bas}}</code></pre>
   <h3>From machine code</h3>
@@ -370,7 +370,7 @@ OUT 48955,71: OUT 65339,2: OUT 65339,199: OUT 65339,59: OUT 65339,252</code></pr
 <section id="mirror">
   <h2><span class="n">12</span>Mirroring and readback</h2>
   <p>Register 67 turns mirroring on (not 0) or off (0); it can be read back. While it is on, writes to <code>4000h</code>–<code>5FFFh</code> go into PicoVideo's DF2 instead of DF1. The TS2068's own memory changes as usual. This lets routines that only know DF1, like the ROM's <code>PRINT</code> and <code>PLOT</code>, draw into DF2. It doesn't change the mode, and writes to <code>6000h</code>–<code>7FFFh</code> still reach DF2.</p>
-  <p>Register 72 reads PicoVideo's copy of video memory, which <code>PEEK</code> can't. Set the index with registers 68 and 69 (0 is <code>4000h</code>, 8192 is <code>6000h</code>), select 72, and each <code>IN</code> returns a byte and steps on.</p>
+  <p>Register 72 reads PicoVideo's copy of video memory, which <code>PEEK</code> can't. Set the index with registers 68 and 69 (0 is <code>4000h</code>, 8192 is <code>6000h</code>), select 72, and each <code>IN</code> returns a byte and steps on. Before 4.6, reads of registers 70–72 can be wrong.</p>
   <p class="ln">mirror.bas</p>
 <pre><code>{{file:examples/mirror.bas}}</code></pre>
   <p>On a PicoVideo this prints 0, 170 and 170.</p>
@@ -422,16 +422,17 @@ OUT 48955,71: OUT 65339,2: OUT 65339,199: OUT 65339,59: OUT 65339,252</code></pr
 
 <section id="firmware">
   <h2><span class="n">15</span>Updating the firmware</h2>
-  <p>The firmware is a <code>.uf2</code> file from the project's GitHub releases page. This manual describes 4.5; sections 6 and 8–13 need 4.2 or later.</p>
+  <p>The firmware is a <code>.uf2</code> file from the project's GitHub releases page. This manual describes 4.6; sections 6 and 8–13 need 4.2 or later.</p>
   <table>
     <tr><th>Version</th><th>Status</th><th>What it has</th></tr>
     <tr><td class="k">V4 (4.0)</td><td>Stable</td><td>TS2068 modes, ULAplus, Atmel PLD fix. Reads <code>$10</code>.</td></tr>
     <tr><td class="k">4.2</td><td>Beta</td><td>Adds Speccy Black, mirroring, readback and modes 3, 5 and 7.</td></tr>
     <tr><td class="k">4.3</td><td><strong>Broken</strong></td><td>4.2 with fixes and the first photo palette.</td></tr>
     <tr><td class="k">4.4</td><td><strong>Broken</strong></td><td>Adds TS-2068 Megabank support.</td></tr>
-    <tr><td class="k">4.5</td><td>Beta</td><td>Fixes 4.3 and 4.4; new photo palette. Reads <code>$45</code>.</td></tr>
+    <tr><td class="k">4.5</td><td>Beta</td><td>Fixes 4.3 and 4.4; new photo palette. Reads <code>$45</code>. Readback of 70–72 unreliable.</td></tr>
+    <tr><td class="k">4.6</td><td>Beta</td><td>Reliable readback. Reads <code>$46</code>.</td></tr>
   </table>
-  <div class="note"><b>Do not flash 4.3 or 4.4</b>They read the bus too soon, which corrupts the picture and breaks the registers, so the version check fails too. They also lose border, mode and ULAplus changes, and 4.3 loses 64-column colors. If you have one or aren't sure, flash 4.5, or V4 for the stable firmware. Replace any 4.5 built from source older than the <code>v4.5</code> tag, too.</div>
+  <div class="note"><b>Do not flash 4.3 or 4.4</b>They read the bus too soon, which corrupts the picture and breaks the registers, so the version check fails too. They also lose border, mode and ULAplus changes, and 4.3 loses 64-column colors. If you have one or aren't sure, flash 4.6, or V4 for the stable firmware. Replace any 4.5 built from source older than the <code>v4.5</code> tag, too.</div>
   <h3>Flashing the Pico</h3>
   <ol>
     <li>Switch the TS2068 off and take PicoVideo out of the bus.</li>
@@ -464,7 +465,7 @@ ninja -C build</code></pre>
     <tr><td class="mono">mirror.bas</td><td>Mirroring and readback</td><td class="num">12</td></tr>
     <tr><td class="mono">pinmode.bas</td><td>Pinning the mode</td><td class="num">13</td></tr>
   </table>
-  <p>This manual was written in 2026 from the 4.5 firmware source and replaces the V4 manual. Firmware 4.5 is a beta, tested on one board: the examples and tape <code>SAVE</code> border stripes worked. Untested on a board: mode 1, <code>$F4</code> and Megabank paging, other boards, non-default builds and general software compatibility. Report problems on the project's GitHub page.</p>
+  <p>This manual was written in 2026 from the 4.6 firmware source and replaces the V4 manual. Firmware 4.6 is a beta. On one board, 4.5 ran the examples and tape <code>SAVE</code> border stripes, and a build of the 4.6 change read every register back correctly. Untested on a board: mode 1, <code>$F4</code> and Megabank paging, other boards, non-default builds and general software compatibility. Report problems on the project's GitHub page.</p>
   <p>ULAplus is a ZX Spectrum standard. PicoVideo follows its palette registers (0–64); registers 65 and up are PicoVideo's own.</p>
   <p><strong>PicoVideo</strong> was designed and programmed by Jeff Burrell, building on V. Hunter Adams' PIO VGA driver for the RP2040. Photo palette and 4.3 fixes by jon0x0. Thanks to the TS-Pico team. Open source under the MIT License, published by Timex Sinclair Projects: github.com/timex-sinclair-projects/PicoVideo.</p>
 </section>
@@ -507,6 +508,6 @@ ninja -C build</code></pre>
       <tr><td class="k" colspan="2" class="mono">32×G + 4×R + B</td></tr>
     </table>
   </div>
-  <p class="colophon">PicoVideo © Jeff Burrell and Timex Sinclair Projects, MIT License. Manual for firmware 4.5, 2026 · timexsinclair.com</p>
+  <p class="colophon">PicoVideo © Jeff Burrell and Timex Sinclair Projects, MIT License. Manual for firmware 4.6, 2026 · timexsinclair.com</p>
 </div>
 </body></html>

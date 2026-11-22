@@ -1,6 +1,6 @@
 # PicoVideo manual
 
-The user and programmer's manual for PicoVideo firmware 4.5.
+The user and programmer's manual for PicoVideo firmware 4.6.
 
 | File | What it is |
 |---|---|

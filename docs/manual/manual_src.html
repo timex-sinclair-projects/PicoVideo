@@ -88,7 +88,7 @@ footer{padding-block:28px;font-size:14px;color:var(--muted)}
 <div class="wrap">
 <header class="cover">
   <div>
-    <div class="eyebrow">Timex/Sinclair 2068 · Jeff Burrell · Firmware 4.5</div>
+    <div class="eyebrow">Timex/Sinclair 2068 · Jeff Burrell · Firmware 4.6</div>
     <h1>PicoVideo</h1>
     <p class="lede">PicoVideo is a TS2068 expansion board that watches the computer's bus and redraws its screen as clean VGA, using a Raspberry Pi Pico. On top of the TS2068's own video modes it adds a 64-color ULAplus palette, a four-color mode, 64 columns with full color and an 80-column text screen with a font you can change.</p>
     <div class="meta"><span>VGA 640×480</span><span>ULAplus</span><span>modes 0–7</span><span>BASIC, C and Z80 examples</span></div>
@@ -183,7 +183,7 @@ footer{padding-block:28px;font-size:14px;color:var(--muted)}
   <p>and register 64 is read:</p>
 <pre><code>OUT 48955,64: PRINT IN 65339</code></pre>
   <h3>Finding the board and its version</h3>
-  <p>Register 127 (<code>$7F</code>) holds the firmware version as two hex digits: <code>$45</code> (69) is 4.5. A board that's present also reads the selected register back from port 48955, which an empty bus does not.</p>
+  <p>Register 127 (<code>$7F</code>) holds the firmware version as two hex digits: <code>$46</code> (70) is 4.6. A board that's present also reads the selected register back from port 48955, which an empty bus does not.</p>
   <p class="listing-name">detect.bas</p>
 <pre><code>{{file:examples/detect.bas}}</code></pre>
   <p>Firmware V4 (4.0) reports 1.0 here, because its version register was never updated.</p>
@@ -365,6 +365,7 @@ OUT 48955,71: OUT 65339,2: OUT 65339,199: OUT 65339,59: OUT 65339,252</code></pr
   <p>Mirroring chooses where writes go, not what is shown: set the display mode separately. Writes to <code>6000h</code>–<code>7FFFh</code> still reach DF2, so the warning about BASIC in section 5 still applies. Register 67 can be read back.</p>
   <h3>Reading video memory</h3>
   <p>The TS2068 can't read PicoVideo's copy of the screen with <code>PEEK</code>. Register 72 (<code>$48</code>) can: set the index with registers 68 and 69, select 72, and each <code>IN</code> returns one byte and steps on. Index 0 is address <code>4000h</code>, index 8192 is <code>6000h</code>.</p>
+  <div class="note"><b>Readback before 4.6</b>Firmware 4.5 answers some reads too late, so registers 70, 71 and 72 can return the previous value, or a mix of bits, and the result changes from run to run. Version 4.6 fixes this. Earlier betas may have the same fault.</div>
   <p>This program writes one byte with mirroring on, then compares PicoVideo's DF1, its DF2 and the TS2068's own memory. On a PicoVideo it prints 0, 170 and 170.</p>
   <p class="listing-name">mirror.bas</p>
 <pre><code>{{file:examples/mirror.bas}}</code></pre>
@@ -401,7 +402,7 @@ OUT 48955,71: OUT 65339,2: OUT 65339,199: OUT 65339,59: OUT 65339,252</code></pr
     <tr><td class="mono">$46</td><td class="num">70</td><td>Font data</td><td>Byte at index (0–2047), index +1</td><td>Yes, index +1</td></tr>
     <tr><td class="mono">$47</td><td class="num">71</td><td>Quad colors</td><td>Color at index (0–3), index +1</td><td>Yes, index +1</td></tr>
     <tr><td class="mono">$48</td><td class="num">72</td><td>Video memory</td><td>—</td><td>Byte at index, index +1</td></tr>
-    <tr><td class="mono">$7F</td><td class="num">127</td><td>Version</td><td>—</td><td><code>$45</code> for 4.5</td></tr>
+    <tr><td class="mono">$7F</td><td class="num">127</td><td>Version</td><td>—</td><td><code>$46</code> for 4.6</td></tr>
   </table></div>
   <h3>Ports PicoVideo watches</h3>
   <div class="tbl"><table>
@@ -442,10 +443,11 @@ OUT 48955,71: OUT 65339,2: OUT 65339,199: OUT 65339,59: OUT 65339,252</code></pr
     <tr><td class="k">4.2</td><td>Beta</td><td>Adds Speccy Black, DF2 mirroring, readback, and modes 3, 5 and 7.</td></tr>
     <tr><td class="k">4.3</td><td><strong>Broken: do not flash</strong></td><td>Fixes for native modes under ULAplus, the ULAplus border and 64-column colors; adds the first photo palette.</td></tr>
     <tr><td class="k">4.4</td><td><strong>Broken: do not flash</strong></td><td>Ignores screen writes to a chunk while a TS-2068 Megabank bank owns it.</td></tr>
-    <tr><td class="k">4.5</td><td>Beta, tested on one board</td><td>Fixes both faults in 4.3 and 4.4. New photo palette: each normal color is a darker version of its BRIGHT color. Version register reads <code>$45</code>. Get <a href="https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.5"><code>picoTsVid-v4.5.uf2</code></a>.</td></tr>
+    <tr><td class="k">4.5</td><td>Beta; replaced by 4.6</td><td>Fixes both faults in 4.3 and 4.4. New photo palette: each normal color is a darker version of its BRIGHT color. Version register reads <code>$45</code>. Reads of registers 70–72 can return wrong values.</td></tr>
+    <tr><td class="k">4.6</td><td>Beta, tested on one board</td><td>Answers every register read in time, so readback of the font, quad colors and video memory is reliable. Version register reads <code>$46</code>. Get <a href="https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.6"><code>picoTsVid-v4.6.uf2</code></a>.</td></tr>
   </table></div>
-  <div class="note"><b>Do not flash 4.3 or 4.4</b>They read the bus too soon, so screen writes land at the wrong addresses, the picture is corrupted and PicoVideo's registers don't work. They also lose writes to the video output, so the border and video mode never change and ULAplus never turns on; in 4.3, 64-column colors never change either. 4.5 fixes both faults. If you flashed 4.3 or 4.4, or aren't sure what is on your board, flash 4.5, or V4 for the stable firmware. Also replace any 4.5 you built from source older than the <code>v4.5</code> tag: it can have the same faults. The version register can't be relied on to identify the broken builds.</div>
-  <p>This manual describes 4.5. Everything in sections 6 and 8 to 13 needs 4.2 or later.</p>
+  <div class="note"><b>Do not flash 4.3 or 4.4</b>They read the bus too soon, so screen writes land at the wrong addresses, the picture is corrupted and PicoVideo's registers don't work. They also lose writes to the video output, so the border and video mode never change and ULAplus never turns on; in 4.3, 64-column colors never change either. 4.5 and later fix both faults. If you flashed 4.3 or 4.4, or aren't sure what is on your board, flash 4.6, or V4 for the stable firmware. Also replace any 4.5 you built from source older than the <code>v4.5</code> tag: it can have the same faults. The version register can't be relied on to identify the broken builds.</div>
+  <p>This manual describes 4.6. Everything in sections 6 and 8 to 13 needs 4.2 or later.</p>
   <h3>Flashing the Pico</h3>
   <p>You need a USB cable with a Micro-B plug for the Pico.</p>
   <ol>
@@ -467,9 +469,9 @@ ninja -C build</code></pre>
 <section id="about">
   <h2><span class="n">16</span>About this edition</h2>
   <p>PicoVideo was designed and programmed by Jeff Burrell, building on V. Hunter Adams' PIO VGA driver for the RP2040. The photo palette and several 4.3 fixes are by jon0x0. Thanks to the TS-Pico team for their help and support. The hardware, PLD and firmware are open source under the MIT License, published by Timex Sinclair Projects at <a href="https://github.com/timex-sinclair-projects/PicoVideo">github.com/timex-sinclair-projects/PicoVideo</a>.</p>
-  <p>This manual was written in 2026 for firmware 4.5, from the firmware source rather than earlier documents. It replaces the earlier user manual, which covered firmware V4. Each register, address and mode it describes was checked against the code. Firmware 4.5 is a beta. The released image was tested on one board on 22 Nov 2026: the 10 example programs worked, and border stripes showed during a tape <code>SAVE</code>. Mode 1, port <code>$F4</code> and Megabank paging, other boards, non-default builds (including the original palette and Debug) and compatibility with a range of existing software haven't been tested on a board. If your board does something this manual doesn't describe, report it on the project's GitHub page.</p>
+  <p>This manual was written in 2026 for firmware 4.6, from the firmware source rather than earlier documents. It replaces the earlier user manual, which covered firmware V4. Each register, address and mode it describes was checked against the code. Firmware 4.6 is a beta. The 4.5 release was tested on one board on 22 Nov 2026: the 10 example programs worked, and border stripes showed during a tape <code>SAVE</code>. The same day, a build of the 4.6 change read every register back correctly on that board; 4.6 differs from it only in its version number. Mode 1, port <code>$F4</code> and Megabank paging, other boards, non-default builds (including the original palette and Debug) and compatibility with a range of existing software haven't been tested on a board. If your board does something this manual doesn't describe, report it on the project's GitHub page.</p>
   <p>ULAplus is a ZX Spectrum standard. PicoVideo follows its palette registers (0–64); the registers from 65 up are PicoVideo's own.</p>
 </section>
 
-<footer>PicoVideo © Jeff Burrell and Timex Sinclair Projects, MIT License. Manual for firmware 4.5, 2026. <a href="https://timexsinclair.com">timexsinclair.com</a></footer>
+<footer>PicoVideo © Jeff Burrell and Timex Sinclair Projects, MIT License. Manual for firmware 4.6, 2026. <a href="https://timexsinclair.com">timexsinclair.com</a></footer>
 </div>
