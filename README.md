@@ -14,11 +14,10 @@ individual attributes, and 80 columns with a font you can load.
 | **V4** | Stable. Shipped on production boards. Fixes stray "rogue" pixels on boards with the faster Atmel PLDs. | [`V4/picoTsVid.uf2`](V4/picoTsVid.uf2) |
 | **4.3** | **Broken: do not flash.** Everything in 4.2 (Speccy Black, DF2 writes through DF1, video modes 3, 5 and 7: see [features](docs/features.md)), plus bug fixes and the first photo palette. | [Releases](https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.3) |
 | **4.4** | **Broken: do not flash.** Everything in 4.3, plus support for the [TS-2068 Megabank](https://github.com/timex-sinclair-projects/TS-2068-Megabank): it ignores screen writes that go to a Megabank bank. | [Releases](https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.4) |
-| **4.5** | Beta. Everything in 4.4, plus a new photo palette: each normal color is now a darker version of its BRIGHT color, at about half its light ([details](docs/photo-palette.md)). Not yet tested on hardware. | Build from [`firmware/`](firmware/) as a Debug build (see below); no release yet |
+| **4.5** | Beta. Everything in 4.4, plus a new photo palette: each normal color is now a darker version of its BRIGHT color, at about half its light ([details](docs/photo-palette.md)). Fixes both faults in 4.3 and 4.4. [Tested on one board](#what-was-tested-in-45). | [Releases](https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.5) |
 
 > [!CAUTION]
-> **Do not flash the released 4.3 or 4.4, or any Release build of 4.5.**
-> They have two separate faults:
+> **Do not flash the released 4.3 or 4.4.** They have two separate faults:
 >
 > - They read the bus too soon, so screen writes land at the wrong addresses,
 >   the picture is corrupted and PicoVideo's registers don't work.
@@ -26,24 +25,37 @@ individual attributes, and 80 columns with a font you can load.
 >   change and ULAplus never turns on. In 4.3, 64-column colors never change
 >   either.
 >
-> If you flashed one, or aren't sure what is on your board, flash V4, or
-> [4.2](https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.2) if you need its beta features.
-> The version register can't be relied on to identify the broken images.
+> [4.5](https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.5) fixes both.
+> If you flashed 4.3 or 4.4, or aren't sure what is on your board, flash 4.5,
+> or V4 for the stable firmware. The version register can't be relied on to
+> identify the broken images.
 >
-> There is no tested fix yet. [Pull request 14](https://github.com/timex-sinclair-projects/PicoVideo/pull/14)
-> fixes only the lost writes: a Release build from it did not work on a board
-> on 22 Nov 2026. If you build 4.5, add `-DCMAKE_BUILD_TYPE=Debug` to the
-> `cmake` configure command. That gives V4's bus timing, but it hasn't been
-> tested on a board.
+> If you built 4.5 yourself from source older than the `v4.5` tag, replace it
+> too: such a build can have the same faults and the same version number.
 >
-> Both faults were found by analyzing and simulating the compiled firmware.
-> The timing fault is not yet confirmed as the cause of the failed board test.
+> The faults were found by analyzing and simulating the compiled firmware.
+> 4.3 and 4.4 themselves haven't been tested on a board. A build of 4.5 with
+> only the lost writes fixed failed on a board, and the same source with the
+> timing fix added worked.
 
 Older builds (V2.0, V3.0 RC1, 4.2) are on the [Releases page](https://github.com/timex-sinclair-projects/PicoVideo/releases) too.
 
 To flash the board, follow [V4/readme.md](V4/readme.md). In short: remove the
 board, hold **BOOTSEL** on the Pico while you plug in USB, then drag the
 `.uf2` file onto the `RPI-RP2` drive that appears.
+
+### What was tested in 4.5
+
+The released `picoTsVid-v4.5.uf2` was tested on one board on 22 Nov 2026:
+
+- The manual's 10 [example programs](docs/manual/examples/) all worked.
+- Border stripes showed during a tape SAVE. (With a TS-Pico fitted, use
+  `SAVE "tpi:tape"` first: a save to the SD card makes no stripes.)
+
+Not tested on a board: mode 1 (second display file), port `$F4` and Megabank
+paging, other boards, non-default builds (including the original palette and
+Debug), and compatibility with a range of existing software. Please
+[report problems](https://github.com/timex-sinclair-projects/PicoVideo/issues).
 
 ## What's in this repository
 
