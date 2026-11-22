@@ -152,7 +152,7 @@ footer{padding-block:28px;font-size:14px;color:var(--muted)}
     <li><strong>Effects timed to the beam.</strong> Some demos and games change the border or the colors partway down the screen, in time with the television's beam. PicoVideo shows the screen without those effects.</li>
     <li><strong>Drawing into a paged bank.</strong> A program that writes to the screen area while it has a dock or EXROM bank paged over it, or a TS-2068 Megabank bank, isn't drawing on the screen, and PicoVideo ignores those writes too. Most programs never do this.</li>
   </ul>
-  <div class="note"><b>If the picture looks wrong</b>PicoVideo keeps its settings until it is switched off. If a program changes them and doesn't put them back, later programs can look wrong: in the wrong mode, or in the wrong colors. Switch the TS2068 off and on again to start fresh. If the picture is corrupted or the border never changes color at all, the firmware may be one of the broken builds (section 15).</div>
+  <div class="note"><b>If the picture looks wrong</b>PicoVideo keeps its settings until it is switched off. If a program changes them and doesn't put them back, later programs can look wrong: in the wrong mode, or in the wrong colors. Switch the TS2068 off and on again to start fresh.</div>
 </section>
 
 <section id="how">
@@ -753,12 +753,11 @@ main()
     <tr><th>Version</th><th>Status</th><th>What it has</th></tr>
     <tr><td class="k">V4 (4.0)</td><td>Stable, on production boards</td><td>TS2068 modes and ULAplus. Fixes stray pixels on boards with Atmel PLDs. Version register reads <code>$10</code>.</td></tr>
     <tr><td class="k">4.2</td><td>Beta</td><td>Adds Speccy Black, DF2 mirroring, readback, and modes 3, 5 and 7.</td></tr>
-    <tr><td class="k">4.3</td><td><strong>Broken: do not flash</strong></td><td>Fixes for native modes under ULAplus, the ULAplus border and 64-column colors; adds the first photo palette.</td></tr>
-    <tr><td class="k">4.4</td><td><strong>Broken: do not flash</strong></td><td>Ignores screen writes to a chunk while a TS-2068 Megabank bank owns it.</td></tr>
+    <tr><td class="k">4.3</td><td>Test build, not released publicly</td><td>Fixes for native modes under ULAplus, the ULAplus border and 64-column colors; adds the first photo palette.</td></tr>
+    <tr><td class="k">4.4</td><td>Test build, not released publicly</td><td>Ignores screen writes to a chunk while a TS-2068 Megabank bank owns it.</td></tr>
     <tr><td class="k">4.5</td><td>Beta; replaced by 4.6</td><td>Fixes both faults in 4.3 and 4.4. New photo palette: each normal color is a darker version of its BRIGHT color. Version register reads <code>$45</code>. Reads of registers 70–72 can return wrong values.</td></tr>
     <tr><td class="k">4.6</td><td>Beta, tested on one board</td><td>Answers every register read in time, so readback of the font, quad colors and video memory is reliable. Version register reads <code>$46</code>. Get <a href="https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.6"><code>picoTsVid-v4.6.uf2</code></a>.</td></tr>
   </table></div>
-  <div class="note"><b>Do not flash 4.3 or 4.4</b>They read the bus too soon, so screen writes land at the wrong addresses, the picture is corrupted and PicoVideo's registers don't work. They also lose writes to the video output, so the border and video mode never change and ULAplus never turns on; in 4.3, 64-column colors never change either. 4.5 and later fix both faults. If you flashed 4.3 or 4.4, or aren't sure what is on your board, flash 4.6, or V4 for the stable firmware. Also replace any 4.5 you built from source older than the <code>v4.5</code> tag: it can have the same faults. The version register can't be relied on to identify the broken builds.</div>
   <p>This manual describes 4.6. Everything in sections 6 and 8 to 13 needs 4.2 or later.</p>
   <h3>Flashing the Pico</h3>
   <p>You need a USB cable with a Micro-B plug for the Pico.</p>
@@ -769,7 +768,7 @@ main()
     <li>A drive called <code>RPI-RP2</code> appears on the computer. Drag the <code>.uf2</code> file onto it.</li>
     <li>The drive disappears by itself when the copy is finished. Unplug the cable and put the board back in the bus.</li>
   </ol>
-  <div class="note"><b>Check the result</b>The program in section 4 prints the firmware version, so you can see that the new firmware is running. It can't do that on the broken builds.</div>
+  <div class="note"><b>Check the result</b>The program in section 4 prints the firmware version, so you can see that the new firmware is running.</div>
   <h3>Building the firmware yourself</h3>
   <p>The source is in the <code>firmware/</code> folder of the repository. You need the Raspberry Pi Pico SDK, an <code>arm-none-eabi</code> GCC toolchain, CMake and Ninja:</p>
 <pre><code>cmake -S firmware -B build -G Ninja \

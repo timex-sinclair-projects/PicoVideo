@@ -173,7 +173,7 @@ pre code{background:none;padding:0;font-size:inherit}
     <li><strong>Effects timed to the beam:</strong> demos and games that change the border or colors partway down the screen show without those effects.</li>
     <li><strong>Paged banks:</strong> writes to the screen area while a dock or EXROM bank is paged over it don't show. Few programs do this.</li>
   </ul>
-  <div class="note"><b>If the picture looks wrong</b>PicoVideo keeps its settings until it is switched off. If a program leaves it in an odd mode or colors, switch the TS2068 off and on again. If the picture is corrupted or the border never changes, check for broken firmware (section 15).</div>
+  <div class="note"><b>If the picture looks wrong</b>PicoVideo keeps its settings until it is switched off. If a program leaves it in an odd mode or colors, switch the TS2068 off and on again.</div>
 </section>
 
 <section id="how">
@@ -427,12 +427,11 @@ OUT 48955,71: OUT 65339,2: OUT 65339,199: OUT 65339,59: OUT 65339,252</code></pr
     <tr><th>Version</th><th>Status</th><th>What it has</th></tr>
     <tr><td class="k">V4 (4.0)</td><td>Stable</td><td>TS2068 modes, ULAplus, Atmel PLD fix. Reads <code>$10</code>.</td></tr>
     <tr><td class="k">4.2</td><td>Beta</td><td>Adds Speccy Black, mirroring, readback and modes 3, 5 and 7.</td></tr>
-    <tr><td class="k">4.3</td><td><strong>Broken</strong></td><td>4.2 with fixes and the first photo palette.</td></tr>
-    <tr><td class="k">4.4</td><td><strong>Broken</strong></td><td>Adds TS-2068 Megabank support.</td></tr>
+    <tr><td class="k">4.3</td><td>Test build</td><td>4.2 with fixes and the first photo palette.</td></tr>
+    <tr><td class="k">4.4</td><td>Test build</td><td>Adds TS-2068 Megabank support.</td></tr>
     <tr><td class="k">4.5</td><td>Beta</td><td>Fixes 4.3 and 4.4; new photo palette. Reads <code>$45</code>. Readback of 70–72 unreliable.</td></tr>
     <tr><td class="k">4.6</td><td>Beta</td><td>Reliable readback. Reads <code>$46</code>.</td></tr>
   </table>
-  <div class="note"><b>Do not flash 4.3 or 4.4</b>They read the bus too soon, which corrupts the picture and breaks the registers, so the version check fails too. They also lose border, mode and ULAplus changes, and 4.3 loses 64-column colors. If you have one or aren't sure, flash 4.6, or V4 for the stable firmware. Replace any 4.5 built from source older than the <code>v4.5</code> tag, too.</div>
   <h3>Flashing the Pico</h3>
   <ol>
     <li>Switch the TS2068 off and take PicoVideo out of the bus.</li>
