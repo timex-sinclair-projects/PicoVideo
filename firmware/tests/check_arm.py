@@ -18,8 +18,8 @@ cycles between those accesses and fails if any gap is shorter than in V4_TIMING.
 This interprets the Thumb code in the ELF and feeds it bus cycles through a
 model of the GPIO pins, which follow a switch instantly. It needs only Python,
 no toolchain. It does not model the PLD, the Z80's signal timing, bus
-contention or the flash cache, and it sets no upper limit on how slow the loop
-may be: a pass is no substitute for a test on a board.
+contention or the flash cache. Its upper limits (LATEST) come from one board,
+so a pass is no substitute for a test on a board.
 """
 import re
 import struct
@@ -46,6 +46,16 @@ V4_TIMING = {
     'data after select': 72,    # PSEL seen to the last read of D7-D0
     'turnaround out': 6,        # buffer turned to the Z80 to the Pico driving
     'turnaround in': 6,         # Pico released to the buffer turned back
+}
+
+# The longest the loop may take, in CPU cycles. 4.5 worked out register reads
+# while the Z80 waited: on a board, answers that took 548-604 ns were often
+# wrong, while the version read at 516 ns never was. Every answer must now be on
+# the bus by then. After a screen write, the loop must be polling again before
+# the next one: a PUSH writes twice, about 850 ns apart.
+LATEST = {
+    'answer': 129,              # PSEL seen to the answer driven, any register
+    'screen write': 190,        # PSEL seen to polling for the next bus cycle
 }
 
 
@@ -450,6 +460,33 @@ def bus_timing(image):
     return {name: min(gaps) if gaps else None for name, gaps in found.items()}
 
 
+def latest_timing(image):
+    """The longest gap of each kind in LATEST, in CPU cycles."""
+    found = {name: [] for name in LATEST}
+
+    def measure(before, target):
+        cycles = before + poke(0x5f00, 0) + target + poke(0x5f00, 0)
+        n = len(before) + 2
+        events = Machine(image, cycles).run().bus.events
+        mine = [(at, kind, value) for m, at, kind, value in events if m == n]
+        following = [at for m, at, kind, value in events if m == n + 1]
+        return mine[0][0], mine, following[0]
+
+    index = register(0x44, 0) + register(0x45, 0)
+    for number in (0, 0x3f, 0x40, 0x41, 0x43, 0x46, 0x47, 0x48, 0x7f):
+        for target in (inp(DATA), inp(SELECT)):
+            start, events, _ = measure(index + out(SELECT, number), target)
+            driven = [at for at, kind, value in events
+                      if kind == 'write' and value[3] & DATA_PINS and not value[1] & DATA_PINS]
+            found['answer'].append(driven[0] - start if driven else None)
+    for before in (out(SELECT, 0), out(SELECT, 0x48), register(0x43, 1)):
+        for address in (0x4005, 0x6005):
+            start, _, following = measure(before, poke(address, 0xaa))
+            found['screen write'].append(following - start)
+
+    return {name: None if None in gaps else max(gaps) for name, gaps in found.items()}
+
+
 def check(image):
     failures = []
     total = 0
@@ -515,6 +552,28 @@ def check(image):
     reads('mode pin', register(0x41, 5) + inp(DATA), [5])
     reads('mirror state', register(0x43, 1) + inp(DATA), [1])
     reads('video memory', poke(0x4000, 0xc3) + out(SELECT, 0x48) + inp(DATA), [0xc3])
+    reads('palette entry', register(20, 0x5a) + out(SELECT, 20) + inp(DATA), [0x5a])
+    reads('unused register', out(SELECT, 0x42) + inp(DATA), [0xff])
+    reads('read after write, no reselect', register(0x43, 1) + inp(DATA), [1])
+
+    # Registers $46-$48 read through the index, which steps on after each read.
+    index = register(0x44, 0) + register(0x45, 0)
+    reads('video memory in turn', poke(0x4000, 170) + poke(0x4001, 85) + index
+          + out(SELECT, 0x48) + inp(DATA) + inp(DATA), [170, 85])
+    reads('screen write after selecting $48', index + out(SELECT, 0x48)
+          + poke(0x4000, 0x3c) + inp(DATA), [0x3c])
+    reads('mirrored write', register(0x43, 1) + poke(0x4000, 0x96) + register(0x43, 0)
+          + register(0x44, 0) + register(0x45, 0x20) + out(SELECT, 0x48) + inp(DATA), [0x96])
+    reads('video memory wraps', poke(0x4000, 0x77) + register(0x44, 0xff)
+          + register(0x45, 0xbf) + out(SELECT, 0x48) + inp(DATA) + inp(DATA), [0, 0x77])
+    reads('quad colors in turn', index + out(SELECT, 0x47) + inp(DATA) * 5,
+          [0, 0xff, 0xe0, 0xfc, 0])
+    reads('quad color written', index + register(0x47, 0x66) + index
+          + out(SELECT, 0x47) + inp(DATA), [0x66])
+    reads('font in turn', register(0x44, 0xff) + register(0x45, 0x07)
+          + register(0x46, 0x3c) + register(0x44, 0xff) + register(0x45, 0x07)
+          + out(SELECT, 0x46) + inp(DATA) + inp(DATA),
+          [0x3c, image.memory[image.symbols['vgaFont']]])
 
     measured = bus_timing(image)
     for name, least in V4_TIMING.items():
@@ -526,6 +585,16 @@ def check(image):
         elif got < least:
             failures.append(f'timing, {name}: {got * NS_PER_CYCLE} ns, '
                             f'V4 allows {least * NS_PER_CYCLE} ns')
+
+    for name, most in LATEST.items():
+        total += 1
+        got = latest_timing(image)[name]
+        if got is None:
+            failures.append(f'timing, {name}: not found, so busMain no longer '
+                            'answers the way this check expects')
+        elif got > most:
+            failures.append(f'timing, {name}: {got * NS_PER_CYCLE} ns, '
+                            f'at most {most * NS_PER_CYCLE} ns allowed')
 
     return total, failures
 
