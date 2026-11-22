@@ -17,21 +17,27 @@ individual attributes, and 80 columns with a font you can load.
 | **4.5** | Beta. Everything in 4.4, plus a new photo palette: each normal color is now a darker version of its BRIGHT color, at about half its light ([details](docs/photo-palette.md)). Not yet tested on hardware. | Build from [`firmware/`](firmware/) as a Debug build (see below); no release yet |
 
 > [!CAUTION]
-> **Do not flash the released 4.3 or 4.4.** With either, the border never
-> changes color, the video mode never changes (so the second display file,
-> extended color, 64-column and modes 3, 5 and 7 can't be displayed) and
-> ULAplus never turns on. In 4.3, 64-column colors never change either.
+> **Do not flash the released 4.3 or 4.4, or any Release build of 4.5.**
+> They have two separate faults:
 >
-> If you flashed one, flash V4, or [4.2](https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.2) if you
-> need its beta features. To see which version you have, run
-> `OUT 48955,127: PRINT IN 65339`: 4.3 prints `67` and 4.4 prints `68`.
+> - They read the bus too soon, so screen writes land at the wrong addresses,
+>   the picture is corrupted and PicoVideo's registers don't work.
+> - They lose writes to the video output, so the border and video mode never
+>   change and ULAplus never turns on. In 4.3, 64-column colors never change
+>   either.
 >
-> A Release build of 4.5, the default, has the same fault unless it includes
-> the fix in [pull request 14](https://github.com/timex-sinclair-projects/PicoVideo/pull/14). When you build it, add
-> `-DCMAKE_BUILD_TYPE=Debug` to the `cmake` configure command.
+> If you flashed one, or aren't sure what is on your board, flash V4, or
+> [4.2](https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.2) if you need its beta features.
+> The version register can't be relied on to identify the broken images.
 >
-> The fault and the Debug workaround were checked by running the compiled
-> firmware in a simulator, not on a board.
+> There is no tested fix yet. [Pull request 14](https://github.com/timex-sinclair-projects/PicoVideo/pull/14)
+> fixes only the lost writes: a Release build from it did not work on a board
+> on 22 Nov 2026. If you build 4.5, add `-DCMAKE_BUILD_TYPE=Debug` to the
+> `cmake` configure command. That gives V4's bus timing, but it hasn't been
+> tested on a board.
+>
+> Both faults were found by analyzing and simulating the compiled firmware.
+> The timing fault is not yet confirmed as the cause of the failed board test.
 
 Older builds (V2.0, V3.0 RC1, 4.2) are on the [Releases page](https://github.com/timex-sinclair-projects/PicoVideo/releases) too.
 
