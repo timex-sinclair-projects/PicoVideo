@@ -44,7 +44,8 @@ How the released images were built:
 |---|---|---|---|
 | V4 and 4.2 | 1.5.1, on Windows | Debug | |
 | 4.3 and 4.4 | 2.1.1, GCC 13.3 | Release | **Broken: don't use these images.** They read the bus too soon, and lose border, video mode and ULAplus writes. |
-| 4.5 | 2.1.1, GCC 13.3 | Release | `busMain.c` at `-Og`. The released image was tested on one board. |
+| 4.5 | 2.1.1, GCC 13.3 | Release | `busMain.c` at `-Og`. The released image was tested on one board; its reads of `$46`–`$48` are too slow. |
+| 4.6 | 2.1.1, GCC 13.3 | Release | Register reads answered in time. A build of this change was tested on one board. |
 
 4.3 and 4.4 have two separate faults, both fixed in the source:
 
@@ -62,8 +63,8 @@ have only been checked in simulation.
 
 The build embeds the date, so to reproduce an image byte for byte use the same
 SDK, compiler and build type, and set `SOURCE_DATE_EPOCH` to the day it was
-built. For 4.5, build tag `v4.5` with `SOURCE_DATE_EPOCH=1795348800`
-(22 Nov 2026). The checks here are not hardware tests: try an image on a real
+built. For 4.5 and 4.6, build tag `v4.5` or `v4.6` with
+`SOURCE_DATE_EPOCH=1795348800` (22 Nov 2026). The checks here are not hardware tests: try an image on a real
 board before you share it.
 
 ### Build options

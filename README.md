@@ -14,7 +14,8 @@ individual attributes, and 80 columns with a font you can load.
 | **V4** | Stable. Shipped on production boards. Fixes stray "rogue" pixels on boards with the faster Atmel PLDs. | [`V4/picoTsVid.uf2`](V4/picoTsVid.uf2) |
 | **4.3** | **Broken: do not flash.** Everything in 4.2 (Speccy Black, DF2 writes through DF1, video modes 3, 5 and 7: see [features](docs/features.md)), plus bug fixes and the first photo palette. | [Releases](https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.3) |
 | **4.4** | **Broken: do not flash.** Everything in 4.3, plus support for the [TS-2068 Megabank](https://github.com/timex-sinclair-projects/TS-2068-Megabank): it ignores screen writes that go to a Megabank bank. | [Releases](https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.4) |
-| **4.5** | Beta. Everything in 4.4, plus a new photo palette: each normal color is now a darker version of its BRIGHT color, at about half its light ([details](docs/photo-palette.md)). Fixes both faults in 4.3 and 4.4. [Tested on one board](#what-was-tested-in-45). | [Releases](https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.5) |
+| **4.5** | Beta. Everything in 4.4, plus a new photo palette: each normal color is now a darker version of its BRIGHT color, at about half its light ([details](docs/photo-palette.md)). Fixes both faults in 4.3 and 4.4. Replaced by 4.6: reads of registers `$46`–`$48` can return wrong values. | [Releases](https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.5) |
+| **4.6** | Beta. Everything in 4.5, with register reads fixed: reading back the font, quad colors and video memory now returns the right values. [Tested on one board](#what-was-tested-in-46). | [Releases](https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.6) |
 
 > [!CAUTION]
 > **Do not flash the released 4.3 or 4.4.** They have two separate faults:
@@ -25,8 +26,9 @@ individual attributes, and 80 columns with a font you can load.
 >   change and ULAplus never turns on. In 4.3, 64-column colors never change
 >   either.
 >
-> [4.5](https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.5) fixes both.
-> If you flashed 4.3 or 4.4, or aren't sure what is on your board, flash 4.5,
+> 4.5 and later fix both.
+> If you flashed 4.3 or 4.4, or aren't sure what is on your board, flash
+> [4.6](https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.6),
 > or V4 for the stable firmware. The version register can't be relied on to
 > identify the broken images.
 >
@@ -44,15 +46,21 @@ To flash the board, follow [V4/readme.md](V4/readme.md). In short: remove the
 board, hold **BOOTSEL** on the Pico while you plug in USB, then drag the
 `.uf2` file onto the `RPI-RP2` drive that appears.
 
-### What was tested in 4.5
+### What was tested in 4.6
 
-The released `picoTsVid-v4.5.uf2` was tested on one board on 22 Nov 2026:
+On one board, 22 Nov 2026:
 
-- The manual's 10 [example programs](docs/manual/examples/) all worked.
-- Border stripes showed during a tape SAVE. (With a TS-Pico fitted, use
-  `SAVE "tpi:tape"` first: a save to the SD card makes no stripes.)
+- A build of the 4.6 change read every register back correctly, passed a
+  demo's 12 feature self-tests and ran a program that draws to the screen
+  quickly. The released `picoTsVid-v4.6.uf2` differs from that build only in
+  its version number.
+- On the released 4.5, the manual's 10
+  [example programs](docs/manual/examples/) all worked, and border stripes
+  showed during a tape SAVE. (With a TS-Pico fitted, use `SAVE "tpi:tape"`
+  first: a save to the SD card makes no stripes.) 4.5 read registers
+  `$46`–`$48` wrongly on that board, which is what 4.6 fixes.
 
-Not tested on a board: mode 1 (second display file), port `$F4` and Megabank
+Not tested on a board: the released 4.6 image itself, mode 1 (second display file), port `$F4` and Megabank
 paging, other boards, non-default builds (including the original palette and
 Debug), and compatibility with a range of existing software. Please
 [report problems](https://github.com/timex-sinclair-projects/PicoVideo/issues).
@@ -67,7 +75,7 @@ Debug), and compatibility with a range of existing software. Please
 | [`docs/`](docs/) | Programmer's reference for the 4.2 features. |
 | [`examples/`](examples/) | 80-column text routines for the TS2068 (z88dk C and Z80 assembler). |
 | [`V4/`](V4/) | The V4 firmware image and flashing guide, kept at this path so existing links keep working. |
-| [`docs/manual/`](docs/manual/) | User and programmer's manual for 4.5: screen HTML, printable PDF and booklet PDF. |
+| [`docs/manual/`](docs/manual/) | User and programmer's manual for 4.6: screen HTML, printable PDF and booklet PDF. |
 | [`PicoVideo manual.pdf`](PicoVideo%20manual.pdf) | Earlier user manual, for V4. |
 
 ## History
