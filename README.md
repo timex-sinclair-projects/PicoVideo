@@ -17,29 +17,6 @@ individual attributes, and 80 columns with a font you can load.
 | **4.5** | Beta. Everything in 4.4, plus a new photo palette: each normal color is now a darker version of its BRIGHT color, at about half its light ([details](docs/photo-palette.md)). Fixes both faults in 4.3 and 4.4. Replaced by 4.6: reads of registers `$46`–`$48` can return wrong values. | [Releases](https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.5) |
 | **4.6** | Beta. Everything in 4.5, with register reads fixed: reading back the font, quad colors and video memory now returns the right values. [Tested on one board](#what-was-tested-in-46). | [Releases](https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.6) |
 
-> [!CAUTION]
-> **Do not flash the released 4.3 or 4.4.** They have two separate faults:
->
-> - They read the bus too soon, so screen writes land at the wrong addresses,
->   the picture is corrupted and PicoVideo's registers don't work.
-> - They lose writes to the video output, so the border and video mode never
->   change and ULAplus never turns on. In 4.3, 64-column colors never change
->   either.
->
-> 4.5 and later fix both.
-> If you flashed 4.3 or 4.4, or aren't sure what is on your board, flash
-> [4.6](https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.6),
-> or V4 for the stable firmware. The version register can't be relied on to
-> identify the broken images.
->
-> If you built 4.5 yourself from source older than the `v4.5` tag, replace it
-> too: such a build can have the same faults and the same version number.
->
-> The faults were found by analyzing and simulating the compiled firmware.
-> 4.3 and 4.4 themselves haven't been tested on a board. A build of 4.5 with
-> only the lost writes fixed failed on a board, and the same source with the
-> timing fix added worked.
-
 Older builds (V2.0, V3.0 RC1, 4.2) are on the [Releases page](https://github.com/timex-sinclair-projects/PicoVideo/releases) too.
 
 To flash the board, follow [V4/readme.md](V4/readme.md). In short: remove the
