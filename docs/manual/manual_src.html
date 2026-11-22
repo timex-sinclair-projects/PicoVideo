@@ -416,7 +416,7 @@ OUT 48955,71: OUT 65339,2: OUT 65339,199: OUT 65339,59: OUT 65339,252</code></pr
 <pre><code>color = 32*green + 4*red + blue     green 0-7, red 0-7, blue 0-3</code></pre>
   <p>Some values: black 0, blue 3, red 28, magenta 31, green 224, cyan 227, yellow 252, white 255, mid gray 146.</p>
   <h3>Example files</h3>
-  <p>All the programs in this manual are in <code>docs/manual/examples/</code> in the repository, as source and as <code>.tap</code> files. Every one was run on an emulated TS2068, and every screenshot here was made by feeding the emulator's memory through PicoVideo's own drawing code.</p>
+  <p>All the programs in this manual are in <code>docs/manual/examples/</code> in the repository, as source and as <code>.tap</code> files. All 10 <code>.tap</code> programs were run on an emulated TS2068 and on a real one with firmware 4.5, and every screenshot here was made by feeding the emulator's memory through PicoVideo's own drawing code.</p>
   <div class="tbl"><table>
     <tr><th>File</th><th>Shows</th><th>Section</th></tr>
     <tr><td class="mono">detect.bas</td><td>Finding the board and its version</td><td>4</td></tr>
@@ -442,9 +442,9 @@ OUT 48955,71: OUT 65339,2: OUT 65339,199: OUT 65339,59: OUT 65339,252</code></pr
     <tr><td class="k">4.2</td><td>Beta</td><td>Adds Speccy Black, DF2 mirroring, readback, and modes 3, 5 and 7.</td></tr>
     <tr><td class="k">4.3</td><td><strong>Broken: do not flash</strong></td><td>Fixes for native modes under ULAplus, the ULAplus border and 64-column colors; adds the first photo palette.</td></tr>
     <tr><td class="k">4.4</td><td><strong>Broken: do not flash</strong></td><td>Ignores screen writes to a chunk while a TS-2068 Megabank bank owns it.</td></tr>
-    <tr><td class="k">4.5</td><td>Beta</td><td>New photo palette: each normal color is a darker version of its BRIGHT color. Version register reads <code>$45</code>.</td></tr>
+    <tr><td class="k">4.5</td><td>Beta, tested on one board</td><td>Fixes both faults in 4.3 and 4.4. New photo palette: each normal color is a darker version of its BRIGHT color. Version register reads <code>$45</code>. Get <a href="https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.5"><code>picoTsVid-v4.5.uf2</code></a>.</td></tr>
   </table></div>
-  <div class="note"><b>Do not flash 4.3, 4.4 or any Release build of 4.5</b>They read the bus too soon, so screen writes land at the wrong addresses, the picture is corrupted and PicoVideo's registers don't work. They also lose writes to the video output, so the border and video mode never change and ULAplus never turns on; in 4.3, 64-column colors never change either. If you flashed one, or aren't sure what is on your board, flash V4, or 4.2 if you need its beta features. The version register can't be relied on to identify the broken images. These faults were found by analyzing and simulating the compiled firmware, and the timing fault is not yet confirmed on a board.</div>
+  <div class="note"><b>Do not flash 4.3 or 4.4</b>They read the bus too soon, so screen writes land at the wrong addresses, the picture is corrupted and PicoVideo's registers don't work. They also lose writes to the video output, so the border and video mode never change and ULAplus never turns on; in 4.3, 64-column colors never change either. 4.5 fixes both faults. If you flashed 4.3 or 4.4, or aren't sure what is on your board, flash 4.5, or V4 for the stable firmware. Also replace any 4.5 you built from source older than the <code>v4.5</code> tag: it can have the same faults. The version register can't be relied on to identify the broken builds.</div>
   <p>This manual describes 4.5. Everything in sections 6 and 8 to 13 needs 4.2 or later.</p>
   <h3>Flashing the Pico</h3>
   <p>You need a USB cable with a Micro-B plug for the Pico.</p>
@@ -459,17 +459,15 @@ OUT 48955,71: OUT 65339,2: OUT 65339,199: OUT 65339,59: OUT 65339,252</code></pr
   <h3>Building the firmware yourself</h3>
   <p>The source is in the <code>firmware/</code> folder of the repository. You need the Raspberry Pi Pico SDK, an <code>arm-none-eabi</code> GCC toolchain, CMake and Ninja:</p>
 <pre><code>cmake -S firmware -B build -G Ninja \
-  -DCMAKE_BUILD_TYPE=Debug \
   -DPICO_SDK_PATH=/path/to/pico-sdk
 ninja -C build</code></pre>
-  <p>Keep <code>-DCMAKE_BUILD_TYPE=Debug</code>. A Release build, the default, doesn't work, and neither does one with the partial fix in <a href="https://github.com/timex-sinclair-projects/PicoVideo/pull/14">pull request 14</a>: that was flashed on 22 Nov 2026 and failed. The Debug build has V4's bus timing, but hasn't been tested on a board.</p>
-  <p>That makes <code>build/picoTsVid.uf2</code>. The build uses the photo palette (section 6). Add <code>-DPICOVIDEO_PHOTO_PALETTE=OFF</code> to the <code>cmake</code> line for the original colors.</p>
+  <p>That makes <code>build/picoTsVid.uf2</code>. The build uses the photo palette (section 6). Add <code style="white-space:nowrap">-DPICOVIDEO_PHOTO_PALETTE=OFF</code> to the <code>cmake</code> line for the original colors.</p>
 </section>
 
 <section id="about">
   <h2><span class="n">16</span>About this edition</h2>
   <p>PicoVideo was designed and programmed by Jeff Burrell, building on V. Hunter Adams' PIO VGA driver for the RP2040. The photo palette and several 4.3 fixes are by jon0x0. Thanks to the TS-Pico team for their help and support. The hardware, PLD and firmware are open source under the MIT License, published by Timex Sinclair Projects at <a href="https://github.com/timex-sinclair-projects/PicoVideo">github.com/timex-sinclair-projects/PicoVideo</a>.</p>
-  <p>This manual was written in 2026 for firmware 4.5, from the firmware source rather than earlier documents. It replaces the earlier user manual, which covered firmware V4. Each register, address and mode it describes was checked against the code. Firmware 4.5 is a beta and hasn't yet been tested on hardware; if your board does something this manual doesn't describe, report it on the project's GitHub page.</p>
+  <p>This manual was written in 2026 for firmware 4.5, from the firmware source rather than earlier documents. It replaces the earlier user manual, which covered firmware V4. Each register, address and mode it describes was checked against the code. Firmware 4.5 is a beta. The released image was tested on one board on 22 Nov 2026: the 10 example programs worked, and border stripes showed during a tape <code>SAVE</code>. Mode 1, port <code>$F4</code> and Megabank paging, other boards, non-default builds (including the original palette and Debug) and compatibility with a range of existing software haven't been tested on a board. If your board does something this manual doesn't describe, report it on the project's GitHub page.</p>
   <p>ULAplus is a ZX Spectrum standard. PicoVideo follows its palette registers (0–64); the registers from 65 up are PicoVideo's own.</p>
 </section>
 
