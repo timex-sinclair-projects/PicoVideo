@@ -173,7 +173,7 @@ pre code{background:none;padding:0;font-size:inherit}
     <li><strong>Effects timed to the beam:</strong> demos and games that change the border or colors partway down the screen show without those effects.</li>
     <li><strong>Paged banks:</strong> writes to the screen area while a dock or EXROM bank is paged over it don't show. Few programs do this.</li>
   </ul>
-  <div class="note"><b>If the picture looks wrong</b>PicoVideo keeps its settings until it is switched off. If a program leaves it in an odd mode or colors, switch the TS2068 off and on again.</div>
+  <div class="note"><b>If the picture looks wrong</b>PicoVideo keeps its settings until it is switched off. If a program leaves it in an odd mode or colors, switch the TS2068 off and on again. If the border never changes, check for broken firmware 4.3 or 4.4 (section 15).</div>
 </section>
 
 <section id="how">
@@ -422,29 +422,29 @@ OUT 48955,71: OUT 65339,2: OUT 65339,199: OUT 65339,59: OUT 65339,252</code></pr
 
 <section id="firmware">
   <h2><span class="n">15</span>Updating the firmware</h2>
-  <p>PicoVideo's behavior lives in the Pico's firmware, a single <code>.uf2</code> file, published on the project's GitHub releases page.</p>
+  <p>The firmware is a <code>.uf2</code> file from the project's GitHub releases page. This manual describes 4.5; sections 6 and 8–13 need 4.2 or later.</p>
   <table>
     <tr><th>Version</th><th>Status</th><th>What it has</th></tr>
-    <tr><td class="k">V4 (4.0)</td><td>Stable</td><td>TS2068 modes and ULAplus; fixes stray pixels with Atmel PLDs. Version reads <code>$10</code>.</td></tr>
+    <tr><td class="k">V4 (4.0)</td><td>Stable</td><td>TS2068 modes, ULAplus, Atmel PLD fix. Reads <code>$10</code>.</td></tr>
     <tr><td class="k">4.2</td><td>Beta</td><td>Adds Speccy Black, mirroring, readback and modes 3, 5 and 7.</td></tr>
-    <tr><td class="k">4.3</td><td>Beta</td><td>Fixes native modes under ULAplus, the ULAplus border and 64-column colors; first photo palette. Version reads <code>$43</code>.</td></tr>
-    <tr><td class="k">4.4</td><td>Beta</td><td>Ignores screen writes to a chunk a TS-2068 Megabank bank owns. Version reads <code>$44</code>.</td></tr>
-    <tr><td class="k">4.5</td><td>Beta</td><td>New photo palette: normal colors darker than BRIGHT. Version reads <code>$45</code>.</td></tr>
+    <tr><td class="k">4.3</td><td><strong>Broken</strong></td><td>4.2 with fixes and the first photo palette.</td></tr>
+    <tr><td class="k">4.4</td><td><strong>Broken</strong></td><td>Adds TS-2068 Megabank support.</td></tr>
+    <tr><td class="k">4.5</td><td>Beta</td><td>New photo palette. Version reads <code>$45</code>.</td></tr>
   </table>
-  <p>This manual describes 4.5. Sections 6 and 8–13 need 4.2 or later.</p>
+  <div class="note"><b>Do not flash the released 4.3 or 4.4</b>The border and video mode never change and ULAplus never turns on; in 4.3, 64-column colors never change either. Flash V4, or 4.2 for its beta features. <code>OUT 48955,127: PRINT IN 65339</code> prints 67 for 4.3, 68 for 4.4. Found in simulation, not on a board.</div>
   <h3>Flashing the Pico</h3>
   <ol>
     <li>Switch the TS2068 off and take PicoVideo out of the bus.</li>
     <li>Hold down <kbd>BOOTSEL</kbd> on the Pico while you plug a Micro-B USB cable into the Pico and your computer, then let go.</li>
-    <li>Drag the <code>.uf2</code> file onto the <code>RPI-RP2</code> drive that appears.</li>
-    <li>When the drive disappears by itself, unplug the cable and put the board back.</li>
+    <li>Drag the <code>.uf2</code> onto the <code>RPI-RP2</code> drive. When it disappears, unplug the cable and put the board back.</li>
   </ol>
-  <p>The program in section 4 prints the version, so you can check it.</p>
   <h3>Building it yourself</h3>
-  <p>You need the Pico SDK, an <code>arm-none-eabi</code> GCC toolchain, CMake and Ninja:</p>
-<pre><code>cmake -S firmware -B build -G Ninja -DPICO_SDK_PATH=/path/to/pico-sdk
+  <p>You need the Pico SDK, <code>arm-none-eabi</code> GCC, CMake and Ninja:</p>
+<pre><code>cmake -S firmware -B build -G Ninja \
+  -DCMAKE_BUILD_TYPE=Debug \
+  -DPICO_SDK_PATH=/path/to/pico-sdk
 ninja -C build</code></pre>
-  <p>That makes <code>build/picoTsVid.uf2</code> with the photo palette. Add <code>-DPICOVIDEO_PHOTO_PALETTE=OFF</code> to the <code>cmake</code> line for the original colors.</p>
+  <p>Keep <code>Debug</code>: a Release build has the same fault unless it includes the fix in pull request 14. The result is <code>build/picoTsVid.uf2</code>. For the original colors, add <code>-DPICOVIDEO_PHOTO_PALETTE=OFF</code>.</p>
 </section>
 
 <section id="about">
@@ -465,7 +465,7 @@ ninja -C build</code></pre>
     <tr><td class="mono">mirror.bas</td><td>Mirroring and readback</td><td class="num">12</td></tr>
     <tr><td class="mono">pinmode.bas</td><td>Pinning the mode</td><td class="num">13</td></tr>
   </table>
-  <p>This manual was written in 2026 for firmware 4.5, from the firmware source, and replaces the earlier user manual for V4. Firmware 4.5 is a beta: if your board does something this manual doesn't describe, report it on the project's GitHub page.</p>
+  <p>This manual was written in 2026 for firmware 4.5, from the firmware source, and replaces the earlier user manual for V4. Firmware 4.5 is a beta, not yet tested on hardware: if your board does something this manual doesn't describe, report it on the project's GitHub page.</p>
   <p>ULAplus is a ZX Spectrum standard. PicoVideo follows its palette registers (0–64); registers 65 and up are PicoVideo's own.</p>
   <p><strong>PicoVideo</strong> was designed and programmed by Jeff Burrell, building on V. Hunter Adams' PIO VGA driver for the RP2040. Photo palette and 4.3 fixes by jon0x0. Thanks to the TS-Pico team.</p>
   <p>Open source under the MIT License, published by Timex Sinclair Projects: github.com/timex-sinclair-projects/PicoVideo.</p>

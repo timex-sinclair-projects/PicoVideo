@@ -152,7 +152,7 @@ footer{padding-block:28px;font-size:14px;color:var(--muted)}
     <li><strong>Effects timed to the beam.</strong> Some demos and games change the border or the colors partway down the screen, in time with the television's beam. PicoVideo shows the screen without those effects.</li>
     <li><strong>Drawing into a paged bank.</strong> A program that writes to the screen area while it has a dock or EXROM bank paged over it, or a TS-2068 Megabank bank, isn't drawing on the screen, and PicoVideo ignores those writes too. Most programs never do this.</li>
   </ul>
-  <div class="note"><b>If the picture looks wrong</b>PicoVideo keeps its settings until it is switched off. If a program changes them and doesn't put them back, later programs can look wrong: in the wrong mode, or in the wrong colors. Switch the TS2068 off and on again to start fresh.</div>
+  <div class="note"><b>If the picture looks wrong</b>PicoVideo keeps its settings until it is switched off. If a program changes them and doesn't put them back, later programs can look wrong: in the wrong mode, or in the wrong colors. Switch the TS2068 off and on again to start fresh. If the border never changes color at all, check for firmware 4.3 or 4.4, which are broken (section 15).</div>
 </section>
 
 <section id="how">
@@ -440,10 +440,11 @@ OUT 48955,71: OUT 65339,2: OUT 65339,199: OUT 65339,59: OUT 65339,252</code></pr
     <tr><th>Version</th><th>Status</th><th>What it has</th></tr>
     <tr><td class="k">V4 (4.0)</td><td>Stable, on production boards</td><td>TS2068 modes and ULAplus. Fixes stray pixels on boards with Atmel PLDs. Version register reads <code>$10</code>.</td></tr>
     <tr><td class="k">4.2</td><td>Beta</td><td>Adds Speccy Black, DF2 mirroring, readback, and modes 3, 5 and 7.</td></tr>
-    <tr><td class="k">4.3</td><td>Beta</td><td>Fixes for native modes under ULAplus, the ULAplus border and 64-column colors; adds the first photo palette. Version register reads <code>$43</code>.</td></tr>
-    <tr><td class="k">4.4</td><td>Beta</td><td>Ignores screen writes to a chunk while a TS-2068 Megabank bank owns it. Version register reads <code>$44</code>.</td></tr>
+    <tr><td class="k">4.3</td><td><strong>Broken: do not flash</strong></td><td>Fixes for native modes under ULAplus, the ULAplus border and 64-column colors; adds the first photo palette. Version register reads <code>$43</code>.</td></tr>
+    <tr><td class="k">4.4</td><td><strong>Broken: do not flash</strong></td><td>Ignores screen writes to a chunk while a TS-2068 Megabank bank owns it. Version register reads <code>$44</code>.</td></tr>
     <tr><td class="k">4.5</td><td>Beta</td><td>New photo palette: each normal color is a darker version of its BRIGHT color. Version register reads <code>$45</code>.</td></tr>
   </table></div>
+  <div class="note"><b>Do not flash the released 4.3 or 4.4</b>With either, the border never changes color, the video mode never changes (so the second display file, extended color, 64-column and modes 3, 5 and 7 can't be displayed) and ULAplus never turns on. In 4.3, 64-column colors never change either. If you flashed one, flash V4, or 4.2 if you need its beta features. To see which version you have, run <code>OUT 48955,127: PRINT IN 65339</code>: 4.3 prints 67 and 4.4 prints 68. The fault was found by running the compiled firmware in a simulator, not on a board.</div>
   <p>This manual describes 4.5. Everything in sections 6 and 8 to 13 needs 4.2 or later.</p>
   <h3>Flashing the Pico</h3>
   <p>You need a USB cable with a Micro-B plug for the Pico.</p>
@@ -457,15 +458,18 @@ OUT 48955,71: OUT 65339,2: OUT 65339,199: OUT 65339,59: OUT 65339,252</code></pr
   <div class="note"><b>Check the result</b>The program in section 4 prints the firmware version, so you can see that the new firmware is running.</div>
   <h3>Building the firmware yourself</h3>
   <p>The source is in the <code>firmware/</code> folder of the repository. You need the Raspberry Pi Pico SDK, an <code>arm-none-eabi</code> GCC toolchain, CMake and Ninja:</p>
-<pre><code>cmake -S firmware -B build -G Ninja -DPICO_SDK_PATH=/path/to/pico-sdk
+<pre><code>cmake -S firmware -B build -G Ninja \
+  -DCMAKE_BUILD_TYPE=Debug \
+  -DPICO_SDK_PATH=/path/to/pico-sdk
 ninja -C build</code></pre>
+  <p>Keep <code>-DCMAKE_BUILD_TYPE=Debug</code>. A Release build, the default, has the same fault as 4.3 and 4.4 unless the source includes the fix in <a href="https://github.com/timex-sinclair-projects/PicoVideo/pull/14">pull request 14</a>.</p>
   <p>That makes <code>build/picoTsVid.uf2</code>. The build uses the photo palette (section 6). Add <code>-DPICOVIDEO_PHOTO_PALETTE=OFF</code> to the <code>cmake</code> line for the original colors.</p>
 </section>
 
 <section id="about">
   <h2><span class="n">16</span>About this edition</h2>
   <p>PicoVideo was designed and programmed by Jeff Burrell, building on V. Hunter Adams' PIO VGA driver for the RP2040. The photo palette and several 4.3 fixes are by jon0x0. Thanks to the TS-Pico team for their help and support. The hardware, PLD and firmware are open source under the MIT License, published by Timex Sinclair Projects at <a href="https://github.com/timex-sinclair-projects/PicoVideo">github.com/timex-sinclair-projects/PicoVideo</a>.</p>
-  <p>This manual was written in 2026 for firmware 4.5, from the firmware source rather than earlier documents. It replaces the earlier user manual, which covered firmware V4. Each register, address and mode it describes was checked against the code. Firmware 4.4 is a beta and hasn't yet been tested on every board; if your board does something this manual doesn't describe, report it on the project's GitHub page.</p>
+  <p>This manual was written in 2026 for firmware 4.5, from the firmware source rather than earlier documents. It replaces the earlier user manual, which covered firmware V4. Each register, address and mode it describes was checked against the code. Firmware 4.5 is a beta and hasn't yet been tested on hardware; if your board does something this manual doesn't describe, report it on the project's GitHub page.</p>
   <p>ULAplus is a ZX Spectrum standard. PicoVideo follows its palette registers (0–64); the registers from 65 up are PicoVideo's own.</p>
 </section>
 
