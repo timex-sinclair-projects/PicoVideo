@@ -26,7 +26,15 @@ ninja -C build
 ```
 
 This produces `build/picoTsVid.uf2`, a Release build unless you set
-`CMAKE_BUILD_TYPE`. Before you flash or share it, check the linked bus handler:
+`CMAKE_BUILD_TYPE`.
+
+> [!CAUTION]
+> **Don't flash a Release, RelWithDebInfo or MinSizeRel build of this branch.**
+> They read the bus too soon. A Release build of it did not work on a board on
+> 22 Nov 2026. A Debug build has V4's bus timing, but hasn't been tested on a
+> board. `check_arm.py` passes all of them, because it doesn't model timing.
+
+To check the linked bus handler for lost writes:
 
 ```bash
 python3 firmware/tests/check_arm.py build/picoTsVid.elf
@@ -37,11 +45,18 @@ How the released images were built:
 | Release | Pico SDK | Build type | Note |
 |---|---|---|---|
 | V4 and 4.2 | 1.5.1, on Windows | Debug | |
-| 4.3 and 4.4 | 2.1.1, GCC 13.3 | Release | **Broken: don't use these images.** Border, video mode and ULAplus changes never reach the video core. |
+| 4.3 and 4.4 | 2.1.1, GCC 13.3 | Release | **Broken: don't use these images.** They read the bus too soon, and lose border, video mode and ULAplus writes. |
 
-4.3 and 4.4 were built without a memory barrier in `busMain()`. That function
-never returns, so the compiler dropped its stores to globals that only the
-video core reads. Building those tags as Debug avoids the fault.
+4.3 and 4.4 have two separate faults:
+
+- **Bus timing.** The repeated reads that give the buffers time to switch
+  compile to back-to-back instructions. The address high byte is last sampled
+  12 ns after the switch, against 44 ns in V4 and 4.2, so it reads as the low
+  byte. This branch does not fix that. It was found by analyzing the linked
+  code and hasn't yet been confirmed on a board.
+- **Lost writes.** `busMain()` never returns, so without a memory barrier the
+  compiler dropped its stores to globals that only the video core reads. The
+  barrier on this branch fixes that in simulation.
 
 The build embeds the date, so to reproduce an image byte for byte use the same
 SDK, compiler and build type, and set `SOURCE_DATE_EPOCH` to the day it was
@@ -81,4 +96,5 @@ python3 firmware/tests/check_arm.py build/picoTsVid.elf
 
 It runs the linked `busMain()` in a small Cortex-M0+ interpreter, feeds it bus
 cycles and checks what the video core would find in RAM. It needs only Python.
-It doesn't model the PLD or signal timing.
+It doesn't model the PLD or signal timing, so it passes builds that read the
+bus too soon to work on a board.
