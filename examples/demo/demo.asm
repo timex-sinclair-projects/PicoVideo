@@ -1,4 +1,4 @@
-; picovideo-demo: every feature of PicoVideo firmware 4.5, on a fixed timeline
+; picovideo-demo: every feature of PicoVideo firmware 4.6, on a fixed timeline
 ; for recording. Build with  python3 build.py
 ;
 ; It takes over the TS2068: interrupts go to its own 60 Hz clock, and nothing
@@ -605,7 +605,7 @@ checkList:
 chkVersion:
         ld      d,R_VERSION
         call    pvRead
-        cp      $45
+        cp      $46
         ret
 
 chkSelect:

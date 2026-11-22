@@ -77,7 +77,7 @@ def main():
                    cwd=HERE, check=True)
 
     (BUILD / 'loader.bas').write_text(
-        '10 REM PicoVideo 4.5 feature demo\n'
+        '10 REM PicoVideo 4.6 feature demo\n'
         '20 BORDER 0: PAPER 0: INK 7: CLEAR 32767\n'
         '30 PRINT "Loading the PicoVideo demo..."\n'
         '40 LOAD "" CODE 32768\n'

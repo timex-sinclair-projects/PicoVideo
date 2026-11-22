@@ -171,7 +171,7 @@ def ready():
     s = Screen()
     s.paint(2, 0, 4, 32, attr(WHITE, BLUE, BRIGHT))
     s.big(2, 'PicoVideo')
-    s.center(4, 'feature demo for firmware 4.5')
+    s.center(4, 'feature demo for firmware 4.6')
     s.center(9, 'Runs by itself in six minutes')
     s.center(12, 'Start recording, then press', attr(CYAN, 0, BRIGHT))
     s.big(14, 'SPACE', attr(YELLOW, 0, BRIGHT))
@@ -187,7 +187,7 @@ def opening():
     q.rect(12, 52, 232, 88, 0)
     q.text(60, 'PicoVideo', 3, 3)
     q.text(94, 'TS2068 + VGA', 3, 2)
-    q.text(120, 'firmware 4.5 feature demo', 3)
+    q.text(120, 'firmware 4.6 feature demo', 3)
     a, b = q.files()
     return {'opening1': a, 'opening2': b}
 
@@ -448,7 +448,7 @@ def pinned():
     return {'pinned': t.mem}
 
 
-CHECKS = ('Version 4.5', 'Register select', 'ULAplus color', 'ULAplus switch', 'Mode pin',
+CHECKS = ('Version 4.6', 'Register select', 'ULAplus color', 'ULAplus switch', 'Mode pin',
           'Mirror switch', 'Quad color', 'Font memory', 'Video memory', 'Mirrored write',
           'Port F4 paging', 'Megabank owner')
 
@@ -476,7 +476,7 @@ def sound():
 
 def ending():
     s = Screen()
-    s.header('PicoVideo', 'firmware 4.5 beta')
+    s.header('PicoVideo', 'firmware 4.6 beta')
     s.center(6, 'Designed by Jeff Burrell', attr(CYAN, 0, BRIGHT))
     s.center(8, 'Photo palette and fixes by', attr(WHITE))
     s.center(9, 'jon0x0', attr(CYAN, 0, BRIGHT))

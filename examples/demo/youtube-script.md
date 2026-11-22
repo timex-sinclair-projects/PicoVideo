@@ -1,4 +1,4 @@
-# PicoVideo 4.5 demo: YouTube script
+# PicoVideo 4.6 demo: YouTube script
 
 The video runs 5:58 from the moment you press SPACE. The program keeps time by
 itself, so every timecode below is measured from that press. They assume the
@@ -193,21 +193,21 @@ the description.
 **Title**
 
 ```text
-PicoVideo 4.5: VGA, 80 columns and 64 colors on the Timex Sinclair 2068
+PicoVideo 4.6: VGA, 80 columns and 64 colors on the Timex Sinclair 2068
 ```
 
 **Description**
 
 ```text
-PicoVideo is an open-source expansion board that gives the Timex Sinclair 2068 a VGA picture, using a Raspberry Pi Pico. It shows the TS2068's own video modes and adds quad color, 64 columns with color, 80-column text with a loadable font, and the 64-color ULAplus palette. This video is one demo program running on the TS2068, showing each feature of firmware 4.5.
+PicoVideo is an open-source expansion board that gives the Timex Sinclair 2068 a VGA picture, using a Raspberry Pi Pico. It shows the TS2068's own video modes and adds quad color, 64 columns with color, 80-column text with a loadable font, and the 64-color ULAplus palette. This video is one demo program running on the TS2068, showing each feature of firmware 4.6.
 
 Warning: this video has flashing and fast-changing colors.
 
-Firmware 4.5 (beta): https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.5
+Firmware 4.6 (beta): https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.6
 Project, manual and source: https://github.com/timex-sinclair-projects/PicoVideo
 More Timex/Sinclair: https://timexsinclair.com
 
-4.5 is a beta. V4 is still the stable firmware. Don't use 4.3 or 4.4: those builds are broken.
+4.6 is a beta. V4 is still the stable firmware. Don't use 4.3 or 4.4: those builds are broken.
 
 PicoVideo is designed by Jeff Burrell. Photo palette and fixes by jon0x0.
 The demo uses ZX0 compression by Einar Saukas.
