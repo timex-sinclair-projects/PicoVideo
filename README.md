@@ -14,7 +14,7 @@ individual attributes, and 80 columns with a font you can load.
 | Version | Status | Get it |
 |---|---|---|
 | **V4** | Stable. Shipped on earlier boards; new boards ship with 4.6. Fixes stray "rogue" pixels on boards with the faster Atmel PLDs. | [`V4/picoTsVid.uf2`](V4/picoTsVid.uf2) |
-| **4.6** | Beta. Adds Speccy Black, DF2 writes through DF1, video modes 3, 5 and 7 ([features](docs/features.md)), [TS-2068 Megabank](https://github.com/timex-sinclair-projects/TS-2068-Megabank) support and a photo palette, where each normal color is a darker version of its BRIGHT color ([details](docs/photo-palette.md)). [Tested on one board](#what-was-tested-in-46). | [Releases](https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.6) |
+| **4.6** | Stable. Adds Speccy Black, DF2 writes through DF1, video modes 3, 5 and 7 ([features](docs/features.md)), [TS-2068 Megabank](https://github.com/timex-sinclair-projects/TS-2068-Megabank) support and a photo palette, where each normal color is a darker version of its BRIGHT color ([details](docs/photo-palette.md)). [Tested on one board](#what-was-tested-in-46). | [Releases](https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.6) |
 
 Older builds (V2.0, V3.0 RC1, 4.2, 4.5) are on the [Releases page](https://github.com/timex-sinclair-projects/PicoVideo/releases) too.
 

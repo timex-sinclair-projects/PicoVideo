@@ -1,6 +1,6 @@
 This version of the Pico code corrects rogue pixels when using Atmel PLDs
 
-This is the current stable firmware. Newer beta builds are on the [Releases page](https://github.com/timex-sinclair-projects/PicoVideo/releases). The source is in [`../firmware`](../firmware/).
+This is the V4 firmware that shipped on earlier boards. The current stable firmware, 4.6, is on the [Releases page](https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.6). The source is in [`../firmware`](../firmware/).
 
 # Upgrading the firmware in your PicoVideo
 
