@@ -160,7 +160,7 @@ off the screen.
 
 `[5:12: the result appears]` Twelve out of twelve.
 
-> Alternate, if any line fails: "Not quite twelve. That's why it's a beta."
+> Alternate, if any line fails: "Not quite twelve. If yours does this, tell us."
 
 ### 5:20: Sound
 
@@ -171,7 +171,7 @@ The audio jack carries the 2068's own sound.
 ### 5:34: End card
 
 PicoVideo was designed by Jeff Burrell, and it's open source. Firmware four
-point five is a beta, so if you try it, tell us what you find. The link is in
+point six is the stable release, so if you try it, tell us what you find. The link is in
 the description.
 
 `[hold the end card until 5:58]`
@@ -203,11 +203,11 @@ PicoVideo is an open-source expansion board that gives the Timex Sinclair 2068 a
 
 Warning: this video has flashing and fast-changing colors.
 
-Firmware 4.6 (beta): https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.6
+Firmware 4.6: https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.6
 Project, manual and source: https://github.com/timex-sinclair-projects/PicoVideo
 More Timex/Sinclair: https://timexsinclair.com
 
-4.6 is a beta. V4 is still the stable firmware. Don't use 4.3 or 4.4: those builds are broken.
+4.6 is the stable firmware.
 
 PicoVideo is designed by Jeff Burrell. Photo palette and fixes by jon0x0.
 The demo uses ZX0 compression by Einar Saukas.

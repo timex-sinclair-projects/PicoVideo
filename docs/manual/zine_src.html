@@ -432,7 +432,7 @@ OUT 48955,71: OUT 65339,2: OUT 65339,199: OUT 65339,59: OUT 65339,252</code></pr
     <tr><td class="k">4.3</td><td>Test build</td><td>4.2 with fixes and the first photo palette.</td></tr>
     <tr><td class="k">4.4</td><td>Test build</td><td>Adds TS-2068 Megabank support.</td></tr>
     <tr><td class="k">4.5</td><td>Beta</td><td>Fixes 4.3 and 4.4; new photo palette. Reads <code>$45</code>. Readback of 70–72 unreliable.</td></tr>
-    <tr><td class="k">4.6</td><td>Beta</td><td>Reliable readback. Reads <code>$46</code>.</td></tr>
+    <tr><td class="k">4.6</td><td>Stable</td><td>Reliable readback. Reads <code>$46</code>.</td></tr>
   </table>
   <h3>Flashing the Pico</h3>
   <ol>
@@ -466,7 +466,7 @@ ninja -C build</code></pre>
     <tr><td class="mono">mirror.bas</td><td>Mirroring and readback</td><td class="num">12</td></tr>
     <tr><td class="mono">pinmode.bas</td><td>Pinning the mode</td><td class="num">13</td></tr>
   </table>
-  <p>This manual was written in 2026 from the 4.6 firmware source and replaces the V4 manual. Firmware 4.6 is a beta. On one board, 4.5 ran the examples and tape <code>SAVE</code> border stripes, and a build of the 4.6 change read every register back correctly. Untested on a board: mode 1, <code>$F4</code> and Megabank paging, other boards, non-default builds and general software compatibility. Report problems on the project's GitHub page.</p>
+  <p>This manual was written in 2026 from the 4.6 firmware source and replaces the V4 manual. Firmware 4.6 is the stable release. On one board, 4.5 ran the examples and tape <code>SAVE</code> border stripes, and a build of the 4.6 change read every register back correctly. Untested on a board: mode 1, <code>$F4</code> and Megabank paging, other boards, non-default builds and general software compatibility. Report problems on the project's GitHub page.</p>
   <p>ULAplus is a ZX Spectrum standard. PicoVideo follows its palette registers (0–64); registers 65 and up are PicoVideo's own.</p>
   <p><strong>PicoVideo</strong> was designed and programmed by Jeff Burrell, building on V. Hunter Adams' PIO VGA driver for the RP2040. Photo palette and 4.3 fixes by jon0x0. Thanks to the TS-Pico team. Open source under the MIT License, published by Timex Sinclair Projects: github.com/timex-sinclair-projects/PicoVideo.</p>
 </section>
