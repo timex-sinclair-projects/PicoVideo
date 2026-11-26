@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ULAplus Color Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column; a wide band for the 256-color chart and the palette builder. Matches the PicoVideo manual: condensed display, serif body, mono data, ZX blue. */
+:root{
+  --bg:#f6f7fb; --surface:#ffffff; --fg:#14162b; --muted:#565a78; --line:#d9dcea;
+  --accent:#0000cd; --accent-soft:#e4e6fb; --hi:#cdcd00;
+  --red:#c62828; --green:#1b8a2e; --blue:#1f3fd1;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d0f1e; --surface:#161935; --fg:#e7e8f5; --muted:#a3a7c9; --line:#2c3060;
+  --accent:#8f9bff; --accent-soft:#232857; --hi:#e8e85a;
+  --red:#ff7b7b; --green:#6fdc84; --blue:#8fa2ff; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d0f1e; --surface:#161935; --fg:#e7e8f5; --muted:#a3a7c9; --line:#2c3060;
+  --accent:#8f9bff; --accent-soft:#232857; --hi:#e8e85a;
+  --red:#ff7b7b; --green:#6fdc84; --blue:#8fa2ff; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+.wrap{max-width:1040px;margin:0 auto}
+.col{max-width:680px}
+h1,h2,h3{font-family:var(--display);font-weight:700;text-transform:uppercase;letter-spacing:.02em;line-height:1.05;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.6rem,7vw,4.2rem)}
+h2{font-size:1.9rem;margin-top:3.2rem;display:flex;gap:.6rem;align-items:baseline}
+h2 .n{color:var(--accent);font-size:1.2rem}
+h3{font-size:1.25rem;margin-top:1.6rem}
+p{margin:.7rem 0}
+code,kbd,.mono{font-family:var(--mono);font-size:.86em}
+code{background:var(--accent-soft);padding:.05em .3em;border-radius:3px}
+.lede{font-size:1.15rem;color:var(--muted);max-width:640px}
+header{padding-top:2.4rem;padding-bottom:.6rem;border-bottom:4px solid var(--accent)}
+.eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.stripes{display:flex;height:10px;width:160px;margin:.9rem 0 1rem}
+.stripes i{flex:1}
+table{border-collapse:collapse;font-size:.95rem}
+th,td{border-bottom:1px solid var(--line);padding:.35rem .6rem;text-align:left;vertical-align:top}
+th{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:.85rem}
+.scroll{overflow-x:auto;max-width:100%}
+.note{border-left:4px solid var(--hi);background:var(--surface);padding:.7rem 1rem;margin:1rem 0;border-radius:0 6px 6px 0}
+.note b{font-family:var(--display);text-transform:uppercase;letter-spacing:.04em;display:block}
+pre{font-family:var(--mono);font-size:.82rem;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:.8rem 1rem;overflow-x:auto;line-height:1.5;margin:.6rem 0}
+
+/* mixer */
+.mixer{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.4rem;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:1.2rem;margin-top:1.4rem}
+@media (max-width:720px){.mixer{grid-template-columns:minmax(0,1fr)}}
+.ch{display:grid;grid-template-columns:4.2rem minmax(0,1fr) 2.2rem;align-items:center;gap:.6rem;margin:.35rem 0}
+.ch label{font-family:var(--display);font-weight:700;text-transform:uppercase;font-size:1.05rem}
+.ch output{font-family:var(--mono);font-size:1rem;text-align:right}
+.ch input[type=range]{width:100%}
+.ch.r label{color:var(--red)} .ch.g label{color:var(--green)} .ch.b label{color:var(--blue)}
+.bits{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:3px;margin-top:1rem}
+.bit{border-radius:4px;text-align:center;padding:.3rem 0;font-family:var(--mono);border:1px solid var(--line)}
+.bit .v{font-size:1.2rem;font-weight:600;display:block}
+.bit .w{font-size:.66rem;color:var(--muted);display:block}
+.bit .l{font-size:.66rem;display:block;font-weight:600}
+.bit.gb .l{color:var(--green)} .bit.rb .l{color:var(--red)} .bit.bb .l{color:var(--blue)}
+.bit.on{background:var(--accent-soft)}
+.big{border-radius:8px;min-height:150px;border:1px solid var(--line);display:flex;align-items:flex-end;padding:.8rem;font-family:var(--mono);font-size:.9rem}
+.readout{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.2rem .9rem;margin-top:.8rem;font-size:.95rem}
+.readout dt{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-top:.2rem}
+.readout dd{margin:0;font-family:var(--mono);overflow-wrap:anywhere}
+.sum{font-family:var(--mono);font-size:.9rem;margin-top:.6rem;color:var(--muted)}
+.sum b{color:var(--fg)}
+.row{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+button,.btn{font-family:var(--mono);font-size:.8rem;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:5px;padding:.4rem .7rem;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+:root[data-theme="dark"] button.primary{color:#0d0f1e}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) button.primary{color:#0d0f1e}}
+button:focus-visible,input:focus-visible,select:focus-visible,.sw:focus-visible,.ent:focus-visible{outline:3px solid var(--hi);outline-offset:2px}
+input[type=text],select{font-family:var(--mono);font-size:.9rem;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:5px;padding:.35rem .5rem}
+input[type=text]{width:7.5rem}
+
+/* levels */
+.levels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin-top:1rem}
+@media (max-width:720px){.levels{grid-template-columns:minmax(0,1fr)}}
+.lv{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:.8rem}
+.lv h3{margin:0 0 .5rem}
+.lvrow{display:grid;grid-template-columns:1.3rem 2.2rem minmax(0,1fr) 3rem;gap:.4rem;align-items:center;font-family:var(--mono);font-size:.78rem;margin:.18rem 0}
+.lvrow .chip{height:18px;border-radius:3px;border:1px solid var(--line)}
+.lvrow .bar{height:8px;background:var(--line);border-radius:4px;position:relative;overflow:hidden}
+.lvrow .bar i{position:absolute;inset:0 auto 0 0;border-radius:4px}
+.lvrow .pct{text-align:right;color:var(--muted)}
+
+/* chart */
+.toolbar{display:flex;flex-wrap:wrap;gap:.8rem 1.4rem;align-items:center;margin:1rem 0 .6rem;font-size:.9rem}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{border:0;border-radius:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{color:#0d0f1e}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .seg button[aria-pressed="true"]{color:#0d0f1e}}
+.panels{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem}
+@media (max-width:980px){.panels{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.panels{grid-template-columns:minmax(0,1fr)}}
+.panel h3{margin:0 0 .35rem;font-size:1.05rem}
+.grid8{display:grid;grid-template-columns:1.1rem repeat(8,minmax(0,1fr));gap:2px;font-family:var(--mono)}
+.grid8 .ax{font-size:.62rem;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.sw{aspect-ratio:1;border:0;border-radius:2px;padding:0;font-family:var(--mono);font-size:.6rem;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;min-width:0}
+.sw.ts::after{content:"";position:absolute;inset:2px;border:2px dotted currentColor;border-radius:2px;opacity:.85}
+.sw.cur{outline:3px solid var(--hi);outline-offset:1px;z-index:1}
+.axis-note{font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-top:.25rem}
+
+/* attribute calculator */
+.calc{display:flex;flex-wrap:wrap;gap:.6rem 1rem;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:.9rem;margin-top:1rem}
+.calc label{font-family:var(--mono);font-size:.8rem;display:flex;gap:.35rem;align-items:center}
+.calc .out{flex-basis:100%;font-family:var(--mono);font-size:.9rem}
+
+/* builder */
+.builder{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:1.2rem;margin-top:1rem}
+@media (max-width:860px){.builder{grid-template-columns:minmax(0,1fr)}}
+.cluts{display:grid;gap:.7rem}
+.clut{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:.6rem .7rem}
+.clut .hd{font-family:var(--mono);font-size:.72rem;color:var(--muted);display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap;margin-bottom:.35rem}
+.ents{display:grid;grid-template-columns:repeat(16,minmax(0,1fr));gap:2px}
+@media (max-width:560px){.ents{grid-template-columns:repeat(8,minmax(0,1fr))}}
+.ent{aspect-ratio:1;border:0;border-radius:3px;padding:0;cursor:pointer;font-family:var(--mono);font-size:.55rem;display:flex;align-items:flex-end;justify-content:center;min-width:0}
+.ent.sel{outline:3px solid var(--hi);outline-offset:1px;z-index:1;position:relative}
+.ents .gap{grid-column:span 1}
+.sub{font-family:var(--mono);font-size:.62rem;color:var(--muted);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:.2rem}
+.sub span:last-child{text-align:right}
+.preview{border-radius:8px;border:1px solid var(--line);padding:14px;margin-top:.8rem}
+.preview .ln{font-family:var(--mono);font-size:.8rem;padding:2px 6px;display:block;white-space:pre;overflow:hidden}
+.editbox{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:.9rem;position:sticky;top:calc(env(safe-area-inset-top,0px) + 8px);align-self:start}
+@media (max-width:860px){.editbox{position:static}}
+.editbox .big{min-height:80px}
+.status{font-family:var(--mono);font-size:.78rem;color:var(--muted);min-height:1.2em}
+footer{margin-top:3rem;border-top:1px solid var(--line);padding-top:1rem;font-size:.85rem;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.big,.sw,.ent{transition:background-color .12s}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">PicoVideo 4.6 · TS 2068</div>
+  <h1>ULAplus Color Guide</h1>
+  <div class="stripes" aria-hidden="true"><i style="background:#e01c1c"></i><i style="background:#fcfc00"></i><i style="background:#00e000"></i><i style="background:#00e0e0"></i></div>
+  <p class="lede">How PicoVideo turns one byte into a color, what the numbers actually mean, and a builder that writes the BASIC to load your own 64-color palette.</p>
+</header>
+
+<section class="col" aria-labelledby="s1">
+  <h2 id="s1"><span class="n">1</span>One byte is one color</h2>
+  <p>Every color PicoVideo sends to the monitor is a single byte. The byte is split into three small numbers: how much <b style="color:var(--green)">green</b>, how much <b style="color:var(--red)">red</b> and how much <b style="color:var(--blue)">blue</b>. The monitor adds the three lights together, so the color you see is just those three amounts mixed.</p>
+  <p>Green and red get 3 bits each, so they go from 0 (off) to 7 (full). Blue gets only 2 bits, so it goes from 0 to 3. That's 8 × 8 × 4 = <b>256 possible colors</b>. Move the sliders and watch the bits.</p>
+</section>
+
+<div class="mixer" id="mixA"></div>
+
+<section class="col" aria-labelledby="s2">
+  <h2 id="s2"><span class="n">2</span>Where 32, 4 and 1 come from</h2>
+  <p>The formula you'll see everywhere, <code>32×G + 4×R + B</code>, isn't a scaling rule. It's just where each number sits inside the byte:</p>
+  <div class="scroll"><table>
+    <thead><tr><th>Bit</th><th class="num">7</th><th class="num">6</th><th class="num">5</th><th class="num">4</th><th class="num">3</th><th class="num">2</th><th class="num">1</th><th class="num">0</th></tr></thead>
+    <tbody>
+      <tr><td>Holds</td><td class="num" style="color:var(--green)">G</td><td class="num" style="color:var(--green)">G</td><td class="num" style="color:var(--green)">G</td><td class="num" style="color:var(--red)">R</td><td class="num" style="color:var(--red)">R</td><td class="num" style="color:var(--red)">R</td><td class="num" style="color:var(--blue)">B</td><td class="num" style="color:var(--blue)">B</td></tr>
+      <tr><td>Bit value</td><td class="num">128</td><td class="num">64</td><td class="num">32</td><td class="num">16</td><td class="num">8</td><td class="num">4</td><td class="num">2</td><td class="num">1</td></tr>
+    </tbody>
+  </table></div>
+  <p>Green's lowest bit is worth 32, so green level G adds <code>G×32</code>. Red's lowest bit is worth 4, so red adds <code>R×4</code>. Blue sits at the bottom and adds <code>B</code>. It's the same idea as writing a number in columns: the multiplier only says which column a digit goes in.</p>
+  <p>Going the other way, from a byte to its three levels:</p>
+<pre>G = INT (v/32)
+R = INT (v/4) - 8*G      : REM same as INT(v/4) AND 7
+B = v - 4*INT (v/4)      : REM same as v AND 3</pre>
+  <p>Worked example: orange is full red, some green, no blue. Pick R=7, G=3, B=0: 3×32 + 7×4 + 0 = 96 + 28 = <b>124</b>.</p>
+</section>
+
+<section aria-labelledby="s3">
+ <div class="col">
+  <h2 id="s3"><span class="n">3</span>What the levels mean</h2>
+  <p>A level is a step of signal, not a percentage of anything. PicoVideo puts the bits straight onto the VGA wires through resistors, so level 7 is the strongest signal the board makes and each step below it is roughly one seventh less. Blue does the same thing in thirds. The firmware does no scaling of its own: the byte you write is the byte that reaches the connector.</p>
+  <p>If you're used to 0–255 color values from a PC, treat each step as an even share of 255:</p>
+ </div>
+  <div class="levels" id="levels"></div>
+ <div class="col">
+  <p>The bars show how much light jon0x0 measured on one PicoVideo and one monitor (an ASUS VS238 in sRGB mode). The light isn't linear: level 4 of red gives only about 28% of full light, because monitors deliberately brighten in a curve. That curve is what makes evenly spaced signal steps look evenly spaced to the eye, so you can design with the plain 0–7 and 0–3 steps and ignore the light figures. They're here only to explain why the numbers don't look like halves and quarters.</p>
+  <div class="note"><b>Blue has half the steps</b>Blue's 4 levels sit at 0, 1/3, 2/3 and full, while red and green have 8. So most colors can't be balanced exactly. A true gray needs R and G equal and B at the nearest third: R=G=4 with B=2 is close, R=G=5 with B=2 is closer. Some ULAplus tools and emulators stretch blue to 8 steps for display. On PicoVideo blue really has 4.</div>
+ </div>
+</section>
+
+<section aria-labelledby="s4">
+ <div class="col">
+  <h2 id="s4"><span class="n">4</span>All 256 colors</h2>
+  <p>One panel per blue level. In each panel red increases to the right and green increases upward. The number on each square is the byte to write. Click any square to load it into the mixers above and below. A dotted outline marks the 16 colors the TS 2068 uses when ULAplus is off.</p>
+ </div>
+  <div class="toolbar">
+    <div class="row"><span class="mono" style="font-size:.78rem;color:var(--muted)">Show colors as</span>
+      <div class="seg" role="group" aria-label="Preview model">
+        <button type="button" id="mEven" aria-pressed="true">Even steps</button>
+        <button type="button" id="mMeas" aria-pressed="false">Measured</button>
+      </div></div>
+    <div class="row"><label for="hexIn" class="mono" style="font-size:.78rem;color:var(--muted)">Nearest to a PC color</label>
+      <input type="text" id="hexIn" value="#ff8000" spellcheck="false" autocomplete="off">
+      <button type="button" id="hexGo">Find</button></div>
+    <span class="status" id="hexMsg" aria-live="polite"></span>
+  </div>
+  <div class="panels" id="panels"></div>
+  <p class="axis-note">"Even steps" draws each level as an equal share of 255. "Measured" redraws them from jon0x0's measurements, which is closer to how one real board looked on one monitor.</p>
+</section>
+
+<section class="col" aria-labelledby="s5">
+  <h2 id="s5"><span class="n">5</span>How attributes choose entries</h2>
+  <p>With ULAplus off, an attribute's INK and PAPER numbers pick from the TS 2068's fixed 16 colors. With ULAplus on, they pick from a table of 64 entries that your program fills. The table is four groups of 16 called CLUTs. FLASH and BRIGHT choose the CLUT, so they stop flashing and brightening. Inside a CLUT, entries 0–7 are the eight INK colors and 8–15 the eight PAPER colors.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>CLUT</th><th class="num">FLASH</th><th class="num">BRIGHT</th><th class="num">INK 0–7</th><th class="num">PAPER 0–7</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td class="num">0</td><td class="num">0</td><td class="num">0–7</td><td class="num">8–15</td></tr>
+      <tr><td>1</td><td class="num">0</td><td class="num">1</td><td class="num">16–23</td><td class="num">24–31</td></tr>
+      <tr><td>2</td><td class="num">1</td><td class="num">0</td><td class="num">32–39</td><td class="num">40–47</td></tr>
+      <tr><td>3</td><td class="num">1</td><td class="num">1</td><td class="num">48–55</td><td class="num">56–63</td></tr>
+    </tbody>
+  </table></div>
+  <p>The entry number is <code>16×(2×FLASH + BRIGHT) + INK</code> for ink, and the same plus 8 for paper. The border always uses CLUT 0's paper entries: <code>BORDER n</code> shows entry <code>8+n</code>.</p>
+  <div class="calc" id="calc">
+    <label for="cInk">INK <select id="cInk"></select></label>
+    <label for="cPap">PAPER <select id="cPap"></select></label>
+    <label for="cBri">BRIGHT <select id="cBri"><option>0</option><option>1</option></select></label>
+    <label for="cFla">FLASH <select id="cFla"><option>0</option><option>1</option></select></label>
+    <div class="out" id="cOut"></div>
+  </div>
+</section>
+
+<section class="col" aria-labelledby="s6">
+  <h2 id="s6"><span class="n">6</span>Talking to PicoVideo</h2>
+  <p>PicoVideo uses the same two ports as a ULAplus Spectrum. Write a register number to port <code>48955</code> ($BF3B), then write or read its value at port <code>65339</code> ($FF3B).</p>
+  <div class="scroll"><table>
+    <thead><tr><th>Register</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td class="num">0–63</td><td>The 64 palette entries, one color byte each. They can be read back.</td></tr>
+      <tr><td class="num">64</td><td>Palette switch: 0 is off, anything else is on.</td></tr>
+    </tbody>
+  </table></div>
+<pre>OUT 48955,19: OUT 65339,124  : REM entry 19 = orange
+OUT 48955,19: PRINT IN 65339 : REM read it back
+OUT 48955,64: OUT 65339,1    : REM palette on
+OUT 48955,64: OUT 65339,0    : REM palette off</pre>
+  <div class="note"><b>Load the palette first</b>All 64 entries are 0 (black) when PicoVideo starts. If you switch the palette on before loading it, the whole screen goes black, which looks like a crash but isn't.</div>
+</section>
+
+<section aria-labelledby="s7">
+ <div class="col">
+  <h2 id="s7"><span class="n">7</span>Build a palette</h2>
+  <p>Click an entry to select it. While it is selected, every change you make, with either mixer, the 256-color chart or a recipe, goes into that entry. The preview shows how a screen using each CLUT would look. When you're done, copy the BASIC program and type it in, or load it into your usual BASIC tool. Your palette is kept in this browser until you reset it.</p>
+  <div class="row" style="margin:.8rem 0">
+    <span class="mono" style="font-size:.78rem;color:var(--muted)">Start from</span>
+    <button type="button" data-preset="ts">TS 2068 colors</button>
+    <button type="button" data-preset="ex">ulaplus.bas example</button>
+    <button type="button" data-preset="gray">Gray ramps</button>
+    <button type="button" data-preset="black">All black</button>
+  </div>
+ </div>
+  <div class="builder">
+    <div>
+      <div class="cluts" id="cluts"></div>
+      <div class="preview" id="preview"></div>
+    </div>
+    <div class="editbox">
+      <div class="status" id="selMsg" aria-live="polite"></div>
+      <div id="mixB"></div>
+    </div>
+  </div>
+ <div class="col">
+  <h3>Your program</h3>
+  <div class="row"><button type="button" class="primary" id="copyBas">Copy BASIC</button><button type="button" id="copyHex">Copy as DEFB</button><span class="status" id="copyMsg" aria-live="polite"></span></div>
+  <pre id="bas"></pre>
+  <pre id="hex"></pre>
+ </div>
+</section>
+
+<section class="col" aria-labelledby="s8">
+  <h2 id="s8"><span class="n">8</span>Mixing recipes</h2>
+  <p>Hue comes from the ratio between the channels; brightness comes from how high they are. To darken a color, lower every channel by about the same proportion. To make it paler, raise the channels that are low. Click a row to load it.</p>
+  <div class="scroll"><table id="recipes">
+    <thead><tr><th></th><th>Color</th><th class="num">G</th><th class="num">R</th><th class="num">B</th><th class="num">Byte</th><th>Why</th></tr></thead>
+    <tbody></tbody>
+  </table></div>
+  <h3>Ramps</h3>
+  <p>A smooth ramp from dark to light keeps the ratio and steps all channels up together. Red and green have 8 steps, so a ramp of one hue can have 8 shades at most, and fewer if blue is involved, since blue changes only every two or three steps.</p>
+</section>
+
+<footer>
+  For PicoVideo firmware 4.6. Ports, registers and the CLUT layout come from the firmware source and the PicoVideo manual (sections 4 and 7). Light measurements: jon0x0, issue #10 in the PicoVideo repository, one board and one monitor.
+</footer>
+</div>
+
+<script>
+(function(){
+const RED_M=[0,.024,.078,.171,.276,.449,.696,.997], GRN_M=[0,.043,.116,.225,.354,.521,.736,.996], BLU_M=[0,.174,.511,.995];
+const TS=[0,2,20,22,160,162,180,182, 0,3,28,31,224,227,252,255];
+const NAMES=["black","blue","red","magenta","green","cyan","yellow","white"];
+let model="even";
+const st={g:3,r:7,b:0};
+const enc=x=>{x=Math.max(0,Math.min(1,x));return Math.round(255*(x<=.0031308?12.92*x:1.055*Math.pow(x,1/2.4)-.055));};
+function split(v){return {g:v>>5,r:(v>>2)&7,b:v&3};}
+function join(g,r,b){return g*32+r*4+b;}
+function rgb(v){const c=split(v);
+  if(model==="even") return [Math.round(c.r*255/7),Math.round(c.g*255/7),c.b*85];
+  return [enc(RED_M[c.r]),enc(GRN_M[c.g]),enc(BLU_M[c.b])];}
+function css(v){const [r,g,b]=rgb(v);return `rgb(${r},${g},${b})`;}
+function ink(v){const [r,g,b]=rgb(v);const L=.2126*(r/255)**2.2+.7152*(g/255)**2.2+.0722*(b/255)**2.2;return L>.22?"#000":"#fff";}
+const hex2=v=>v.toString(16).toUpperCase().padStart(2,"0");
+const bin=v=>v.toString(2).padStart(8,"0");
+
+/* storage */
+function load(k,d){try{const s=localStorage.getItem(k);return s?JSON.parse(s):d;}catch(e){return d;}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+
+/* presets */
+const PRE={
+  ts:[...TS.slice(0,8),...TS.slice(0,8),...TS.slice(8),...TS.slice(8),...TS.slice(0,8),...TS.slice(0,8),...TS.slice(8),...TS.slice(8)],
+  ex:[0,2,20,22,160,162,180,182,0,2,20,22,160,162,180,182, 0,3,28,31,224,227,252,255,0,3,28,31,224,227,252,255,
+      0,36,72,109,145,182,218,255,255,218,182,145,109,72,36,0, 28,124,220,236,225,163,39,87,5,9,49,85,121,157,221,254],
+  gray:(()=>{const g=[0,36,72,109,145,182,218,255];const a=[];for(let k=0;k<4;k++){a.push(...g,...g.slice().reverse());}return a;})(),
+  black:new Array(64).fill(0)
+};
+let pal=load("ulaplus-guide-pal",PRE.ex.slice());
+if(!Array.isArray(pal)||pal.length!==64) pal=PRE.ex.slice();
+let sel=null;
+
+/* mixers */
+const mixers=[];
+function buildMixer(el,compact){
+  el.innerHTML=`
+  <div>
+    <div class="ch g"><label for="${el.id}g">Green</label><input type="range" id="${el.id}g" min="0" max="7" step="1"><output></output></div>
+    <div class="ch r"><label for="${el.id}r">Red</label><input type="range" id="${el.id}r" min="0" max="7" step="1"><output></output></div>
+    <div class="ch b"><label for="${el.id}b">Blue</label><input type="range" id="${el.id}b" min="0" max="3" step="1"><output></output></div>
+    <div class="bits" aria-hidden="true"></div>
+    <div class="sum"></div>
+  </div>
+  <div>
+    <div class="big"></div>
+    ${compact?"":`<dl class="readout"><dt>Decimal</dt><dd data-k="dec"></dd><dt>Hex</dt><dd data-k="hex"></dd><dt>Binary</dt><dd data-k="bin"></dd><dt>As 0–255</dt><dd data-k="pc"></dd><dt>BASIC</dt><dd data-k="bas"></dd></dl>`}
+  </div>`;
+  const inputs=["g","r","b"].map(k=>el.querySelector("#"+el.id+k));
+  inputs.forEach((inp,i)=>inp.addEventListener("input",()=>{st[["g","r","b"][i]]=+inp.value;changed(true);}));
+  mixers.push({el,inputs,compact});
+}
+function renderMixers(){
+  const v=join(st.g,st.r,st.b);
+  for(const m of mixers){
+    m.inputs[0].value=st.g;m.inputs[1].value=st.r;m.inputs[2].value=st.b;
+    m.inputs.forEach((inp,i)=>inp.nextElementSibling.textContent=[st.g,st.r,st.b][i]);
+    const bits=bin(v),labs=["G","G","G","R","R","R","B","B"],cls=["gb","gb","gb","rb","rb","rb","bb","bb"];
+    m.el.querySelector(".bits").innerHTML=[...bits].map((c,i)=>`<div class="bit ${cls[i]} ${c==="1"?"on":""}"><span class="l">${labs[i]}</span><span class="v">${c}</span><span class="w">${128>>i}</span></div>`).join("");
+    m.el.querySelector(".sum").innerHTML=`32×<b>${st.g}</b> + 4×<b>${st.r}</b> + <b>${st.b}</b> = <b>${v}</b>`;
+    const big=m.el.querySelector(".big");big.style.background=css(v);big.style.color=ink(v);
+    big.textContent=m.compact?(sel!=null?`entry ${sel} = ${v}`:`${v}`):`${v}  ·  $${hex2(v)}`;
+    if(!m.compact){const [r,g,b]=rgb(v);const q=k=>m.el.querySelector(`[data-k="${k}"]`);
+      q("dec").textContent=v;q("hex").textContent="$"+hex2(v);q("bin").textContent="%"+bin(v);
+      q("pc").textContent=`R ${r}, G ${g}, B ${b}  (#${hex2(r)}${hex2(g)}${hex2(b)})`;
+      q("bas").textContent=`OUT 48955,n: OUT 65339,${v}`;}
+  }
+}
+function setColor(v,fromUser){Object.assign(st,split(v));changed(fromUser);}
+function changed(fromUser){
+  const v=join(st.g,st.r,st.b);
+  if(fromUser&&sel!=null&&pal[sel]!==v){pal[sel]=v;save("ulaplus-guide-pal",pal);renderBuilder();}
+  renderMixers();markChart();
+}
+
+/* levels */
+function renderLevels(){
+  const defs=[["Red",8,RED_M,"r"],["Green",8,GRN_M,"g"],["Blue",4,BLU_M,"b"]];
+  document.getElementById("levels").innerHTML=defs.map(([n,cnt,M,k])=>{
+    let rows="";for(let i=cnt-1;i>=0;i--){const pc=Math.round(i*255/(cnt-1));
+      const v=k==="r"?join(0,i,0):k==="g"?join(i,0,0):join(0,0,i);
+      const col=n==="Red"?"var(--red)":n==="Green"?"var(--green)":"var(--blue)";
+      rows+=`<div class="lvrow"><span>${i}</span><span class="chip" style="background:${css(v)}"></span><span class="bar" title="${(M[i]*100).toFixed(1)}% of full light"><i style="width:${(M[i]*100).toFixed(1)}%;background:${col}"></i></span><span class="pct">${pc}</span></div>`;}
+    return `<div class="lv"><h3 style="color:var(--${k==="r"?"red":k==="g"?"green":"blue"})">${n} · ${cnt} levels</h3>
+      <div class="lvrow" style="color:var(--muted)"><span>lv</span><span></span><span>measured light</span><span class="pct">0–255</span></div>${rows}</div>`;}).join("");
+}
+
+/* chart */
+function renderChart(){
+  const P=document.getElementById("panels");let h="";
+  for(let b=0;b<4;b++){
+    h+=`<div class="panel"><h3 style="color:var(--blue)">Blue ${b}</h3><div class="grid8">`;
+    for(let g=7;g>=0;g--){h+=`<span class="ax">${g}</span>`;
+      for(let r=0;r<8;r++){const v=join(g,r,b);
+        h+=`<button type="button" class="sw${isTs(v)?" ts":""}" data-v="${v}" style="background:${css(v)};color:${ink(v)}" aria-label="Color ${v}: green ${g}, red ${r}, blue ${b}">${v}</button>`;}}
+    h+=`<span></span>`;for(let r=0;r<8;r++)h+=`<span class="ax">${r}</span>`;
+    h+=`</div><div class="axis-note">↑ green · red →</div></div>`;}
+  P.innerHTML=h;markChart();
+}
+function isTs(v){return TS.includes(v)||v===37;}
+function markChart(){const v=join(st.g,st.r,st.b);
+  document.querySelectorAll(".sw.cur").forEach(e=>e.classList.remove("cur"));
+  const e=document.querySelector(`.sw[data-v="${v}"]`);if(e)e.classList.add("cur");}
+document.getElementById("panels").addEventListener("click",e=>{const b=e.target.closest(".sw");if(b)setColor(+b.dataset.v,true);});
+function setModel(m){model=m;document.getElementById("mEven").setAttribute("aria-pressed",m==="even");document.getElementById("mMeas").setAttribute("aria-pressed",m==="meas");
+  renderChart();renderLevels();renderMixers();renderBuilder();renderRecipes();}
+document.getElementById("mEven").onclick=()=>setModel("even");
+document.getElementById("mMeas").onclick=()=>setModel("meas");
+function findHex(){const s=document.getElementById("hexIn").value.trim().replace(/^#/,"");const msg=document.getElementById("hexMsg");
+  if(!/^[0-9a-fA-F]{6}$/.test(s)){msg.textContent="Type a color as #RRGGBB, for example #ff8000.";return;}
+  const r=parseInt(s.slice(0,2),16),g=parseInt(s.slice(2,4),16),b=parseInt(s.slice(4,6),16);
+  const G=Math.round(g*7/255),R=Math.round(r*7/255),B=Math.round(b*3/255);const v=join(G,R,B);
+  setColor(v,true);msg.textContent=`#${s.toLowerCase()} → G ${G}, R ${R}, B ${B} = ${v}`;}
+document.getElementById("hexGo").onclick=findHex;
+document.getElementById("hexIn").addEventListener("keydown",e=>{if(e.key==="Enter")findHex();});
+
+/* calculator */
+const cI=document.getElementById("cInk"),cP=document.getElementById("cPap");
+NAMES.forEach((n,i)=>{cI.add(new Option(`${i} (${n})`,i));cP.add(new Option(`${i} (${n})`,i));});cI.value=3;cP.value=6;
+function calc(){const i=+cI.value,p=+cP.value,b=+document.getElementById("cBri").value,f=+document.getElementById("cFla").value;
+  const base=16*(2*f+b),ei=base+i,ep=base+8+p;
+  document.getElementById("cOut").innerHTML=`CLUT ${2*f+b}: ink uses entry <b>${ei}</b> (${pal[ei]}), paper uses entry <b>${ep}</b> (${pal[ep]}) in your palette below.`+
+   ` <span style="display:inline-block;padding:0 .5rem;margin-left:.3rem;background:${css(pal[ep])};color:${css(pal[ei])};border:1px solid var(--line);border-radius:3px">Sample</span>`;}
+["cInk","cPap","cBri","cFla"].forEach(id=>document.getElementById(id).addEventListener("change",calc));
+
+/* builder */
+function renderBuilder(){
+  const C=document.getElementById("cluts");let h="";
+  for(let k=0;k<4;k++){const f=k>>1,b=k&1;
+    h+=`<div class="clut"><div class="hd"><span>CLUT ${k} · FLASH ${f} · BRIGHT ${b}</span><span>entries ${16*k}–${16*k+15}</span></div><div class="ents">`;
+    for(let j=0;j<16;j++){const e=16*k+j,v=pal[e];
+      h+=`<button type="button" class="ent${e===sel?" sel":""}" data-e="${e}" style="background:${css(v)};color:${ink(v)}" aria-label="Entry ${e}, ${j<8?"INK "+j:"PAPER "+(j-8)}, value ${v}" aria-pressed="${e===sel}">${e}</button>`;}
+    h+=`</div><div class="sub"><span>INK 0–7</span><span>PAPER 0–7</span></div></div>`;}
+  C.innerHTML=h;
+  // preview: each CLUT as text on paper
+  let pv="";for(let k=0;k<4;k++){const base=16*k;
+    for(let p=0;p<8;p+=4){let line="";
+      for(let q=p;q<p+4;q++){line+=`<span style="background:${css(pal[base+8+q])};color:${css(pal[base+((q+4)%8)])};padding:2px 6px;display:inline-block;min-width:25%">INK ${(q+4)%8} PAPER ${q}</span>`;}
+      pv+=`<span class="ln" style="padding:0">${line}</span>`;}}
+  const P=document.getElementById("preview");P.innerHTML=`<div class="mono" style="font-size:.72rem;color:var(--muted);margin-bottom:.4rem">Preview: two rows per CLUT, top to bottom. The border here is BORDER 0 (entry 8).</div>`+pv;
+  P.style.background=css(pal[8]);
+  const pm=P.querySelector(".mono");pm.style.color=ink(pal[8]);
+  const m=document.getElementById("selMsg");
+  if(sel!=null){const k=sel>>4,j=sel&15;m.textContent=`Editing entry ${sel}: CLUT ${k}, ${j<8?"INK "+j:"PAPER "+(j-8)}. Click it again to stop.`;}
+  else m.textContent="Select an entry to edit it.";
+  renderCode();calc();
+}
+document.getElementById("cluts").addEventListener("click",e=>{const b=e.target.closest(".ent");if(!b)return;const n=+b.dataset.e;
+  if(sel===n){sel=null;}else{sel=n;Object.assign(st,split(pal[n]));}
+  renderBuilder();renderMixers();markChart();});
+document.querySelectorAll("[data-preset]").forEach(b=>b.addEventListener("click",()=>{pal=PRE[b.dataset.preset].slice();save("ulaplus-guide-pal",pal);
+  if(sel!=null)Object.assign(st,split(pal[sel]));renderBuilder();renderMixers();markChart();}));
+function renderCode(){
+  let s="10 REM ULAplus palette\n20 RESTORE 100\n30 FOR c=0 TO 63: READ v: OUT 48955,c: OUT 65339,v: NEXT c\n40 OUT 48955,64: OUT 65339,1: REM palette on\n50 STOP\n";
+  for(let k=0;k<4;k++)s+=`${100+10*k} DATA ${pal.slice(16*k,16*k+16).join(",")}\n`;
+  document.getElementById("bas").textContent=s.trimEnd();
+  let h="palette:\n";for(let k=0;k<4;k++)h+=`    DEFB ${pal.slice(16*k,16*k+16).map(v=>"$"+hex2(v)).join(",")}  ; CLUT ${k}\n`;
+  document.getElementById("hex").textContent=h.trimEnd();
+}
+async function copy(id,label){const t=document.getElementById(id).textContent,msg=document.getElementById("copyMsg");
+  try{await navigator.clipboard.writeText(t);msg.textContent=label+" copied.";}
+  catch(e){const r=document.createRange();r.selectNodeContents(document.getElementById(id));const s=getSelection();s.removeAllRanges();s.addRange(r);msg.textContent="Selected. Press Ctrl+C or ⌘C to copy.";}}
+document.getElementById("copyBas").onclick=()=>copy("bas","BASIC");
+document.getElementById("copyHex").onclick=()=>copy("hex","DEFB lines");
+
+/* recipes */
+const REC=[["Orange",3,7,0,"Full red, a little under half green"],["Gold",6,7,0,"Red and green both high, green a step lower"],
+ ["Brown",2,4,0,"Orange's ratio at about half the strength"],["Pink",4,7,2,"Red full, the others raised to pale it"],
+ ["Purple",0,4,3,"Blue full, red about half"],["Sky blue",5,3,3,"Blue full, green high, a little red"],
+ ["Teal",4,0,2,"Green and blue at about half"],["Navy",0,0,1,"Blue's lowest step"],
+ ["Olive",4,4,0,"Yellow at about half strength"],["Lime",7,4,0,"Full green with some red"],
+ ["Mid gray",4,4,2,"Equal red and green, blue at the nearest third"],["Light gray",6,6,2,"Blue can't match level 6 exactly"]];
+function renderRecipes(){document.querySelector("#recipes tbody").innerHTML=REC.map(([n,g,r,b,w])=>{const v=join(g,r,b);
+  return `<tr data-v="${v}" style="cursor:pointer" tabindex="0"><td><span style="display:inline-block;width:1.6rem;height:1rem;border-radius:3px;border:1px solid var(--line);background:${css(v)}"></span></td><td>${n}</td><td class="num">${g}</td><td class="num">${r}</td><td class="num">${b}</td><td class="num">${v}</td><td>${w}</td></tr>`;}).join("");}
+const rt=document.querySelector("#recipes tbody");
+rt.addEventListener("click",e=>{const tr=e.target.closest("tr");if(tr)setColor(+tr.dataset.v,true);});
+rt.addEventListener("keydown",e=>{if(e.key==="Enter"){const tr=e.target.closest("tr");if(tr)setColor(+tr.dataset.v,true);}});
+
+buildMixer(document.getElementById("mixA"),false);
+const mb=document.getElementById("mixB");mb.classList.add("mixer");mb.style.gridTemplateColumns="minmax(0,1fr)";mb.style.margin="0";mb.style.padding="0";mb.style.border="0";
+buildMixer(mb,true);
+if(sel!=null)Object.assign(st,split(pal[sel]));
+renderLevels();renderChart();renderBuilder();renderRecipes();renderMixers();markChart();
+})();
+</script>
+</body>
+</html>
