@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PicoVideo Docs</title>
+<meta name="description" content="Manual, ULAplus color guide and programmer's notes for the PicoVideo VGA board for the Timex/Sinclair 2068.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+:root{
+  --bg:#f6f7fb; --surface:#ffffff; --fg:#14162b; --muted:#565a78; --line:#d9dcea;
+  --accent:#0000cd; --hi:#cdcd00;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d0f1e; --surface:#161935; --fg:#e7e8f5; --muted:#a3a7c9; --line:#2c3060;
+  --accent:#8f9bff; --hi:#e8e85a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d0f1e; --surface:#161935; --fg:#e7e8f5; --muted:#a3a7c9; --line:#2c3060;
+  --accent:#8f9bff; --hi:#e8e85a; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.55}
+.wrap{max-width:860px;margin:0 auto;padding:0 16px 64px}
+header{background:#0000cd;color:#fff;padding:48px 16px 40px}
+header .wrap{padding-bottom:0}
+.kicker{font-family:var(--mono);font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--hi);margin:0 0 .4rem}
+header .kicker{color:#cdcd00}
+h1,h2{font-family:var(--display);font-weight:700;text-transform:uppercase;letter-spacing:.02em;line-height:1.05;margin:0}
+h1{font-size:clamp(2.8rem,8vw,4.4rem)}
+.lede{max-width:600px;margin:.8rem 0 0;font-size:1.1rem}
+header img{display:block;width:100%;max-width:520px;margin-top:28px;background:#fff;border-radius:6px}
+h2{font-size:1.6rem;margin:2.6rem 0 1rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+a.card{display:block;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:18px 18px 16px;color:inherit;text-decoration:none}
+a.card:hover,a.card:focus-visible{border-color:var(--accent);outline:none}
+.card h3{font-family:var(--display);font-weight:700;font-size:1.35rem;text-transform:uppercase;letter-spacing:.02em;margin:0 0 .3rem;color:var(--accent)}
+.card p{margin:0;color:var(--muted);font-size:.95rem}
+.card .fmt{display:block;font-family:var(--mono);font-size:.75rem;margin-top:.6rem;color:var(--muted)}
+ul.links{list-style:none;padding:0;margin:0;border-top:1px solid var(--line)}
+ul.links li{border-bottom:1px solid var(--line);padding:.7rem 0;display:flex;flex-wrap:wrap;gap:.2rem 1rem;justify-content:space-between}
+ul.links a{color:var(--accent);font-weight:600}
+ul.links span{color:var(--muted);font-size:.95rem}
+footer{margin-top:3rem;color:var(--muted);font-size:.9rem}
+footer a{color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <p class="kicker">Timex/Sinclair 2068 · Firmware 4.6</p>
+    <h1>PicoVideo</h1>
+    <p class="lede">A VGA video board for the TS 2068. It watches the bus, draws its own copy of the screen at 640×480, and adds ULAplus, extended modes and 80-column text.</p>
+    <img src="picovideo-board.svg" alt="Illustration of the PicoVideo board: a Raspberry Pi Pico, a GAL in a socket, three bus buffers, a VGA connector, an audio jack and the TS2068 edge connector">
+  </div>
+</header>
+<main class="wrap">
+  <h2>Start here</h2>
+  <div class="cards">
+    <a class="card" href="manual/PicoVideo%20Manual.html">
+      <h3>The manual</h3>
+      <p>Installation, every mode and register, and examples in BASIC, C and Z80 assembler.</p>
+      <span class="fmt">Web page</span>
+    </a>
+    <a class="card" href="ulaplus-color-guide.html">
+      <h3>ULAplus color guide</h3>
+      <p>How a color byte is built, a chart of all 256 colors, and a palette builder that writes the BASIC for you.</p>
+      <span class="fmt">Interactive web page</span>
+    </a>
+  </div>
+
+  <h2>Print the manual</h2>
+  <ul class="links">
+    <li><a href="manual/PicoVideo%20Manual%20(half-letter).pdf">Half-letter PDF</a><span>Read on screen or print one page per sheet.</span></li>
+    <li><a href="manual/PicoVideo%20Manual%20(booklet,%20print%20duplex).pdf">Booklet PDF</a><span>Print double-sided on letter paper, flip on the short edge, fold and staple.</span></li>
+  </ul>
+
+  <h2>Programmer's notes</h2>
+  <ul class="links">
+    <li><a href="features.html">Features and registers</a><span>Video modes 3, 5 and 7, Speccy Black, DF2 writes and readback.</span></li>
+    <li><a href="photo-palette.html">Photo palette</a><span>How the normal colors were tuned, with measurements.</span></li>
+    <li><a href="https://github.com/timex-sinclair-projects/PicoVideo/tree/main/docs/manual/examples">Example programs</a><span>BASIC, C and assembler, with .tap files.</span></li>
+  </ul>
+
+  <h2>Firmware and source</h2>
+  <ul class="links">
+    <li><a href="https://github.com/timex-sinclair-projects/PicoVideo/releases/tag/v4.6">Firmware 4.6</a><span>The current stable release. Drag the .uf2 onto the Pico to install it.</span></li>
+    <li><a href="https://github.com/timex-sinclair-projects/PicoVideo">Source on GitHub</a><span>Hardware, logic and firmware, under the MIT License.</span></li>
+  </ul>
+
+  <footer>
+    <p>More Timex/Sinclair projects at <a href="https://timexsinclair.com">timexsinclair.com</a>.</p>
+  </footer>
+</main>
+</body>
+</html>

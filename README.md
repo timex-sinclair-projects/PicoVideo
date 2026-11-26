@@ -7,6 +7,9 @@ Raspberry Pi Pico to generate VGA video. It gives a clearer picture than the
 stock video output and adds new video modes: four-color, 64 columns with
 individual attributes, and 80 columns with a font you can load.
 
+The manual and the ULAplus color guide are on the
+[docs site](https://timex-sinclair-projects.github.io/PicoVideo/).
+
 > **Still in development. Use at your own risk.**
 
 ## Which firmware should I use?
@@ -48,11 +51,11 @@ Debug), and compatibility with a range of existing software. Please
 | [`firmware/`](firmware/) | Pico C source (Pico SDK, CMake). Core 0 handles the TS2068 bus and core 1 generates VGA. |
 | [`pld/`](pld/) | WinCUPL source and JEDEC file for the GAL16V8/ATF16V8 bus-decode PLD. |
 | [`hardware/`](hardware/) | Current SMD board in EasyEDA Pro (schematic, PCB, BOM), plus the earlier Altium design and its Gerbers. |
-| [`docs/`](docs/) | Programmer's reference for the 4.2 features. |
+| [`docs/`](docs/) | Programmer's reference for the 4.2 features. Published as the [docs site](https://timex-sinclair-projects.github.io/PicoVideo/). |
 | [`examples/`](examples/) | 80-column text routines for the TS2068 (z88dk C and Z80 assembler). |
 | [`V4/`](V4/) | The V4 firmware image and flashing guide, kept at this path so existing links keep working. |
-| [`docs/manual/`](docs/manual/) | User and programmer's manual for 4.6: screen HTML, printable PDF and booklet PDF. |
-| [`docs/ulaplus-color-guide.html`](docs/ulaplus-color-guide.html) | ULAplus color guide: how a color byte is built, a chart of all 256 colors, and a palette builder that writes the BASIC to load it. Download it and open it in a browser. |
+| [`docs/manual/`](docs/manual/) | User and programmer's manual for 4.6: [read it online](https://timex-sinclair-projects.github.io/PicoVideo/manual/PicoVideo%20Manual.html), or print the PDF or booklet PDF. |
+| [`docs/ulaplus-color-guide.html`](docs/ulaplus-color-guide.html) | [ULAplus color guide](https://timex-sinclair-projects.github.io/PicoVideo/ulaplus-color-guide.html): how a color byte is built, a chart of all 256 colors, and a palette builder that writes the BASIC to load it. |
 | [`PicoVideo manual.pdf`](PicoVideo%20manual.pdf) | Earlier user manual, for V4. |
 
 ## History
