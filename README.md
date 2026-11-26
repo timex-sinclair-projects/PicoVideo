@@ -52,6 +52,7 @@ Debug), and compatibility with a range of existing software. Please
 | [`examples/`](examples/) | 80-column text routines for the TS2068 (z88dk C and Z80 assembler). |
 | [`V4/`](V4/) | The V4 firmware image and flashing guide, kept at this path so existing links keep working. |
 | [`docs/manual/`](docs/manual/) | User and programmer's manual for 4.6: screen HTML, printable PDF and booklet PDF. |
+| [`docs/ulaplus-color-guide.html`](docs/ulaplus-color-guide.html) | ULAplus color guide: how a color byte is built, a chart of all 256 colors, and a palette builder that writes the BASIC to load it. Download it and open it in a browser. |
 | [`PicoVideo manual.pdf`](PicoVideo%20manual.pdf) | Earlier user manual, for V4. |
 
 ## History
